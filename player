@@ -1,0 +1,5 @@
+# player.py - Player klase
+# Glabā spēlētāja sesijas datus: vārds, punkti, mēģinājumi, sasniegtais līmenis.
+# Visi atribūti privāti, piekļuve ar getter/setter metodēm (iekapsulēšana).
+# Atribūti: _name, _score, _attempts, _level_reached
+# Metodes: add_score(), reset_attempts(), get_score(), get_name()

@@ -1,0 +1,5 @@
+# task.py - Task klase
+# Viena uzdevuma datu modelis: jautājums, pareizā atbilde, palīdzība, punkti.
+# Katrs Level satur vairākus Task objektus (kompozīcija).
+# Atribūti: _question, _correct_answer, _hint, _points
+# Metodes: display(), verify(ans), get_hint(), get_points()
