@@ -148,10 +148,8 @@ class Portal(Tile):
         else:
             color = self._color
 
-        # Ārējais aplis (pulsē)
-        pygame.draw.circle(screen, color, (center_x, center_y), radius_outer, 3)
 
-        # Iekšējais aplis
+        pygame.draw.circle(screen, color, (center_x, center_y), radius_outer, 3)
         pygame.draw.circle(screen, color, (center_x, center_y), radius_inner)
 
     def deactivate(self):
@@ -165,9 +163,7 @@ class Portal(Tile):
         return self._is_active
 
 
-# ============================================================
-# FACTORY FUNKCIJA - izveido tile pēc tipa
-# ============================================================
+
 def create_tile(tile_type, grid_x, grid_y):
     """Factory funkcija - izveido pareizu tile objektu pēc tipa.
     Šī ir profesionāla pieeja - viena vieta, kur izveidot objektus."""

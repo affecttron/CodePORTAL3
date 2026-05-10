@@ -1,11 +1,3 @@
-# level.py - Level bāzes klase + 3 apakšklases
-# Level: abstraktā bāzes klase līmeņiem (mantošana + polimorfisms)
-# ConditionLevel: if/else nosacījumu uzdevumi
-# LoopLevel: for/while ciklu uzdevumi
-# FunctionLevel: funkciju izsaukumu uzdevumi
-# Bāzes atribūti: _level_id, _title, _tasks, _time_limit
-# Virtuālā metode: display_task() - pārdefinēta katrā apakšklasē
-
 class Level:
     def __init__(self, level_id, title, time_limit):
         self._level_id = level_id
@@ -14,7 +6,6 @@ class Level:
         self._time_limit = time_limit
 
     def display_task(self):
-        # Virtuālā metode - tiek pārdefinēta apakšklasēs
         pass
 
     def check_answer(self, ans):
@@ -34,7 +25,6 @@ class ConditionLevel(Level):
         self._code_snippet = ""
 
     def display_task(self):
-        # Pārdefinētā metode - if/else uzdevumu attēlošana
         pass
 
     def generate_if_else(self):
@@ -48,7 +38,6 @@ class LoopLevel(Level):
         self._iterations = 0
 
     def display_task(self):
-        # Pārdefinētā metode - for/while ciklu uzdevumu attēlošana
         pass
 
     def generate_loop(self):
@@ -62,7 +51,6 @@ class FunctionLevel(Level):
         self._parametri = []
 
     def display_task(self):
-        # Pārdefinētā metode - funkciju uzdevumu attēlošana
         pass
 
     def generate_func(self):

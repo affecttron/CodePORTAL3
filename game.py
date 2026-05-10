@@ -1,8 +1,3 @@
-# game.py - Game klase
-# Galvenā vadības klase: koordinē spēles gaitu, pārvalda līmeņus,
-# izseko spēles stāvoklim un beidz spēli.
-# Atribūti: _title, _current_level, _is_running, _levels
-# Metodes: start_game(), load_levels(), next_level(), end_game()
 
 from player import Player
 from level import ConditionLevel, LoopLevel, FunctionLevel
