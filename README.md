@@ -10,7 +10,6 @@
 [![OOP](https://img.shields.io/badge/OOP-8%20klases-0077B6?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/Licence-MIT-success?style=for-the-badge)]()
 
-*"The cake is a lie. Bet kods — nav."*
 
 </div>
 
@@ -18,7 +17,7 @@
 
 ## 📖 Par spēli
 
-**CODE Portal³** ir kiberpunka tematikas mācību spēle, kurā spēlētājs piedalās misijā kā hakeris, kas iziet cauri trim drošības portāliem. Katrs portāls ir programmēšanas puzle — nosacījumi, cikli, funkcijas. Portāls atveras tikai tad, kad atbilde ir pareiza. Nepareiza atbilde? Signalizācija iedarbojas un zaudē laiku! ⚡
+**CODE Portal³** ir kiberpunka tematikas mācību spēle, kurā spēlētājs piedalās misijā kā hakeris, kas iziet cauri trim drošības portāliem. Katrs portāls ir programmēšanas puzle - nosacījumi, cikli, funkcijas. Portāls atveras tikai tad, kad atbilde ir pareiza. Nepareiza atbilde? Signalizācija iedarbojas un zaudē laiku! ⚡
 
 > Projekts izstrādāts kā kursa darbs programmēšanas kursā. Komanda: **PORTAL 3**.
 
@@ -45,11 +44,11 @@
 code-portal3/
 │
 ├── main.py               # Galvenais ieejas punkts
-├── game.py               # Game klase — spēles vadība
-├── player.py             # Player klase — spēlētāja dati
+├── game.py               # Game klase - spēles vadība
+├── player.py             # Player klase - spēlētāja dati
 ├── level.py              # Level bāzes klase + apakšklases
-├── task.py               # Task klase — uzdevumu modelis
-├── score_log.py          # ScoreLog klase — rezultātu saglabāšana
+├── task.py               # Task klase - uzdevumu modelis
+├── score_log.py          # ScoreLog klase - rezultātu saglabāšana
 │
 ├── data/
 │   ├── tasks.json        # Visi uzdevumi un pareizās atbildes
@@ -67,10 +66,10 @@ code-portal3/
 
 ```
 Game
- ├── Player          (asociācija — izmanto)
- ├── ScoreLog        (asociācija — saglabā rezultātus)
- └── Level           (asociācija — menedžē)
-      ├── Task            (kompozīcija — satur)
+ ├── Player          (asociācija - izmanto)
+ ├── ScoreLog        (asociācija - saglabā rezultātus)
+ └── Level           (asociācija - menedžē)
+      ├── Task            (kompozīcija - satur)
       ├── ConditionLevel  (mantošana ↳ pārdefinē display_task())
       ├── LoopLevel       (mantošana ↳ pārdefinē display_task())
       └── FunctionLevel   (mantošana ↳ pārdefinē display_task())
