@@ -1,7 +1,0 @@
-# level.py - Level bāzes klase + 3 apakšklases
-# Level: abstraktā bāzes klase līmeņiem (mantošana + polimorfisms)
-# ConditionLevel: if/else nosacījumu uzdevumi
-# LoopLevel: for/while ciklu uzdevumi
-# FunctionLevel: funkciju izsaukumu uzdevumi
-# Bāzes atribūti: _level_id, _title, _tasks, _time_limit
-# Virtuālā metode: display_task() - pārdefinēta katrā apakšklasē
