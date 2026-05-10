@@ -90,7 +90,7 @@ Game
 
 | Dalībnieks | Loma |
 |---|---|
-| Artūrs Skorikovs | UML diagramma, dizains |
+| Artūrs Skorikovs |Projekta izstrādāšana, UML diagramma, dizains, Grafiskais Dizains |
 
 
 > Komandas nosaukums: **PORTAL 3** — jo Portal 2 jau bija paņemts 🌀
