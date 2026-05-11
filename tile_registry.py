@@ -1,0 +1,189 @@
+import json
+import os
+import pygame
+from settings import TILE_SIZE, IMAGES_FOLDER
+
+
+class TileDefinition:
+    """Viena tile veida definīcija (no JSON ieraksta)."""
+
+    def __init__(self, data, image=None):
+        self._id = data["id"]
+        self._name = data.get("name", self._id)
+        self._image_filename = data.get("image", "")
+        self._image = image 
+
+        # ipasibas
+        self._solid = data.get("solid", False)
+        self._kills = data.get("kills", False)
+        self._is_portal = data.get("portal", False)
+        self._level_id = data.get("level_id", 0)
+        self._climbable = data.get("climbable", False)
+        self._decoration = data.get("decoration", False)
+        self._special = data.get("special", "")
+
+        # fallback
+        fc = data.get("fallback_color", [128, 128, 128])
+        self._fallback_color = tuple(fc)
+
+
+    def get_id(self):
+        return self._id
+
+    def get_name(self):
+        return self._name
+
+    def get_image(self):
+        return self._image
+
+    def has_image(self):
+        return self._image is not None
+
+    def get_fallback_color(self):
+        return self._fallback_color
+
+    def is_solid(self):
+        return self._solid
+
+    def kills_player(self):
+        return self._kills
+
+    def is_portal(self):
+        return self._is_portal
+
+    def get_level_id(self):
+        return self._level_id
+
+    def is_climbable(self):
+        return self._climbable
+
+    def is_decoration(self):
+        return self._decoration
+
+    def get_special(self):
+        return self._special
+
+    def is_spawn(self):
+        return self._special == "spawn"
+
+
+class TileRegistry:
+    """Galvenā tile sistēmas pārvaldnieks.
+    Ielādē JSON, attēlus un nodrošina ērtu piekļuvi visiem tiles."""
+
+    def __init__(self, registry_file="data/tiles_registry.json"):
+        self._registry_file = registry_file
+        self._categories = []          # Saraksts ar kategorijām (nosaukumi)
+        self._tiles_by_id = {}          # {id: TileDefinition}
+        self._tiles_by_category = {}    # {category_name: [TileDefinition, ...]}
+        self._loaded_images_count = 0
+        self._missing_images_count = 0
+
+
+    def load(self):
+        """Ielādē tile registry no JSON faila un mēģina ielādēt attēlus."""
+        if not os.path.exists(self._registry_file):
+            print(f"❌ Registry fails neatrasts: {self._registry_file}")
+            return False
+
+
+        with open(self._registry_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+
+        self._categories = []
+        self._tiles_by_id = {}
+        self._tiles_by_category = {}
+        self._loaded_images_count = 0
+        self._missing_images_count = 0
+
+        for cat_data in data.get("categories", []):
+            cat_name = cat_data["name"]
+            self._categories.append(cat_name)
+            self._tiles_by_category[cat_name] = []
+
+            for tile_data in cat_data.get("tiles", []):
+                image = self._try_load_image(tile_data.get("image", ""))
+                tile_def = TileDefinition(tile_data, image)
+
+                self._tiles_by_id[tile_def.get_id()] = tile_def
+                self._tiles_by_category[cat_name].append(tile_def)
+
+        print(f"✅ Registry ielādēts:")
+        print(f"   Kategorijas: {len(self._categories)}")
+        print(f"   Tile veidi: {len(self._tiles_by_id)}")
+        print(f"   Attēli ielādēti: {self._loaded_images_count}")
+        print(f"   Trūkst attēlu: {self._missing_images_count} (izmantos fallback krāsu)")
+
+        return True
+
+    def _try_load_image(self, filename):
+        """Mēģina ielādēt attēlu. Atgriež pygame Surface vai None."""
+        if not filename:
+            return None
+
+        # folder path
+        full_path = os.path.join(IMAGES_FOLDER, "tiles", filename)
+
+        # ja nav faila
+        if not os.path.exists(full_path):
+            self._missing_images_count += 1
+            return None
+
+        try:
+            image = pygame.image.load(full_path).convert_alpha()
+            # mergojam
+            if image.get_width() != TILE_SIZE or image.get_height() != TILE_SIZE:
+                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+            self._loaded_images_count += 1
+            return image
+        except pygame.error as e:
+            print(f"⚠️ Nevarēja ielādēt {filename}: {e}")
+            self._missing_images_count += 1
+            return None
+
+  
+    def get_tile(self, tile_id):
+        """Atgriež TileDefinition pēc ID vai None."""
+        return self._tiles_by_id.get(tile_id)
+
+    def has_tile(self, tile_id):
+        """Pārbauda, vai tile ID eksistē registry."""
+        return tile_id in self._tiles_by_id
+
+    def get_all_tile_ids(self):
+        """Atgriež visu tile ID sarakstu."""
+        return list(self._tiles_by_id.keys())
+
+    def get_categories(self):
+        """Atgriež kategoriju nosaukumu sarakstu."""
+        return self._categories.copy()
+
+    def get_tiles_in_category(self, category_name):
+        """Atgriež visus tiles dotajā kategorijā."""
+        return self._tiles_by_category.get(category_name, [])
+
+    def get_tile_count(self):
+        """Atgriež kopējo tile veidu skaitu."""
+        return len(self._tiles_by_id)
+
+
+    def draw_tile(self, screen, tile_id, x, y, animation_frame=0):
+        """Zīmē tile uz ekrāna pēc ID.
+        Ja ir attēls - lieto to, ja nav - krāsainu taisnstūri."""
+        tile_def = self.get_tile(tile_id)
+        if tile_def is None:
+            pygame.draw.rect(screen, (255, 0, 255), (x, y, TILE_SIZE, TILE_SIZE))
+            return
+
+        if tile_def.has_image():
+            screen.blit(tile_def.get_image(), (x, y))
+        else:
+            color = tile_def.get_fallback_color()
+            pygame.draw.rect(screen, color, (x, y, TILE_SIZE, TILE_SIZE))
+
+            if tile_def.is_portal():
+                pulse = abs((animation_frame % 60) - 30) / 30  # 0 līdz 1
+                center = (x + TILE_SIZE // 2, y + TILE_SIZE // 2)
+                radius = int(TILE_SIZE // 3 + pulse * 5)
+                pygame.draw.circle(screen, color, center, radius, 3)
