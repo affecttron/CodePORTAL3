@@ -1,0 +1,183 @@
+{
+  "spawn": {
+    "x": 5,
+    "y": 8
+  },
+  "tiles": [
+    {
+      "type": "ground",
+      "x": 4,
+      "y": 9
+    },
+    {
+      "type": "ground",
+      "x": 5,
+      "y": 9
+    },
+    {
+      "type": "ground",
+      "x": 6,
+      "y": 9
+    },
+    {
+      "type": "ground",
+      "x": 7,
+      "y": 9
+    },
+    {
+      "type": "ground",
+      "x": 8,
+      "y": 9
+    },
+    {
+      "type": "ground",
+      "x": 9,
+      "y": 9
+    },
+    {
+      "type": "ground",
+      "x": 10,
+      "y": 9
+    },
+    {
+      "type": "platform",
+      "x": 5,
+      "y": 10
+    },
+    {
+      "type": "platform",
+      "x": 4,
+      "y": 10
+    },
+    {
+      "type": "platform",
+      "x": 6,
+      "y": 10
+    },
+    {
+      "type": "platform",
+      "x": 7,
+      "y": 10
+    },
+    {
+      "type": "platform",
+      "x": 8,
+      "y": 10
+    },
+    {
+      "type": "platform",
+      "x": 9,
+      "y": 10
+    },
+    {
+      "type": "platform",
+      "x": 10,
+      "y": 10
+    },
+    {
+      "type": "spike",
+      "x": 8,
+      "y": 8
+    },
+    {
+      "type": "portal_red",
+      "x": 14,
+      "y": 5
+    },
+    {
+      "type": "portal_yellow",
+      "x": 17,
+      "y": 5
+    },
+    {
+      "type": "portal_green",
+      "x": 20,
+      "y": 5
+    },
+    {
+      "type": "ladder",
+      "x": 10,
+      "y": 8
+    },
+    {
+      "type": "ladder",
+      "x": 10,
+      "y": 7
+    },
+    {
+      "type": "ladder",
+      "x": 10,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 11,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 12,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 13,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 14,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 15,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 16,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 17,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 18,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 19,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 20,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 21,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 22,
+      "y": 6
+    },
+    {
+      "type": "ground",
+      "x": 5,
+      "y": 1
+    },
+    {
+      "type": "neon_sign",
+      "x": 4,
+      "y": 5
+    }
+  ]
+}
