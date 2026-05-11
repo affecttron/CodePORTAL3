@@ -1,0 +1,238 @@
+{
+  "categories": [
+    {
+      "name": "Pamati",
+      "icon": "▓",
+      "tiles": [
+        {
+          "id": "ground",
+          "name": "Grīda",
+          "image": "ground.png",
+          "solid": true,
+          "kills": false,
+          "fallback_color": [60, 60, 90]
+        },
+        {
+          "id": "platform",
+          "name": "Platforma",
+          "image": "platform.png",
+          "solid": true,
+          "kills": false,
+          "fallback_color": [80, 90, 120]
+        },
+        {
+          "id": "wall",
+          "name": "Siena",
+          "image": "wall.png",
+          "solid": true,
+          "kills": false,
+          "fallback_color": [50, 50, 70]
+        },
+        {
+          "id": "ceiling",
+          "name": "Griesti",
+          "image": "ceiling.png",
+          "solid": true,
+          "kills": false,
+          "fallback_color": [40, 40, 60]
+        }
+      ]
+    },
+    {
+      "name": "Bīstami",
+      "icon": "💀",
+      "tiles": [
+        {
+          "id": "spike",
+          "name": "Mietiņi",
+          "image": "spike.png",
+          "solid": false,
+          "kills": true,
+          "fallback_color": [200, 50, 50]
+        },
+        {
+          "id": "lava",
+          "name": "Lava",
+          "image": "lava.png",
+          "solid": false,
+          "kills": true,
+          "fallback_color": [255, 100, 0]
+        },
+        {
+          "id": "electric",
+          "name": "Elektrība",
+          "image": "electric.png",
+          "solid": false,
+          "kills": true,
+          "fallback_color": [100, 200, 255]
+        }
+      ]
+    },
+    {
+      "name": "Portāli",
+      "icon": "🌀",
+      "tiles": [
+        {
+          "id": "portal_red",
+          "name": "Sarkans portāls",
+          "image": "portal_red.png",
+          "solid": false,
+          "kills": false,
+          "portal": true,
+          "level_id": 1,
+          "fallback_color": [255, 0, 64]
+        },
+        {
+          "id": "portal_yellow",
+          "name": "Dzeltens portāls",
+          "image": "portal_yellow.png",
+          "solid": false,
+          "kills": false,
+          "portal": true,
+          "level_id": 2,
+          "fallback_color": [255, 215, 0]
+        },
+        {
+          "id": "portal_green",
+          "name": "Zaļš portāls",
+          "image": "portal_green.png",
+          "solid": false,
+          "kills": false,
+          "portal": true,
+          "level_id": 3,
+          "fallback_color": [0, 255, 65]
+        }
+      ]
+    },
+    {
+      "name": "Interaktīvi",
+      "icon": "⚙",
+      "tiles": [
+        {
+          "id": "ladder",
+          "name": "Kāpnes",
+          "image": "ladder.png",
+          "solid": false,
+          "kills": false,
+          "climbable": true,
+          "fallback_color": [150, 100, 50]
+        },
+        {
+          "id": "checkpoint",
+          "name": "Saglabājums",
+          "image": "checkpoint.png",
+          "solid": false,
+          "kills": false,
+          "fallback_color": [0, 200, 100]
+        },
+        {
+          "id": "coin",
+          "name": "Monēta",
+          "image": "coin.png",
+          "solid": false,
+          "kills": false,
+          "fallback_color": [255, 215, 0]
+        },
+        {
+          "id": "key",
+          "name": "Atslēga",
+          "image": "key.png",
+          "solid": false,
+          "kills": false,
+          "fallback_color": [200, 200, 200]
+        }
+      ]
+    },
+    {
+      "name": "Dekorācijas",
+      "icon": "🎨",
+      "tiles": [
+        {
+          "id": "neon_sign",
+          "name": "Neon zīme",
+          "image": "neon_sign.png",
+          "solid": false,
+          "kills": false,
+          "decoration": true,
+          "fallback_color": [255, 16, 240]
+        },
+        {
+          "id": "monitor",
+          "name": "Monitors",
+          "image": "monitor.png",
+          "solid": false,
+          "kills": false,
+          "decoration": true,
+          "fallback_color": [50, 100, 150]
+        },
+        {
+          "id": "lamp",
+          "name": "Lampa",
+          "image": "lamp.png",
+          "solid": false,
+          "kills": false,
+          "decoration": true,
+          "fallback_color": [255, 255, 200]
+        },
+        {
+          "id": "crate",
+          "name": "Kaste",
+          "image": "crate.png",
+          "solid": true,
+          "kills": false,
+          "fallback_color": [130, 90, 50]
+        },
+        {
+          "id": "barrel",
+          "name": "Muca",
+          "image": "barrel.png",
+          "solid": true,
+          "kills": false,
+          "fallback_color": [100, 70, 40]
+        },
+        {
+          "id": "pipe",
+          "name": "Caurule",
+          "image": "pipe.png",
+          "solid": false,
+          "kills": false,
+          "decoration": true,
+          "fallback_color": [100, 100, 120]
+        },
+        {
+          "id": "wire",
+          "name": "Vadu",
+          "image": "wire.png",
+          "solid": false,
+          "kills": false,
+          "decoration": true,
+          "fallback_color": [80, 80, 100]
+        },
+        {
+          "id": "graffiti",
+          "name": "Grafiti",
+          "image": "graffiti.png",
+          "solid": false,
+          "kills": false,
+          "decoration": true,
+          "fallback_color": [255, 50, 200]
+        }
+      ]
+    },
+    {
+      "name": "Speciāli",
+      "icon": "⭐",
+      "tiles": [
+        {
+          "id": "spawn",
+          "name": "Sākuma punkts",
+          "image": "spawn.png",
+          "solid": false,
+          "kills": false,
+          "special": "spawn",
+          "fallback_color": [255, 16, 240]
+        }
+      ]
+    }
+  ]
+}
