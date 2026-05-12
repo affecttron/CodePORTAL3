@@ -1,28 +1,118 @@
-# score_log.py - ScoreLog klase
-# Atbild par datu persistenci: rezultātu rakstīšanu CSV failā un sesiju žurnalēšanu.
-# Nodrošina datu ievadi, apstrādi un izvadi (failu apstrāde).
-# Atribūti: _filename, _entries, _session_id, _timestamp
-# Metodes: save_score(player), load_scores(), write_log(msg), get_top_scores()
-
 import csv
+import os
 from datetime import datetime
+from settings import SCORES_FILE, LOG_FILE
 
 
 class ScoreLog:
-    def __init__(self, filename="data/scores.csv"):
+
+    def __init__(self, filename=SCORES_FILE, log_filename=LOG_FILE):
         self._filename = filename
+        self._log_filename = log_filename
         self._entries = []
-        self._session_id = ""
+        self._session_id = self._generate_session_id()
         self._timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    def save_score(self, player):
-        pass
+        # Pjabut mapei kur ievietot
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
 
+        # veido csv
+        self._ensure_csv_exists()
+
+    def _generate_session_id(self):
+        """Unikāls sesijas ID (datums + laiks)."""
+        return datetime.now().strftime("session_%Y%m%d_%H%M%S")
+
+    def _ensure_csv_exists(self):
+        """Izveido CSV ar galvenēm, ja fails neeksistē."""
+        if not os.path.exists(self._filename):
+            with open(self._filename, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["name", "date", "score", "level_reached", "tasks_completed"])
+
+    # saglabashana
+    def save_score(self, player):
+        """Saglabā Player datus CSV failā."""
+        try:
+            with open(self._filename, "a", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    player.get_name(),
+                    self._timestamp,
+                    player.get_score(),
+                    player.get_level_reached(),
+                    player.get_tasks_completed(),
+                ])
+            print(f"✅ Saglabāts: {player.get_name()} - {player.get_score()} pts")
+            self.write_log(f"Score saved: {player.get_name()} = {player.get_score()}")
+            return True
+        except Exception as e:
+            print(f"❌ Kļūda saglabājot: {e}")
+            return False
+
+    # loading
     def load_scores(self):
-        pass
+        """Ielādē visus rezultātus no CSV."""
+        if not os.path.exists(self._filename):
+            return []
+
+        scores = []
+        try:
+            with open(self._filename, "r", newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    scores.append({
+                        "name": row["name"],
+                        "date": row["date"],
+                        "score": int(row["score"]),
+                        "level_reached": int(row["level_reached"]),
+                        "tasks_completed": int(row["tasks_completed"]),
+                    })
+            self._entries = scores
+            return scores
+        except Exception as e:
+            print(f"❌ Kļūda ielādējot: {e}")
+            return []
+
+    # top rezultati
+    def get_top_scores(self, limit=5):
+        scores = self.load_scores()
+        # sorteja 
+        sorted_scores = sorted(scores, key=lambda x: x["score"], reverse=True)
+        return sorted_scores[:limit]
+
+    def get_player_best(self, player_name):
+        scores = self.load_scores()
+        player_scores = [s for s in scores if s["name"] == player_name]
+        if not player_scores:
+            return None
+        return max(player_scores, key=lambda x: x["score"])
+
+    # statistika
+    def get_total_games(self):
+        """Cik kopā spēļu reģistrēts."""
+        return len(self.load_scores())
+
+    def get_average_score(self):
+        """Vidējais punkts visiem spēlētājiem."""
+        scores = self.load_scores()
+        if not scores:
+            return 0
+        total = sum(s["score"] for s in scores)
+        return total // len(scores)
 
     def write_log(self, msg):
-        pass
+        try:
+            os.makedirs(os.path.dirname(self._log_filename), exist_ok=True)
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open(self._log_filename, "a", encoding="utf-8") as f:
+                f.write(f"[{timestamp}] [{self._session_id}] {msg}\n")
+        except Exception as e:
+            print(f"Kļūda: {e}")
 
-    def get_top_scores(self):
-        pass
+
+    def get_session_id(self):
+        return self._session_id
+
+    def get_filename(self):
+        return self._filename

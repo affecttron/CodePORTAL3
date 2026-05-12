@@ -1,1 +1,6 @@
-# PORTAL 3 - sesiju žurnāls
+# PORTAL 3 - sesiju žurnāls[2026-05-12 22:58:00] [session_20260512_225800] Score saved: Artūrs = 350
+[2026-05-12 22:58:00] [session_20260512_225800] Score saved: Anna = 275
+[2026-05-12 22:58:00] [session_20260512_225800] Score saved: Pēteris = 450
+[2026-05-12 22:59:07] [session_20260512_225907] Score saved: Artūrs = 350
+[2026-05-12 22:59:07] [session_20260512_225907] Score saved: Anna = 275
+[2026-05-12 22:59:07] [session_20260512_225907] Score saved: Pēteris = 450
