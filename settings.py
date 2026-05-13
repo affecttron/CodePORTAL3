@@ -1,7 +1,7 @@
 
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
-FPS = 60
+SCREEN_WIDTH = 2560
+SCREEN_HEIGHT = 1440
+FPS = 260
 TITLE = "CODE Portal 3"
 FULLSCREEN = True
 
@@ -10,7 +10,7 @@ FULLSCREEN = True
 # TILE
 
 TILE_SIZE = 64                    # Viens tile = 64x64 pikseļi
-WORLD_WIDTH_TILES = 60            # Pasaule platumā (tiles)
+WORLD_WIDTH_TILES = 120            # Pasaule platumā (tiles)
 WORLD_HEIGHT_TILES = 17           # Pasaule augstumā (tiles)
 WORLD_WIDTH = WORLD_WIDTH_TILES * TILE_SIZE     # = 3840 px
 WORLD_HEIGHT = WORLD_HEIGHT_TILES * TILE_SIZE   # = 1088 px

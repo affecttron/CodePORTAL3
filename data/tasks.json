@@ -1,1 +1,298 @@
-{}
+{
+  "levels": [
+    {
+      "level_id": 1,
+      "title": "Drošības vārti - if/else nosacījumi",
+      "type": "ConditionLevel",
+      "time_limit": 60,
+      "tasks": [
+        {
+          "question": "x = 10\nif x > 5:\n    print('A')\nelse:\n    print('B')\n\nKas tiks izvadīts?",
+          "correct_answer": "A",
+          "hint": "Pārbaudi vai 10 ir lielāks par 5.",
+          "points": 100
+        },
+        {
+          "question": "x = 3\nif x > 5:\n    print('liels')\nelse:\n    print('mazs')\n\nKas tiks izvadīts?",
+          "correct_answer": "mazs",
+          "hint": "3 nav lielāks par 5, tāpēc izpildās else zars.",
+          "points": 100
+        },
+        {
+          "question": "y = 7\nif y % 2 == 0:\n    print('para')\nelse:\n    print('nepara')\n\nKas tiks izvadīts?",
+          "correct_answer": "nepara",
+          "hint": "Operators % atgriež atlikumu. 7 dalot ar 2 atlikums ir 1.",
+          "points": 100
+        },
+        {
+          "question": "a = 5\nb = 10\nif a > b:\n    print('X')\nelif a == b:\n    print('Y')\nelse:\n    print('Z')\n\nKas tiks izvadīts?",
+          "correct_answer": "Z",
+          "hint": "5 nav lielāks par 10 un nav vienāds ar 10.",
+          "points": 100
+        },
+        {
+          "question": "vecums = 18\nif vecums >= 18:\n    print('pieaugušais')\nelse:\n    print('bērns')\n\nKas tiks izvadīts?",
+          "correct_answer": "pieaugušais",
+          "hint": "Operators >= ietver arī vienādību.",
+          "points": 100
+        },
+        {
+          "question": "n = 0\nif n > 0:\n    print('pozitīvs')\nelif n < 0:\n    print('negatīvs')\nelse:\n    print('nulle')\n\nKas tiks izvadīts?",
+          "correct_answer": "nulle",
+          "hint": "0 nav ne pozitīvs, ne negatīvs.",
+          "points": 100
+        },
+        {
+          "question": "x = 15\nif x > 10 and x < 20:\n    print('starp')\nelse:\n    print('arpus')\n\nKas tiks izvadīts?",
+          "correct_answer": "starp",
+          "hint": "Abi nosacījumi ir patiesi: 15 > 10 UN 15 < 20.",
+          "points": 100
+        },
+        {
+          "question": "ir_lietus = True\nif ir_lietus:\n    print('lietussargs')\nelse:\n    print('saulesbrilles')\n\nKas tiks izvadīts?",
+          "correct_answer": "lietussargs",
+          "hint": "Mainīgais ir_lietus ir True, tāpēc izpildās if zars.",
+          "points": 100
+        },
+        {
+          "question": "x = -5\nif x >= 0:\n    print('ne negatīvs')\nelse:\n    print('negatīvs')\n\nKas tiks izvadīts?",
+          "correct_answer": "negatīvs",
+          "hint": "-5 nav lielāks vai vienāds ar 0.",
+          "points": 100
+        },
+        {
+          "question": "skaitlis = 50\nif skaitlis < 10:\n    print('mazs')\nelif skaitlis < 100:\n    print('vidējs')\nelse:\n    print('liels')\n\nKas tiks izvadīts?",
+          "correct_answer": "vidējs",
+          "hint": "50 nav mazāks par 10, bet ir mazāks par 100.",
+          "points": 100
+        },
+        {
+          "question": "a = 4\nb = 4\nif a == b:\n    print('vienādi')\nelse:\n    print('atšķirīgi')\n\nKas tiks izvadīts?",
+          "correct_answer": "vienādi",
+          "hint": "Operators == pārbauda vienādību.",
+          "points": 100
+        },
+        {
+          "question": "temp = 25\nif temp > 30:\n    print('karsts')\nelif temp > 20:\n    print('silts')\nelif temp > 10:\n    print('vesss')\nelse:\n    print('auksts')\n\nKas tiks izvadīts?",
+          "correct_answer": "silts",
+          "hint": "25 nav lielāks par 30, bet ir lielāks par 20.",
+          "points": 100
+        },
+        {
+          "question": "x = 8\ny = 3\nif x > y or x == 0:\n    print('jā')\nelse:\n    print('nē')\n\nKas tiks izvadīts?",
+          "correct_answer": "jā",
+          "hint": "Pietiek ar vienu patiesu nosacījumu, ja izmanto 'or'.",
+          "points": 100
+        },
+        {
+          "question": "burts = 'A'\nif burts == 'A':\n    print(1)\nelif burts == 'B':\n    print(2)\nelse:\n    print(3)\n\nKas tiks izvadīts?",
+          "correct_answer": "1",
+          "hint": "Salīdzinot burtus, jāsakrīt precīzi.",
+          "points": 100
+        },
+        {
+          "question": "x = 100\nif not x > 50:\n    print('mazs')\nelse:\n    print('liels')\n\nKas tiks izvadīts?",
+          "correct_answer": "liels",
+          "hint": "Operators 'not' apgriež loģisko vērtību. not True = False.",
+          "points": 100
+        }
+      ]
+    },
+    {
+      "level_id": 2,
+      "title": "Datu tunelis - for/while cikli",
+      "type": "LoopLevel",
+      "time_limit": 60,
+      "tasks": [
+        {
+          "question": "summa = 0\nfor i in range(5):\n    summa = summa + i\nprint(summa)\n\nKas tiks izvadīts?",
+          "correct_answer": "10",
+          "hint": "range(5) dod 0,1,2,3,4. To summa: 0+1+2+3+4 = 10.",
+          "points": 100
+        },
+        {
+          "question": "x = 0\nfor i in range(3):\n    x = x + 2\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "6",
+          "hint": "Cikls izpildās 3 reizes, katru reizi pieskaitot 2.",
+          "points": 100
+        },
+        {
+          "question": "rezultats = 1\nfor i in range(1, 4):\n    rezultats = rezultats * i\nprint(rezultats)\n\nKas tiks izvadīts?",
+          "correct_answer": "6",
+          "hint": "range(1,4) dod 1,2,3. Reizinājums: 1*1*2*3 = 6.",
+          "points": 100
+        },
+        {
+          "question": "skaits = 0\nfor burts in 'Python':\n    skaits = skaits + 1\nprint(skaits)\n\nKas tiks izvadīts?",
+          "correct_answer": "6",
+          "hint": "Cikls iziet cauri katram burtam vārdā 'Python'.",
+          "points": 100
+        },
+        {
+          "question": "n = 10\nwhile n > 5:\n    n = n - 1\nprint(n)\n\nKas tiks izvadīts?",
+          "correct_answer": "5",
+          "hint": "Cikls turpinās kamēr n > 5. Apstājas, kad n kļūst 5.",
+          "points": 100
+        },
+        {
+          "question": "x = 1\nwhile x < 20:\n    x = x * 2\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "32",
+          "hint": "x: 1→2→4→8→16→32. Pēc 32 cikls vairs neizpildās.",
+          "points": 100
+        },
+        {
+          "question": "summa = 0\nfor i in range(1, 6):\n    summa = summa + i\nprint(summa)\n\nKas tiks izvadīts?",
+          "correct_answer": "15",
+          "hint": "1+2+3+4+5 = 15.",
+          "points": 100
+        },
+        {
+          "question": "x = 0\nfor i in range(10):\n    if i % 2 == 0:\n        x = x + 1\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "5",
+          "hint": "No 0 līdz 9 ir 5 pāra skaitļi: 0,2,4,6,8.",
+          "points": 100
+        },
+        {
+          "question": "n = 0\nwhile n < 100:\n    n = n + 25\nprint(n)\n\nKas tiks izvadīts?",
+          "correct_answer": "100",
+          "hint": "n: 0→25→50→75→100. Pie 100 cikls apstājas.",
+          "points": 100
+        },
+        {
+          "question": "summa = 0\nfor i in range(0, 11, 2):\n    summa = summa + i\nprint(summa)\n\nKas tiks izvadīts?",
+          "correct_answer": "30",
+          "hint": "range(0,11,2) dod 0,2,4,6,8,10. Summa = 30.",
+          "points": 100
+        },
+        {
+          "question": "x = 5\nfor i in range(3):\n    x = x + i\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "8",
+          "hint": "i: 0,1,2. x: 5+0=5, 5+1=6, 6+2=8.",
+          "points": 100
+        },
+        {
+          "question": "skaits = 0\nfor i in range(5):\n    for j in range(3):\n        skaits = skaits + 1\nprint(skaits)\n\nKas tiks izvadīts?",
+          "correct_answer": "15",
+          "hint": "Iekšējais cikls izpildās 3 reizes katrā ārējā ciklā: 5*3 = 15.",
+          "points": 100
+        },
+        {
+          "question": "n = 16\nskaits = 0\nwhile n > 1:\n    n = n // 2\n    skaits = skaits + 1\nprint(skaits)\n\nKas tiks izvadīts?",
+          "correct_answer": "4",
+          "hint": "n: 16→8→4→2→1. Cikls izpildās 4 reizes.",
+          "points": 100
+        },
+        {
+          "question": "rezultats = 0\nfor i in range(1, 5):\n    rezultats = rezultats + i * 2\nprint(rezultats)\n\nKas tiks izvadīts?",
+          "correct_answer": "20",
+          "hint": "1*2 + 2*2 + 3*2 + 4*2 = 2+4+6+8 = 20.",
+          "points": 100
+        },
+        {
+          "question": "x = 100\nwhile x >= 10:\n    x = x // 10\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "1",
+          "hint": "x: 100→10→1. Pie 1 cikls apstājas, jo 1 < 10.",
+          "points": 100
+        }
+      ]
+    },
+    {
+      "level_id": 3,
+      "title": "Galvenā servera istaba - funkcijas",
+      "type": "FunctionLevel",
+      "time_limit": 60,
+      "tasks": [
+        {
+          "question": "def kvadrats(x):\n    return x * x\n\nprint(kvadrats(4))\n\nKo atgriež funkcija?",
+          "correct_answer": "16",
+          "hint": "Funkcija atgriež skaitļa kvadrātu: 4 * 4 = 16.",
+          "points": 100
+        },
+        {
+          "question": "def saskaita(a, b):\n    return a + b\n\nprint(saskaita(3, 7))\n\nKo atgriež funkcija?",
+          "correct_answer": "10",
+          "hint": "3 + 7 = 10.",
+          "points": 100
+        },
+        {
+          "question": "def sveiciens(vards):\n    return 'Sveiks, ' + vards\n\nprint(sveiciens('Anna'))\n\nKo atgriež funkcija?",
+          "correct_answer": "Sveiks, Anna",
+          "hint": "Funkcija savieno tekstu ar mainīgā vērtību.",
+          "points": 100
+        },
+        {
+          "question": "def dubults(x):\n    return x * 2\n\nprint(dubults(8))\n\nKo atgriež funkcija?",
+          "correct_answer": "16",
+          "hint": "8 * 2 = 16.",
+          "points": 100
+        },
+        {
+          "question": "def maks(a, b):\n    if a > b:\n        return a\n    else:\n        return b\n\nprint(maks(5, 9))\n\nKo atgriež funkcija?",
+          "correct_answer": "9",
+          "hint": "Funkcija atgriež lielāko no diviem skaitļiem.",
+          "points": 100
+        },
+        {
+          "question": "def reizina(a, b):\n    return a * b\n\nprint(reizina(6, 7))\n\nKo atgriež funkcija?",
+          "correct_answer": "42",
+          "hint": "6 * 7 = 42.",
+          "points": 100
+        },
+        {
+          "question": "def absolutais(x):\n    if x < 0:\n        return -x\n    return x\n\nprint(absolutais(-15))\n\nKo atgriež funkcija?",
+          "correct_answer": "15",
+          "hint": "Negatīvam skaitlim funkcija atgriež tā pretējo (pozitīvo) vērtību.",
+          "points": 100
+        },
+        {
+          "question": "def garums(teksts):\n    return len(teksts)\n\nprint(garums('hello'))\n\nKo atgriež funkcija?",
+          "correct_answer": "5",
+          "hint": "len() atgriež teksta garumu. 'hello' ir 5 burti.",
+          "points": 100
+        },
+        {
+          "question": "def parbaude(n):\n    if n % 2 == 0:\n        return 'para'\n    else:\n        return 'nepara'\n\nprint(parbaude(8))\n\nKo atgriež funkcija?",
+          "correct_answer": "para",
+          "hint": "8 dalot ar 2 atlikums ir 0, tātad pāra skaitlis.",
+          "points": 100
+        },
+        {
+          "question": "def kubs(x):\n    return x ** 3\n\nprint(kubs(3))\n\nKo atgriež funkcija?",
+          "correct_answer": "27",
+          "hint": "3 * 3 * 3 = 27. Operators ** ir kāpināšana.",
+          "points": 100
+        },
+        {
+          "question": "def videjais(a, b, c):\n    return (a + b + c) / 3\n\nprint(videjais(2, 4, 6))\n\nKo atgriež funkcija?",
+          "correct_answer": "4.0",
+          "hint": "(2+4+6) / 3 = 12 / 3 = 4.0 (dalīšana atgriež float).",
+          "points": 100
+        },
+        {
+          "question": "def dubla(x):\n    x = x * 2\n    return x\n\nrezultats = dubla(5)\nprint(rezultats + 1)\n\nKas tiks izvadīts?",
+          "correct_answer": "11",
+          "hint": "Funkcija atgriež 10, tad pieskaita 1.",
+          "points": 100
+        },
+        {
+          "question": "def f(x):\n    return x + 10\n\ndef g(x):\n    return x * 2\n\nprint(f(g(3)))\n\nKo atgriež funkcija?",
+          "correct_answer": "16",
+          "hint": "Vispirms g(3) = 6, tad f(6) = 6 + 10 = 16.",
+          "points": 100
+        },
+        {
+          "question": "def atkartot(teksts, n):\n    return teksts * n\n\nprint(atkartot('ab', 3))\n\nKo atgriež funkcija?",
+          "correct_answer": "ababab",
+          "hint": "Teksta reizināšana atkārto tekstu N reizes.",
+          "points": 100
+        },
+        {
+          "question": "def faktorials(n):\n    rezultats = 1\n    for i in range(1, n + 1):\n        rezultats = rezultats * i\n    return rezultats\n\nprint(faktorials(4))\n\nKo atgriež funkcija?",
+          "correct_answer": "24",
+          "hint": "4! = 1 * 2 * 3 * 4 = 24.",
+          "points": 100
+        }
+      ]
+    }
+  ]
+}

@@ -4,3 +4,17 @@
 [2026-05-12 22:59:07] [session_20260512_225907] Score saved: Artūrs = 350
 [2026-05-12 22:59:07] [session_20260512_225907] Score saved: Anna = 275
 [2026-05-12 22:59:07] [session_20260512_225907] Score saved: Pēteris = 450
+[2026-05-13 19:33:59] [session_20260513_193346] Score saved: TestSpēlētājs = 0
+[2026-05-13 19:34:27] [session_20260513_193418] Score saved: TestSpēlētājs = 0
+[2026-05-13 19:35:56] [session_20260513_193537] Score saved: TestSpēlētājs = 0
+[2026-05-13 19:38:37] [session_20260513_193645] Score saved: TestSpēlētājs = 200
+[2026-05-13 19:49:15] [session_20260513_194733] Score saved: TestSpēlētājs = 325
+[2026-05-13 19:50:03] [session_20260513_194942] Score saved: TestSpēlētājs = 0
+[2026-05-13 19:51:38] [session_20260513_195040] Score saved: TestSpēlētājs = 0
+[2026-05-13 19:56:42] [session_20260513_195631] Score saved: TestSpēlētājs = 0
+[2026-05-13 19:57:32] [session_20260513_195716] Score saved: TestSpēlētājs = 0
+[2026-05-13 19:58:57] [session_20260513_195841] Score saved: TestSpēlētājs = 0
+[2026-05-13 20:00:27] [session_20260513_200003] Score saved: TestSpēlētājs = 0
+[2026-05-13 20:01:01] [session_20260513_200036] Score saved: TestSpēlētājs = 125
+[2026-05-13 20:02:15] [session_20260513_200208] Score saved: TestSpēlētājs = 0
+[2026-05-13 20:02:36] [session_20260513_200218] Score saved: TestSpēlētājs = 0
