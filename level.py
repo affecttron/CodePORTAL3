@@ -12,6 +12,7 @@ from settings import (
 
 
 class Level:
+
     def __init__(self, level_id, title, time_limit=TIME_LIMIT_PER_TASK):
         self._level_id = level_id
         self._title = title
@@ -72,8 +73,8 @@ class Level:
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
 
-        panel_width = 1000
-        panel_height = 600
+        panel_width = 1100
+        panel_height = 650
         panel_x = (SCREEN_WIDTH - panel_width) // 2
         panel_y = (SCREEN_HEIGHT - panel_height) // 2
 
@@ -92,6 +93,58 @@ class Level:
         screen.blit(prog_text, prog_rect)
 
         return panel_x, panel_y, panel_width, panel_height
+
+    def _draw_code_block(self, screen, font_normal, panel_x, panel_y, panel_w, color):
+        task = self.get_current_task()
+        if task is None:
+            return
+
+        code_x = panel_x + 50
+        code_y = panel_y + 140
+        code_w = panel_w - 100
+        code_h = 330
+
+        # Fons
+        pygame.draw.rect(screen, BLACK, (code_x, code_y, code_w, code_h))
+        pygame.draw.rect(screen, color, (code_x, code_y, code_w, code_h), 2)
+
+        # Virsraksts
+        labels = {
+            NEON_RED: "[ Python kods ]",
+            NEON_YELLOW: "[ Cikla izsekošana ]",
+            NEON_GREEN: "[ Funkcijas izsaukums ]",
+        }
+        label_text = labels.get(color, "[ Kods ]")
+        label = font_normal.render(label_text, True, color)
+        screen.blit(label, (code_x + 10, code_y - 30))
+
+        question_lines = task.get_question().split("\n")
+        max_width = code_w - 40
+        line_y = code_y + 15
+
+        for line in question_lines:
+            text_surface = font_normal.render(line, True, color)
+            if text_surface.get_width() <= max_width:
+                screen.blit(text_surface, (code_x + 20, line_y))
+                line_y += 26
+            else:
+                words = line.split(" ")
+                current_line = ""
+                for word in words:
+                    test_line = current_line + word + " "
+                    test_surface = font_normal.render(test_line, True, color)
+                    if test_surface.get_width() <= max_width:
+                        current_line = test_line
+                    else:
+                        if current_line:
+                            text = font_normal.render(current_line, True, color)
+                            screen.blit(text, (code_x + 20, line_y))
+                            line_y += 26
+                        current_line = word + " "
+                if current_line:
+                    text = font_normal.render(current_line, True, color)
+                    screen.blit(text, (code_x + 20, line_y))
+                    line_y += 26
 
     def get_level_id(self):
         return self._level_id
@@ -116,101 +169,39 @@ class Level:
 
 
 class ConditionLevel(Level):
+
     def __init__(self, level_id=1, title="Drošības vārti - if/else"):
         super().__init__(level_id, title)
         self._branch_type = "if/else"
-        self._theme_color = NEON_RED  # Sarkans!
+        self._theme_color = NEON_RED
 
     def display_task(self, screen, font_big, font_normal):
         panel_x, panel_y, panel_w, panel_h = self._draw_base_ui(screen, font_big, font_normal)
-
-        task = self.get_current_task()
-        if task is None:
-            return
-
-        code_x = panel_x + 50
-        code_y = panel_y + 150
-        code_w = panel_w - 100
-        code_h = 300
-
-        pygame.draw.rect(screen, BLACK, (code_x, code_y, code_w, code_h))
-        pygame.draw.rect(screen, NEON_RED, (code_x, code_y, code_w, code_h), 2)
-
-        label = font_normal.render("[ Python kods ]", True, NEON_RED)
-        screen.blit(label, (code_x + 10, code_y - 30))
-
-        question_lines = task.get_question().split("\n")
-        line_y = code_y + 20
-        for line in question_lines:
-            text = font_normal.render(line, True, NEON_GREEN)
-            screen.blit(text, (code_x + 20, line_y))
-            line_y += 30
+        self._draw_code_block(screen, font_normal, panel_x, panel_y, panel_w, NEON_RED)
 
 
 class LoopLevel(Level):
+
     def __init__(self, level_id=2, title="Datu tunelis - cikli"):
         super().__init__(level_id, title)
         self._loop_type = "for/while"
-        self._theme_color = NEON_YELLOW  # Dzeltens!
+        self._theme_color = NEON_YELLOW
 
     def display_task(self, screen, font_big, font_normal):
-        # Pārdefinēta
         panel_x, panel_y, panel_w, panel_h = self._draw_base_ui(screen, font_big, font_normal)
-
-        task = self.get_current_task()
-        if task is None:
-            return
-
-        code_x = panel_x + 50
-        code_y = panel_y + 150
-        code_w = panel_w - 100
-        code_h = 300
-
-        pygame.draw.rect(screen, BLACK, (code_x, code_y, code_w, code_h))
-        pygame.draw.rect(screen, NEON_YELLOW, (code_x, code_y, code_w, code_h), 2)
-
-        label = font_normal.render("[ Cikla izsekošana ]", True, NEON_YELLOW)
-        screen.blit(label, (code_x + 10, code_y - 30))
-
-        question_lines = task.get_question().split("\n")
-        line_y = code_y + 20
-        for line in question_lines:
-            text = font_normal.render(line, True, NEON_YELLOW)
-            screen.blit(text, (code_x + 20, line_y))
-            line_y += 30
+        self._draw_code_block(screen, font_normal, panel_x, panel_y, panel_w, NEON_YELLOW)
 
 
 class FunctionLevel(Level):
+
     def __init__(self, level_id=3, title="Galvenā servera istaba - funkcijas"):
         super().__init__(level_id, title)
         self._func_name = ""
-        self._theme_color = NEON_GREEN  # Zaļš!
+        self._theme_color = NEON_GREEN
 
     def display_task(self, screen, font_big, font_normal):
-        # Pārdefinēta
         panel_x, panel_y, panel_w, panel_h = self._draw_base_ui(screen, font_big, font_normal)
-
-        task = self.get_current_task()
-        if task is None:
-            return
-
-        code_x = panel_x + 50
-        code_y = panel_y + 150
-        code_w = panel_w - 100
-        code_h = 300
-
-        pygame.draw.rect(screen, BLACK, (code_x, code_y, code_w, code_h))
-        pygame.draw.rect(screen, NEON_GREEN, (code_x, code_y, code_w, code_h), 2)
-
-        label = font_normal.render("[ Funkcijas izsaukums ]", True, NEON_GREEN)
-        screen.blit(label, (code_x + 10, code_y - 30))
-
-        question_lines = task.get_question().split("\n")
-        line_y = code_y + 20
-        for line in question_lines:
-            text = font_normal.render(line, True, NEON_CYAN)
-            screen.blit(text, (code_x + 20, line_y))
-            line_y += 30
+        self._draw_code_block(screen, font_normal, panel_x, panel_y, panel_w, NEON_GREEN)
 
 
 def create_level(level_id):
