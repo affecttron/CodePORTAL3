@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/CODE3.png" alt="CODE Portal 3" width="500"/>
+<img src="assets/CODE3.png" alt="CODE Portal 3" width="750"/>
 
 # CODE Portal³
 
