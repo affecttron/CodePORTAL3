@@ -74,6 +74,7 @@ class Game:
         self._completed_portals = set()
 
         self._portal_cooldown = 0
+        self._jump_pressed = False  # Fix: track jump key state to avoid missed presses
 
     def _load_world(self):
         level_file = "level_1.json"
@@ -107,10 +108,8 @@ class Game:
                     continue
 
                 if self._state == STATE_PLAYING:
-                    if event.key == pygame.K_SPACE:
-                        self._player_sprite.jump()
-                    elif event.key == pygame.K_UP or event.key == pygame.K_w:
-                        self._player_sprite.jump()
+                    if event.key in (pygame.K_SPACE, pygame.K_UP, pygame.K_w):
+                        self._jump_pressed = True
                     elif event.key == pygame.K_r:
                         spawn_x, spawn_y = self._world.get_spawn_position()
                         self._player_sprite.respawn(spawn_x, spawn_y)
@@ -120,13 +119,15 @@ class Game:
                         self._submit_answer()
                     elif event.key == pygame.K_BACKSPACE:
                         self._input_text = self._input_text[:-1]
-                    elif event.unicode and len(self._input_text) < 50:
-                        if event.unicode.isprintable():
-                            self._input_text += event.unicode
 
                 elif self._state in [STATE_GAME_OVER, STATE_WIN]:
                     if event.key == pygame.K_RETURN:
                         self._running = False
+
+            # Fix: TEXTINPUT fires only after dead key is fully composed (fixes Latvian š, ā, ē, etc.)
+            if event.type == pygame.TEXTINPUT:
+                if self._state == STATE_TASK and len(self._input_text) < 50:
+                    self._input_text += event.text
 
     def _handle_continuous_input(self):
         if self._state != STATE_PLAYING:
@@ -134,13 +135,19 @@ class Game:
 
         keys = pygame.key.get_pressed()
 
-        # Kustība
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self._player_sprite.move_left()
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self._player_sprite.move_right()
         else:
             self._player_sprite.stop()
+
+        # Fix: only clear the flag if the jump actually fired (player was on ground).
+        # If they weren't on ground yet, keep the flag alive for the next frame.
+        if self._jump_pressed:
+            if self._player_sprite.is_on_ground():
+                self._player_sprite.jump()
+                self._jump_pressed = False
 
     def _update(self):
         if self._state == STATE_PLAYING:
@@ -176,6 +183,7 @@ class Game:
         self._state = STATE_TASK
         self._input_text = ""
         self._player.reset_attempts()
+        pygame.key.start_text_input()  # Fix: enable TEXTINPUT events for Latvian keyboard
         print(f"🌀 Portāls atvērts: Līmenis {level_id}")
 
     def _submit_answer(self):
@@ -240,6 +248,8 @@ class Game:
         self._current_portal = None
         self._input_text = ""
         self._portal_cooldown = 60
+        pygame.key.stop_text_input()  # Fix: disable TEXTINPUT events outside quiz
+        self._player_sprite._x -= 100
 
         self._player_sprite._x -= 100
 
