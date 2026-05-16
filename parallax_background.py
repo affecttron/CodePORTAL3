@@ -4,7 +4,6 @@ from settings import SCREEN_WIDTH, SCREEN_HEIGHT, IMAGES_FOLDER
 
 
 class ParallaxLayer:
-    """Viens parallax slānis."""
 
     def __init__(self, image, scroll_speed, y_offset=0):
         # 0.0 = nekustās (tāli), 1.0 = kustās ar pasauli (tuvi)
@@ -15,7 +14,6 @@ class ParallaxLayer:
         self._height = image.get_height()
 
     def draw(self, screen, camera_x, camera_y):
-        """Zīmē slāni ar parallax efektu un atkārtošanos."""
         # Aprēķinām nobīdi
         offset_x = -(camera_x * self._scroll_speed) % self._width
         offset_y = -(camera_y * self._scroll_speed) + self._y_offset
@@ -28,19 +26,16 @@ class ParallaxLayer:
 
 
 class ParallaxBackground:
-    """Parallax fona pārvaldnieks ar vairākiem slāņiem."""
 
     def __init__(self):
         self._layers = []
         self._sky_color = (10, 10, 25)  # Pamata fons, ja nav slāņu
 
     def add_layer(self, image, scroll_speed, y_offset=0):
-        """Pievieno slāni. Slāņi tiek zīmēti secīgi (pirmais = tālākais)."""
         layer = ParallaxLayer(image, scroll_speed, y_offset)
         self._layers.append(layer)
 
     def add_layer_from_file(self, filename, scroll_speed, y_offset=0):
-        """Mēģina ielādēt attēlu un pievienot kā slāni."""
         filepath = os.path.join(IMAGES_FOLDER, "backgrounds", filename)
 
         if not os.path.exists(filepath):
@@ -63,7 +58,6 @@ class ParallaxBackground:
             return False
 
     def add_color_layer(self, color, scroll_speed, height_ratio=1.0):
-        """Pievieno krāsainu slāni (placeholder, ja nav attēla)."""
         layer_height = int(SCREEN_HEIGHT * height_ratio)
         image = pygame.Surface((SCREEN_WIDTH * 2, layer_height), pygame.SRCALPHA)
         image.fill(color)
@@ -71,7 +65,6 @@ class ParallaxBackground:
         self.add_layer(image, scroll_speed, y_offset)
 
     def add_gradient_layer(self, color_top, color_bottom, scroll_speed):
-        """Pievieno gradient krāsu slāni (placeholder)."""
         image = pygame.Surface((SCREEN_WIDTH * 2, SCREEN_HEIGHT), pygame.SRCALPHA)
         for y in range(SCREEN_HEIGHT):
             ratio = y / SCREEN_HEIGHT
@@ -82,7 +75,6 @@ class ParallaxBackground:
         self.add_layer(image, scroll_speed, 0)
 
     def add_silhouette_layer(self, color, scroll_speed, building_count=10):
-        """Pievieno pilsētas siluetu (placeholder dekorēšanai)."""
         import random
         layer_width = SCREEN_WIDTH * 2
         image = pygame.Surface((layer_width, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -115,7 +107,6 @@ class ParallaxBackground:
         self.add_layer(image, scroll_speed, 0)
 
     def add_stars_layer(self, scroll_speed, star_count=200):
-        """Pievieno zvaigžņu slāni."""
         import random
         layer_width = SCREEN_WIDTH * 2
         image = pygame.Surface((layer_width, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -132,7 +123,6 @@ class ParallaxBackground:
         self.add_layer(image, scroll_speed, 0)
 
     def draw(self, screen, camera_x, camera_y):
-        """Zīmē visus slāņus pareizajā kārtībā (no aizmugures uz priekšu)."""
         # Pamata fons
         screen.fill(self._sky_color)
 
@@ -141,7 +131,6 @@ class ParallaxBackground:
             layer.draw(screen, camera_x, camera_y)
 
     def set_sky_color(self, color):
-        """Iestata pamata fona krāsu."""
         self._sky_color = color
 
     def get_layer_count(self):
@@ -152,7 +141,6 @@ class ParallaxBackground:
 
 
     def create_cyberpunk_scene(self):
-        """Izveido kiberpunka ainu no failiem (vai placeholder, ja faili nav)."""
         self.clear()
         self.set_sky_color((10, 5, 30))
 
@@ -178,7 +166,6 @@ class ParallaxBackground:
             print(f"✅ Parallax: {loaded_count}/{len(layers_config)} slāņi ielādēti")
 
     def _create_placeholder_scene(self):
-        """Placeholder ar krāsainiem siluetiem (kā iepriekš)."""
         self.add_stars_layer(scroll_speed=0.05, star_count=150)
         self.add_silhouette_layer(color=(20, 15, 40), scroll_speed=0.15)
         self.add_silhouette_layer(color=(30, 25, 55), scroll_speed=0.3)

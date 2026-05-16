@@ -24,7 +24,6 @@ BUTTON_SPACING = 8
 
 
 class LevelEditor:
-    """Level Editor ar kategorijām un registry atbalstu."""
 
     def __init__(self):
         pygame.init()
@@ -66,7 +65,6 @@ class LevelEditor:
         self._mouse_pos = (0, 0)
 
     def _select_first_tile(self):
-        """Izvēlas pirmo tile no pašreizējās kategorijas."""
         category = self._categories[self._current_category_index]
         tiles = self._registry.get_tiles_in_category(category)
         if tiles:
@@ -173,7 +171,6 @@ class LevelEditor:
                 self._unsaved_changes = True
 
     def _handle_category_click(self, screen_x):
-        """Klikšķis uz kategoriju cilnes."""
         x_offset = 20
         for i, cat_name in enumerate(self._categories):
             text_width = self._font.size(cat_name)[0] + 30
@@ -186,7 +183,6 @@ class LevelEditor:
             x_offset += text_width + 10
 
     def _handle_toolbar_click(self, screen_x, screen_y):
-        """Klikšķis uz tile pogas toolbar."""
         category = self._categories[self._current_category_index]
         tiles = self._registry.get_tiles_in_category(category)
 
@@ -243,7 +239,6 @@ class LevelEditor:
             self._unsaved_changes = True
 
     def _clamp_scroll(self):
-        """Neļauj scroll iziet ārpus robežām."""
         category = self._categories[self._current_category_index]
         tiles = self._registry.get_tiles_in_category(category)
         total_width = len(tiles) * (BUTTON_SIZE + BUTTON_SPACING)

@@ -5,7 +5,6 @@ from settings import TILE_SIZE, IMAGES_FOLDER
 
 
 class TileDefinition:
-    """Viena tile veida definīcija (no JSON ieraksta)."""
 
     def __init__(self, data, image=None):
         self._id = data["id"]
@@ -68,8 +67,6 @@ class TileDefinition:
 
 
 class TileRegistry:
-    """Galvenā tile sistēmas pārvaldnieks.
-    Ielādē JSON, attēlus un nodrošina ērtu piekļuvi visiem tiles."""
 
     def __init__(self, registry_file="data/tiles_registry.json"):
         self._registry_file = registry_file
@@ -81,7 +78,6 @@ class TileRegistry:
 
 
     def load(self):
-        """Ielādē tile registry no JSON faila un mēģina ielādēt attēlus."""
         if not os.path.exists(self._registry_file):
             print(f"❌ Registry fails neatrasts: {self._registry_file}")
             return False
@@ -118,7 +114,6 @@ class TileRegistry:
         return True
 
     def _try_load_image(self, filename):
-        """Mēģina ielādēt attēlu. Atgriež pygame Surface vai None."""
         if not filename:
             return None
 
@@ -144,33 +139,25 @@ class TileRegistry:
 
   
     def get_tile(self, tile_id):
-        """Atgriež TileDefinition pēc ID vai None."""
         return self._tiles_by_id.get(tile_id)
 
     def has_tile(self, tile_id):
-        """Pārbauda, vai tile ID eksistē registry."""
         return tile_id in self._tiles_by_id
 
     def get_all_tile_ids(self):
-        """Atgriež visu tile ID sarakstu."""
         return list(self._tiles_by_id.keys())
 
     def get_categories(self):
-        """Atgriež kategoriju nosaukumu sarakstu."""
         return self._categories.copy()
 
     def get_tiles_in_category(self, category_name):
-        """Atgriež visus tiles dotajā kategorijā."""
         return self._tiles_by_category.get(category_name, [])
 
     def get_tile_count(self):
-        """Atgriež kopējo tile veidu skaitu."""
         return len(self._tiles_by_id)
 
 
     def draw_tile(self, screen, tile_id, x, y, animation_frame=0):
-        """Zīmē tile uz ekrāna pēc ID.
-        Ja ir attēls - lieto to, ja nav - krāsainu taisnstūri."""
         tile_def = self.get_tile(tile_id)
         if tile_def is None:
             pygame.draw.rect(screen, (255, 0, 255), (x, y, TILE_SIZE, TILE_SIZE))

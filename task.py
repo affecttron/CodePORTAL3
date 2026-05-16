@@ -8,22 +8,14 @@ class Task:
         self._attempts_used = 0
 
     def display(self):
-        """Atgriež uzdevuma tekstu (vēlāk to zīmēsim uz pygame ekrāna)"""
         return self._question
 
     def verify(self, ans):
-        """Pārbauda atbildi - atgriež True ja pareiza, False ja nepareiza"""
         spēlētāja_atbilde = ans.strip().lower()
         pareizā_atbilde = self._correct_answer.strip().lower()
         return spēlētāja_atbilde == pareizā_atbilde
 
     def calculate_points(self, attempt_number, time_taken):
-        """Aprēķina punktus pēc README sistēmas:
-        - 1. mēģinājums: 100 pts
-        - 2. mēģinājums: 50 pts
-        - 3. mēģinājums: 20 pts
-        - Ātruma bonuss (< 15 sek): +25 pts
-        """
         if attempt_number == 1:
             base_points = 100
         elif attempt_number == 2:
@@ -40,11 +32,9 @@ class Task:
         return base_points + speed_bonus
 
     def increment_attempts(self):
-        """Palielina izmantoto mēģinājumu skaitu"""
         self._attempts_used += 1
 
     def reset_attempts(self):
-        """Atjauno mēģinājumus uz 0 (jaunam uzdevumam)"""
         self._attempts_used = 0
 
     # Getters

@@ -10,7 +10,6 @@ from settings import (
 
 
 class World:
-    """2D pasaule ar tiles un JSON saglabāšanu."""
 
     def __init__(self, registry=None):
         self._tiles = []

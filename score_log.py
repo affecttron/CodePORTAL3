@@ -20,11 +20,9 @@ class ScoreLog:
         self._ensure_csv_exists()
 
     def _generate_session_id(self):
-        """Unikāls sesijas ID (datums + laiks)."""
         return datetime.now().strftime("session_%Y%m%d_%H%M%S")
 
     def _ensure_csv_exists(self):
-        """Izveido CSV ar galvenēm, ja fails neeksistē."""
         if not os.path.exists(self._filename):
             with open(self._filename, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
@@ -32,7 +30,6 @@ class ScoreLog:
 
     # saglabashana
     def save_score(self, player):
-        """Saglabā Player datus CSV failā."""
         try:
             with open(self._filename, "a", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
@@ -52,7 +49,6 @@ class ScoreLog:
 
     # loading
     def load_scores(self):
-        """Ielādē visus rezultātus no CSV."""
         if not os.path.exists(self._filename):
             return []
 
@@ -90,11 +86,9 @@ class ScoreLog:
 
     # statistika
     def get_total_games(self):
-        """Cik kopā spēļu reģistrēts."""
         return len(self.load_scores())
 
     def get_average_score(self):
-        """Vidējais punkts visiem spēlētājiem."""
         scores = self.load_scores()
         if not scores:
             return 0
