@@ -76,6 +76,11 @@ class Game:
 
         self._portal_cooldown = 0
 
+        # Backspace hold-to-delete (frames pie 60 FPS)
+        self._backspace_held_frames = 0
+        self._BACKSPACE_INITIAL_DELAY = 25
+        self._BACKSPACE_REPEAT_RATE = 3
+
     def _load_world(self):
         level_file = "level_1.json"
         filepath = os.path.join(LEVELS_FOLDER, level_file)
@@ -146,10 +151,23 @@ class Game:
         else:
             self._player_sprite.stop()
 
+    def _handle_task_hold_input(self):
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_BACKSPACE]:
+            self._backspace_held_frames += 1
+            if self._backspace_held_frames > self._BACKSPACE_INITIAL_DELAY:
+                if (self._backspace_held_frames - self._BACKSPACE_INITIAL_DELAY) % self._BACKSPACE_REPEAT_RATE == 0:
+                    self._input_text = self._input_text[:-1]
+        else:
+            self._backspace_held_frames = 0
+
     def _update(self):
         if self._state == STATE_PLAYING:
             self._handle_continuous_input()
             self._update_playing()
+        elif self._state == STATE_TASK:
+            self._handle_task_hold_input()
 
         if self._feedback_timer > 0:
             self._feedback_timer -= 1
