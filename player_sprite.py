@@ -6,9 +6,11 @@ from settings import (
     NEON_CYAN, NEON_PINK, WHITE,
 )
 
+COYOTE_FRAMES = 6      # frames after leaving ground where jump still works
+JUMP_BUFFER_FRAMES = 10  # frames before landing where a queued jump fires
+
 
 class PlayerSprite:
-    """Spēlētāja sprite ar platformer fiziku."""
 
     def __init__(self, x, y):
         self._x = float(x)
@@ -22,33 +24,48 @@ class PlayerSprite:
         self._vel_x = 0.0
         self._vel_y = 0.0
 
-        # stavoklis 
+        # stavoklis
         self._on_ground = False      # Vai stāv uz platformas?
         self._facing_right = True    # Kurp skatās (animācijai)
         self._is_moving = False      # Vai pašlaik kustas?
         self._is_jumping = False     # Vai lec?
 
+        self._coyote_timer = 0       # frames left where jump works after leaving ground
+        self._jump_buffer = 0        # frames left for a buffered jump to fire
+
         self._animation_frame = 0
 
 
     def update(self, platforms):
-        """Galvenā update metode - tiek izsaukta katru kadru.
-        platforms = saraksts ar pygame.Rect objektiem (no World.get_solid_rects())"""
+        prev_on_ground = self._on_ground
 
         self._apply_gravity()
         self._move_horizontal(platforms)
         self._move_vertical(platforms)
         self._check_world_bounds()
+
+        # Coyote time: allow jumping for a few frames after walking off a ledge
+        if prev_on_ground and not self._on_ground:
+            self._coyote_timer = COYOTE_FRAMES
+        elif self._on_ground:
+            self._coyote_timer = 0
+        elif self._coyote_timer > 0:
+            self._coyote_timer -= 1
+
+        # Jump buffer: fire a buffered jump as soon as we can
+        if self._jump_buffer > 0:
+            self._jump_buffer -= 1
+            if self._on_ground or self._coyote_timer > 0:
+                self._execute_jump()
+
         self._animation_frame += 1
 
     def _apply_gravity(self):
-        """Pielietojam gravitāciju (privāta metode)."""
         self._vel_y += GRAVITY
         if self._vel_y > MAX_FALL_SPEED:
             self._vel_y = MAX_FALL_SPEED
 
     def _move_horizontal(self, platforms):
-        """Kustība X virzienā ar sadursmju pārbaudi."""
         self._x += self._vel_x
 
 
@@ -62,7 +79,6 @@ class PlayerSprite:
                 self._vel_x = 0
 
     def _move_vertical(self, platforms):
-        """Kustība Y virzienā ar sadursmju pārbaudi."""
         self._y += self._vel_y
         self._on_ground = False
 
@@ -79,7 +95,6 @@ class PlayerSprite:
                     self._vel_y = 0
 
     def _check_world_bounds(self):
-        """Neļauj iziet ārpus pasaules robežām."""
         if self._x < 0:
             self._x = 0
         if self._x + self._width > WORLD_WIDTH:
@@ -91,31 +106,33 @@ class PlayerSprite:
  # kustibas
 
     def move_left(self):
-        """Sāk kustību pa kreisi."""
         self._vel_x = -MOVE_SPEED
         self._facing_right = False
         self._is_moving = True
 
     def move_right(self):
-        """Sāk kustību pa labi."""
         self._vel_x = MOVE_SPEED
         self._facing_right = True
         self._is_moving = True
 
     def stop(self):
-        """Aptur horizontālo kustību."""
         self._vel_x = 0
         self._is_moving = False
 
     def jump(self):
-        """Lec (tikai ja ir uz zemes)."""
-        if self._on_ground:
-            self._vel_y = JUMP_STRENGTH
-            self._on_ground = False
-            self._is_jumping = True
+        if self._on_ground or self._coyote_timer > 0:
+            self._execute_jump()
+        else:
+            self._jump_buffer = JUMP_BUFFER_FRAMES
+
+    def _execute_jump(self):
+        self._vel_y = JUMP_STRENGTH
+        self._on_ground = False
+        self._is_jumping = True
+        self._coyote_timer = 0
+        self._jump_buffer = 0
 
     def respawn(self, x, y):
-        """Pārvieto spēlētāju uz dotu pozīciju (pēc nāves)."""
         self._x = float(x)
         self._y = float(y)
         self._vel_x = 0
@@ -123,7 +140,6 @@ class PlayerSprite:
 
 
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
-        """Zīmē spēlētāju ar kameras nobīdi."""
         screen_x = int(self._x - camera_offset_x)
         screen_y = int(self._y - camera_offset_y)
 
@@ -161,7 +177,6 @@ class PlayerSprite:
                 )
 
     def get_rect(self):
-        """Pygame Rect spēlētājam (sadursmēm)."""
         return pygame.Rect(int(self._x), int(self._y), self._width, self._height)
 
     def get_x(self):
@@ -171,7 +186,6 @@ class PlayerSprite:
         return self._y
 
     def get_center_x(self):
-        """X koordināta no spēlētāja vidus (kamerai)."""
         return self._x + self._width // 2
 
     def get_center_y(self):

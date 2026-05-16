@@ -62,6 +62,7 @@ class Game:
 
         self._state = STATE_PLAYING
         self._running = True
+        pygame.key.stop_text_input()
 
         self._current_level = None
         self._current_portal = None
@@ -120,13 +121,16 @@ class Game:
                         self._submit_answer()
                     elif event.key == pygame.K_BACKSPACE:
                         self._input_text = self._input_text[:-1]
-                    elif event.unicode and len(self._input_text) < 50:
-                        if event.unicode.isprintable():
-                            self._input_text += event.unicode
 
                 elif self._state in [STATE_GAME_OVER, STATE_WIN]:
                     if event.key == pygame.K_RETURN:
                         self._running = False
+
+            # TEXTINPUT handles dead-key composition (e.g. Latvian ' + a → ā)
+            # so we use it instead of event.unicode from KEYDOWN
+            if event.type == pygame.TEXTINPUT:
+                if self._state == STATE_TASK and len(self._input_text) < 50:
+                    self._input_text += event.text
 
     def _handle_continuous_input(self):
         if self._state != STATE_PLAYING:
@@ -176,6 +180,7 @@ class Game:
         self._state = STATE_TASK
         self._input_text = ""
         self._player.reset_attempts()
+        pygame.key.start_text_input()
         print(f"🌀 Portāls atvērts: Līmenis {level_id}")
 
     def _submit_answer(self):
@@ -240,6 +245,7 @@ class Game:
         self._current_portal = None
         self._input_text = ""
         self._portal_cooldown = 60
+        pygame.key.stop_text_input()
 
         self._player_sprite._x -= 100
 
