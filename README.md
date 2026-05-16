@@ -1,188 +1,115 @@
 <div align="center">
 
-<img src="assets/CODE3.png" alt="CODE Portal 3" width="750"/>
+<img src="assets/CODE3.png" alt="CODE Portal 3" width="720"/>
 
 # CODE Portal³
 
-### Kiberpunka 2D platformer ar programmēšanas uzdevumiem
+**Kiberpunka 2D platformer ar Python programmēšanas uzdevumiem**
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
 [![Pygame](https://img.shields.io/badge/Pygame--CE-2.5+-00B4D8?style=flat)](https://pyga.me/)
-[![OOP](https://img.shields.io/badge/OOP-Inheritance%20%7C%20Polymorphism-0077B6?style=flat)]()
+[![OOP](https://img.shields.io/badge/OOP-4_Principi-0077B6?style=flat)]()
 [![License](https://img.shields.io/badge/License-MIT-success?style=flat)]()
-
-[Apraksts](#apraksts) • [Funkcijas](#funkcijas) • [Instalācija](#instalācija) • [Spēles vadība](#spēles-vadība) • [Arhitektūra](#arhitektūra)
 
 </div>
 
-<br>
+---
 
-## Apraksts
+## Par spēli
 
-CODE Portal³ ir kiberpunka tematikas 2D platformer spēle, kurā spēlētājs uzņemas hakera lomu un cenšas izlauzties cauri trim drošības portāliem. Katrs portāls ir programmēšanas mīkla par Python valodas pamatkonceptiem - nosacījumiem, cikliem un funkcijām.
+Uzņemies hakera lomu un izlauzies cauri trim drošības portāliem kiberpunka pasaulē. Katrs portāls ir Python mīkla — risinot uzdevumus, apgūsti programmēšanas pamatkonceptus klasiskā platformer žanrā.
 
-Spēle savieno klasisko platformer žanru ar interaktīvu mācīšanos. Spēlētājs staigā, lec un izvairās no šķēršļiem kiberpunka pasaulē, pa ceļam risinot uzdevumus, kas palīdz apgūt programmēšanu.
+## Portāli
 
-<br>
+| Portāls | Tēma | Konteksts |
+|:-:|:-:|:--|
+| 🔴 **Sarkanais** | Nosacījumi | `if`, `elif`, `else` izsekošana |
+| 🟡 **Dzeltenais** | Cikli | `for` un `while` rezultātu noteikšana |
+| 🟢 **Zaļais** | Funkcijas | Funkciju atgriežamo vērtību analīze |
 
-## Funkcijas
+## Galvenās iespējas
 
-### Spēles mehānika
-Pilnībā funkcionāls 2D platformer ar gravitāciju, lēkšanas fiziku un sadursmju sistēmu. Spēlētājs pārvietojas pa pasauli, kurā ir platformas, sienas, bīstami šķēršļi un trīs interaktīvi portāli, kas atver programmēšanas uzdevumus.
-
-### Trīs portāli, trīs tēmas
-| Portāls | Tēma | Apraksts |
-|---------|------|----------|
-| Sarkanais | Nosacījumi | `if`, `elif`, `else` konstrukciju izsekošana |
-| Dzeltenais | Cikli | `for` un `while` ciklu rezultātu noteikšana |
-| Zaļais | Funkcijas | Funkciju izsaukumu atgriežamo vērtību analīze |
-
-### Punktu sistēma
-- Pareiza atbilde no pirmā mēģinājuma 100 punkti
-- Pareiza atbilde no otrā mēģinājuma 50 punkti
-- Pareiza atbilde no trešā mēģinājuma 20 punkti
-- Ātruma bonuss zem 15 sekundēm +25 punkti
-- Trīs nepareizas atbildes nozīmē uzdevuma zaudējumu
-
-### Vizuālais Level Editor
-Iebūvēts redaktors, kurš ļauj vizuāli veidot pielāgotas pasaules. Lietotājs var izvēlēties starp 24 dažādiem tile veidiem, kas sadalīti sešās kategorijās. Visi līmeņi tiek saglabāti JSON formātā un automātiski ielādēti spēlē.
-
-### Parallax fons
-Daudzslāņu kiberpunka pilsētas fons ar dažādiem ritināšanas ātrumiem, kas rada dziļuma sajūtu. Atbalsta gan reālus attēlus, gan procedurāli ģenerētus placeholder slāņus.
-
-### Datu noturība
-Spēlētāju rezultāti tiek saglabāti CSV failā. Sistēma nodrošina top 5 rezultātu apkopošanu, atsevišķu spēlētāju statistikas izsekošanu un sesijas žurnālēšanu.
-
-<br>
+- **Platformer fizika** — gravitācija, lēkšana, sadursmes, šķēršļi
+- **Vizuāls Level Editor** — 24 tile veidi, 6 kategorijas, JSON saglabāšana
+- **Parallax fons** — daudzslāņu kiberpunka pilsēta
+- **Punktu sistēma** — 100/50/20 pēc mēģinājuma + ātruma bonuss (−15s = +25)
+- **CSV statistika** — top 5 rezultāti un sesijas žurnāls
 
 ## Instalācija
 
-### Priekšnosacījumi
-Python 3.10 vai jaunāka versija un pip pakotņu pārvaldnieks.
-
-### Soļi
-
-Pirmkārt, lejupielādē projekta failus.
-
-Otrkārt, instalē nepieciešamās bibliotēkas ar komandu:
-
 ```bash
 pip install pygame-ce
-```
-
-Treškārt, palaiž spēli ar komandu:
-
-```bash
 python main.py
 ```
 
-### Atkarības
-| Bibliotēka | Versija | Mērķis |
-|------------|---------|--------|
-| Python | 3.10+ | Programmēšanas valoda |
-| pygame-ce | 2.5+ | Grafiskā saskarne un fizika |
+> Nepieciešams Python 3.10+
 
-<br>
+## Vadība
 
-## Spēles vadība
+<table>
+<tr><td valign="top">
 
-### Pārvietošanās pasaulē
+**Pasaulē**
 | Taustiņš | Darbība |
-|----------|---------|
-| `A` vai `←` | Staigāt pa kreisi |
-| `D` vai `→` | Staigāt pa labi |
-| `SPACE` vai `W` | Lekt |
+|:-:|:--|
+| `A` `D` / `←` `→` | Kustība |
+| `SPACE` / `W` | Lēkt |
 | `R` | Atjaunot pozīciju |
-| `ESC` | Iziet no spēles |
+| `ESC` | Iziet |
 
-### Uzdevumu logā
+</td><td valign="top">
+
+**Uzdevumā**
 | Taustiņš | Darbība |
-|----------|---------|
-| `Burti un cipari` | Rakstīt atbildi |
-| `BACKSPACE` | Dzēst rakstzīmi |
-| `ENTER` | Iesniegt atbildi |
-| `ESC` | Atcelt uzdevumu |
+|:-:|:--|
+| `0-9` `A-Z` | Atbilde |
+| `ENTER` | Iesniegt |
+| `BACKSPACE` | Dzēst |
+| `ESC` | Atcelt |
 
-### Level Editor
+</td><td valign="top">
+
+**Editorā**
 | Taustiņš | Darbība |
-|----------|---------|
-| Kreisais peles taustiņš | Likt tile |
-| Labais peles taustiņš | Dzēst tile |
-| `WASD` vai bultiņas | Kustināt kameru |
-| `TAB` | Pārslēgt kategoriju |
-| `G` | Ieslēgt režģi |
-| `Ctrl+S` | Saglabāt līmeni |
-| `Ctrl+N` | Jauns tukšs līmenis |
-| `Ctrl+1/2/3` | Pārslēgt starp līmeņiem |
+|:-:|:--|
+| `LMB` / `RMB` | Likt / dzēst |
+| `TAB` | Kategorija |
+| `G` | Režģis |
+| `Ctrl+S` / `N` | Saglabāt / jauns |
 
-<br>
+</td></tr>
+</table>
 
 ## Arhitektūra
 
-Projekts izstrādāts pēc objektorientētās programmēšanas principiem ar skaidru atbildību sadalījumu starp klasēm.
-
-### OOP principu izmantošana
+Projekts balstīts uz **objektorientētās programmēšanas** principiem ar skaidru klašu atbildību sadali.
 
 | Princips | Pielietojums |
-|----------|--------------|
-| **Iekapsulēšana** | Visi klases atribūti deklarēti kā privāti, piekļuve nodrošināta caur getter un setter metodēm |
-| **Mantošana** | Vairāku līmeņu klašu hierarhijas tile sistēmā un uzdevumu sistēmā |
-| **Polimorfisms** | Virtuālās metodes, kas pārdefinētas apakšklasēs ar atšķirīgu uzvedību |
-| **Kompozīcija** | Komplekso klasēs (Game, World) tiek izmantoti vienkāršāku klasu objekti |
-| **Factory šablons** | Centralizētas funkcijas objektu izveidošanai |
-
-### Klašu hierarhija
+|:--|:--|
+| **Iekapsulēšana** | Privāti atribūti, piekļuve caur getter/setter |
+| **Mantošana** | Tile un Level klašu hierarhijas |
+| **Polimorfisms** | Virtuālās metodes pārdefinētas apakšklasēs |
+| **Kompozīcija** | Game/World izmanto vienkāršāku klašu objektus |
 
 ```
-Tile (bāzes klase)
-├── SolidTile          Cietie tile, kas darbojas kā sadursmes objekti
-├── PortalTile         Portāli, kas atver programmēšanas uzdevumus
-└── HazardTile         Bīstami objekti, kas nogalina spēlētāju
-
-Level (bāzes klase)
-├── ConditionLevel     if/else nosacījumu līmenis
-├── LoopLevel          for/while ciklu līmenis
-└── FunctionLevel      Funkciju līmenis
+Tile                              Level
+├── SolidTile                     ├── ConditionLevel
+├── PortalTile                    ├── LoopLevel
+└── HazardTile                    └── FunctionLevel
 ```
 
-### Tehnoloģijas
+**Tehnoloģijas:** Python 3 · pygame-ce · JSON (līmeņi, uzdevumi) · CSV (rezultāti)
 
-**Python 3** kā galvenā programmēšanas valoda nodrošina objektorientētas programmēšanas iespējas un plašu standarta biblioteku.
+## Spēles plūsma
 
-**pygame-ce** ir modernā pygame versija, kas tiek aktīvi uzturēta. Tā nodrošina grafisko renderēšanu, lietotāja ievades apstrādi un audio atbalstu.
+Spēlētājs pārvietojas pa pasauli līdz portālam → atveras uzdevumu logs ar Python koda fragmentu → analizē kodu un ievada rezultātu → pareiza atbilde deaktivē portālu → pēc visu trīs portālu pabeigšanas tiek parādīts uzvaras ekrāns ar punktu skaitu.
 
-**JSON** formāts tiek izmantots gan uzdevumu datu glabāšanai, gan līmeņu saglabāšanai, gan tile sistēmas konfigurācijai. Šī formāta priekšrocība ir cilvēkam saprotama struktūra un viegla manipulācija.
-
-**CSV** formāts izvēlēts spēlētāju rezultātu glabāšanai tā vienkāršības un saderības ar tabulu programmām dēļ.
-
-<br>
-
-## Spēles darbības princips
-
-Spēlētājs sāk pasaules sākumā un caur platformer mehānikām pārvietojas līdz pirmajam portālam. Pieskaroties portālam, atveras uzdevumu logs ar Python koda fragmentu un jautājumu. Spēlētājam jāanalizē kods un jāievada pareizais rezultāts.
-
-Pēc pareizas atbildes portāls deaktivējas un spēlētājs var doties tālāk uz nākamo. Pēc visu trīs portālu pabeigšanas tiek parādīts uzvaras ekrāns ar kopējo punktu skaitu. Visi rezultāti automātiski saglabājas CSV failā turpmākai analīzei.
-
-<br>
-
-## Izstrādes komanda
-
-| Loma | Dalībnieks |
-|------|------------|
-| Projekta izstrāde, dizains, UML | Artūrs Skorikovs |
-
-Komandas nosaukums **PORTAL 3** atsaucas uz to, ka Portal 2 jau bija paņemts.
-
-<br>
-
-## Licence
-
-Šis projekts ir licencēts saskaņā ar MIT licenci.
-
-<br>
+---
 
 <div align="center">
 
-**Izstrādāts kā kursa darbs programmēšanas kursā**
+**Artūrs Skorikovs** · Komanda **PORTAL 3** *(jo Portal 2 jau bija paņemts)*
+
+Kursa darbs programmēšanas kursā · MIT License
 
 </div>

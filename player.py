@@ -14,6 +14,9 @@ class Player:
             self._score += points
             self._tasks_completed += 1
 
+    def deduct_score(self, points):
+        self._score = max(0, self._score - points)
+
     def reset_attempts(self):
         self._attempts = 0
 

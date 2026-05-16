@@ -209,15 +209,16 @@ class Game:
         else:
             # NEPAREIZI
             self._player.increment_attempts()
+            self._player.deduct_score(5)
             attempts = self._player.get_attempts()
 
             if not self._player.has_attempts_left():
-                self._show_feedback("Pārāk daudz kļūdu!", NEON_RED)
+                self._show_feedback("Pārāk daudz kļūdu! -5 punkti!", NEON_RED)
                 self._close_task_fail()
             else:
                 remaining = 3 - attempts
                 hint = task.get_hint() if attempts >= 2 else ""
-                msg = f"Nepareizi! Vēl {remaining} mēģ. {hint}"
+                msg = f"Nepareizi! -5 punkti! Vēl {remaining} mēģ. {hint}"
                 self._show_feedback(msg, NEON_YELLOW)
                 self._input_text = ""
 
