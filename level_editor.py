@@ -124,8 +124,8 @@ class LevelEditor:
             self._show_message(f"Kategorija: {self._categories[self._current_category_index]}")
             return
 
-        keys = pygame.key.get_pressed()
-        ctrl_pressed = keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL]
+        ctrl_pressed = bool(event.mod & pygame.KMOD_CTRL)
+        shift_pressed = bool(event.mod & pygame.KMOD_SHIFT)
 
         if ctrl_pressed:
             if event.key == pygame.K_s:
@@ -137,15 +137,17 @@ class LevelEditor:
                 self._unsaved_changes = True
                 self._show_message("Jauns tukšs līmenis")
             elif event.key == pygame.K_1:
-                self._switch_level("level_1.json")
+                self._switch_level("level_1.json", force=shift_pressed)
             elif event.key == pygame.K_2:
-                self._switch_level("level_2.json")
+                self._switch_level("level_2.json", force=shift_pressed)
             elif event.key == pygame.K_3:
-                self._switch_level("level_3.json")
+                self._switch_level("level_3.json", force=shift_pressed)
 
     def _handle_mouse_click(self, event):
         screen_x, screen_y = event.pos
 
+        if screen_y < TOP_BAR_HEIGHT:
+            return
 
         if TOP_BAR_HEIGHT <= screen_y < TOP_BAR_HEIGHT + CATEGORY_BAR_HEIGHT:
             self._handle_category_click(screen_x)
@@ -200,6 +202,7 @@ class LevelEditor:
     def _handle_continuous_input(self):
         keys = pygame.key.get_pressed()
         camera_speed = 15
+        ctrl_pressed = keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL]
 
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self._camera.move(-camera_speed, 0)
@@ -207,7 +210,7 @@ class LevelEditor:
             self._camera.move(camera_speed, 0)
         if keys[pygame.K_UP] or keys[pygame.K_w]:
             self._camera.move(0, -camera_speed)
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+        if keys[pygame.K_DOWN] or (keys[pygame.K_s] and not ctrl_pressed):
             self._camera.move(0, camera_speed)
 
         # ja tur peli
@@ -297,7 +300,7 @@ class LevelEditor:
 
         start_y = -(cam_y % TILE_SIZE)
         for y in range(int(start_y), grid_bottom, TILE_SIZE):
-            if y > grid_top:
+            if y >= grid_top:
                 pygame.draw.line(self._screen, EDITOR_GRID_COLOR,
                                  (0, y), (SCREEN_WIDTH, y), 1)
 
@@ -447,7 +450,10 @@ class LevelEditor:
         self._message = msg
         self._message_timer = 120
 
-    def _switch_level(self, filename):
+    def _switch_level(self, filename, force=False):
+        if self._unsaved_changes and not force:
+            self._show_message("Nesaglabātas izmaiņas! Ctrl+S vai Shift+Ctrl+1/2/3 lai pārslēgtu")
+            return
         self._current_filename = filename
         if os.path.exists(os.path.join(LEVELS_FOLDER, filename)):
             self._world.load_from_file(filename)
