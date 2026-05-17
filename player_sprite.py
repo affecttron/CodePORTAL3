@@ -235,3 +235,9 @@ class PlayerSprite:
 
     def is_moving(self):
         return self._is_moving
+
+    def get_vel_x(self):
+        return self._vel_x
+
+    def get_vel_y(self):
+        return self._vel_y

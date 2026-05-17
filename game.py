@@ -303,6 +303,7 @@ class Game:
         self._parallax.draw(self._screen, cam_x, cam_y)
         self._world.draw(self._screen, cam_x, cam_y)
         self._player_sprite.draw(self._screen, cam_x, cam_y)
+        self._camera.apply_motion_blur(self._screen)
         self._draw_hud()
 
         if self._feedback_timer > 0:
