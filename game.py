@@ -97,7 +97,6 @@ class Game:
             self._clock.tick(FPS)
 
         self._score_log.save_score(self._player)
-        pygame.quit()
 
     def _handle_events(self):
         for event in pygame.event.get():
@@ -115,7 +114,7 @@ class Game:
                 if self._state == STATE_PLAYING:
                     if event.key == pygame.K_SPACE:
                         self._player_sprite.jump()
-                    elif event.key == pygame.K_UP or event.key == pygame.K_w:
+                    elif event.key == pygame.K_UP:
                         self._player_sprite.jump()
                     elif event.key == pygame.K_r:
                         spawn_x, spawn_y = self._world.get_spawn_position()
@@ -151,6 +150,14 @@ class Game:
         else:
             self._player_sprite.stop()
 
+        # Rāpšanās pa kāpnēm (W = augšup, S = lejup)
+        if keys[pygame.K_w]:
+            self._player_sprite.climb_up()
+        elif keys[pygame.K_s]:
+            self._player_sprite.climb_down()
+        else:
+            self._player_sprite.stop_climbing()
+
     def _handle_task_hold_input(self):
         keys = pygame.key.get_pressed()
 
@@ -176,7 +183,10 @@ class Game:
             self._portal_cooldown -= 1
 
     def _update_playing(self):
-        self._player_sprite.update(self._world.get_solid_rects())
+        self._player_sprite.update(
+            self._world.get_solid_rects(),
+            self._world.get_climbable_rects(),
+        )
         self._camera.update()
 
         hazard = self._world.check_hazard_collision(self._player_sprite.get_rect())
@@ -293,6 +303,7 @@ class Game:
         self._parallax.draw(self._screen, cam_x, cam_y)
         self._world.draw(self._screen, cam_x, cam_y)
         self._player_sprite.draw(self._screen, cam_x, cam_y)
+        self._camera.apply_motion_blur(self._screen)
         self._draw_hud()
 
         if self._feedback_timer > 0:
@@ -315,9 +326,9 @@ class Game:
         text = self._font.render(portals_text, True, NEON_CYAN)
         self._screen.blit(text, (500, 20))
 
-        controls = "A/D = staigāt | SPACE/W = lekt | R = respawn | ESC = iziet"
+        controls = "A/D = staigāt | SPACE = lekt | W/S = rāpties | R = respawn | ESC = iziet"
         text = self._font_small.render(controls, True, GRAY)
-        self._screen.blit(text, (SCREEN_WIDTH - 450, 25))
+        self._screen.blit(text, (SCREEN_WIDTH - 560, 25))
 
     def _draw_feedback(self):
         text = self._font_big.render(self._feedback_message, True, self._feedback_color)
@@ -395,3 +406,4 @@ class Game:
 if __name__ == "__main__":
     game = Game("TestSpēlētājs")
     game.run()
+    pygame.quit()

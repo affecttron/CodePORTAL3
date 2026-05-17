@@ -1,7 +1,7 @@
 import pygame
 from settings import (
     PLAYER_WIDTH, PLAYER_HEIGHT,
-    GRAVITY, JUMP_STRENGTH, MOVE_SPEED, MAX_FALL_SPEED,
+    GRAVITY, JUMP_STRENGTH, MOVE_SPEED, MAX_FALL_SPEED, CLIMB_SPEED,
     WORLD_WIDTH, WORLD_HEIGHT,
     NEON_CYAN, NEON_PINK, WHITE,
 )
@@ -33,13 +33,24 @@ class PlayerSprite:
         self._coyote_timer = 0       # frames left where jump works after leaving ground
         self._jump_buffer = 0        # frames left for a buffered jump to fire
 
+        # Kāpnes: pārklājas ar climbable tile + W/S
+        self._on_ladder = False
+        self._climb_dir = 0          # -1 = augšup, +1 = lejup, 0 = stāv
+        self._climb_lockout = 0      # frames where climb is ignored (post-jump)
+
         self._animation_frame = 0
 
 
-    def update(self, platforms):
+    def update(self, platforms, climbables=None):
         prev_on_ground = self._on_ground
 
-        self._apply_gravity()
+        self._update_ladder_state(climbables or [])
+
+        if self._on_ladder and self._climb_dir != 0:
+            self._vel_y = CLIMB_SPEED * self._climb_dir
+        else:
+            self._apply_gravity()
+
         self._move_horizontal(platforms)
         self._move_vertical(platforms)
         self._check_world_bounds()
@@ -58,6 +69,9 @@ class PlayerSprite:
             if self._on_ground or self._coyote_timer > 0:
                 self._execute_jump()
 
+        if self._climb_lockout > 0:
+            self._climb_lockout -= 1
+
         self._animation_frame += 1
 
     def _apply_gravity(self):
@@ -65,16 +79,21 @@ class PlayerSprite:
         if self._vel_y > MAX_FALL_SPEED:
             self._vel_y = MAX_FALL_SPEED
 
+    def _update_ladder_state(self, climbables):
+        player_rect = self.get_rect()
+        self._on_ladder = any(player_rect.colliderect(r) for r in climbables)
+        if not self._on_ladder:
+            self._climb_dir = 0
+
     def _move_horizontal(self, platforms):
         self._x += self._vel_x
 
-
-        player_rect = self.get_rect()
         for platform_rect in platforms:
+            player_rect = self.get_rect()
             if player_rect.colliderect(platform_rect):
                 if self._vel_x > 0:
                     self._x = platform_rect.left - self._width
-                elif self._vel_x < 0: 
+                elif self._vel_x < 0:
                     self._x = platform_rect.right
                 self._vel_x = 0
 
@@ -82,8 +101,8 @@ class PlayerSprite:
         self._y += self._vel_y
         self._on_ground = False
 
-        player_rect = self.get_rect()
         for platform_rect in platforms:
+            player_rect = self.get_rect()
             if player_rect.colliderect(platform_rect):
                 if self._vel_y > 0:  # Krīt uz leju
                     self._y = platform_rect.top - self._height
@@ -93,6 +112,7 @@ class PlayerSprite:
                 elif self._vel_y < 0:  # Lec uz augšu
                     self._y = platform_rect.bottom
                     self._vel_y = 0
+                    self._is_jumping = False
 
     def _check_world_bounds(self):
         if self._x < 0:
@@ -119,7 +139,24 @@ class PlayerSprite:
         self._vel_x = 0
         self._is_moving = False
 
+    def climb_up(self):
+        if self._on_ladder and self._climb_lockout == 0:
+            self._climb_dir = -1
+
+    def climb_down(self):
+        if self._on_ladder and self._climb_lockout == 0:
+            self._climb_dir = 1
+
+    def stop_climbing(self):
+        self._climb_dir = 0
+
+    def is_on_ladder(self):
+        return self._on_ladder
+
     def jump(self):
+        if self._on_ladder:
+            self._execute_jump()
+            return
         if self._on_ground or self._coyote_timer > 0:
             self._execute_jump()
         else:
@@ -131,6 +168,8 @@ class PlayerSprite:
         self._is_jumping = True
         self._coyote_timer = 0
         self._jump_buffer = 0
+        self._climb_dir = 0
+        self._climb_lockout = 12
 
     def respawn(self, x, y):
         self._x = float(x)
@@ -196,3 +235,9 @@ class PlayerSprite:
 
     def is_moving(self):
         return self._is_moving
+
+    def get_vel_x(self):
+        return self._vel_x
+
+    def get_vel_y(self):
+        return self._vel_y

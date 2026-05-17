@@ -22,6 +22,19 @@ GRAVITY = 0.8                     # Cik ātri spēlētājs krīt
 JUMP_STRENGTH = -16               # Lēciena spēks (negatīvs = uz augšu)
 MOVE_SPEED = 6                    # Staigāšanas ātrums (px/kadrā)
 MAX_FALL_SPEED = 18               # Maksimālais kritiena ātrums
+CLIMB_SPEED = 5                   # Rāpšanās ātrums pa kāpnēm (px/kadrā)
+
+
+# KAMERA
+
+CAMERA_SMOOTHNESS_X = 0.11        # Cik strauji kamera seko horizontāli (mazāks = vienmērīgāks)
+CAMERA_SMOOTHNESS_Y = 0.18        # Vertikāli — nedaudz straujāks (lai redz, kur lec)
+CAMERA_LOOKAHEAD_MAX = 220        # Cik tālu kamera "skatās uz priekšu" kustības virzienā (px)
+CAMERA_LOOKAHEAD_LERP = 0.04      # Cik lēni kamera pielāgo look-ahead vērtību
+CAMERA_MOTION_BLUR = True         # Vai motion-blur trail efekts ir ieslēgts
+CAMERA_BLUR_MIN_SPEED = 1.0       # Zem šī kameras ātruma — bez blur
+CAMERA_BLUR_ALPHA_GAIN = 9        # Cik strauji blur biezums aug ar ātrumu
+CAMERA_BLUR_ALPHA_MAX = 85        # Maksimālā trail alpha
 
 
 
