@@ -1,4 +1,4 @@
-"""GLSL post-FX pipeline — pygame surface → GL texture → fullscreen quad."""
+"""GLSL post-FX pipeline — two-pass: surface → scene FBO → screen."""
 
 import os
 import time
@@ -20,19 +20,22 @@ SHADER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shaders")
 class ShaderPipeline:
 
     @classmethod
-    def create(cls, size, fullscreen=False, shader="cyberpunk"):
+    def create(cls, size, fullscreen=False, shader="cyberpunk", render_scale=1.0):
         # falls back to plain blitting if moderngl is missing/broken
         if not _MODERNGL_AVAILABLE:
             print("[shader] moderngl not installed — running without post-FX.")
             return _PassthroughPipeline(size, fullscreen)
         try:
-            return cls(size, fullscreen, shader)
+            return cls(size, fullscreen, shader, render_scale)
         except Exception as exc:
             print(f"[shader] disabled ({exc.__class__.__name__}: {exc}) — falling back.")
             return _PassthroughPipeline(size, fullscreen)
 
-    def __init__(self, size, fullscreen, shader_name):
-        self._size = (int(size[0]), int(size[1]))
+    def __init__(self, size, fullscreen, shader_name, render_scale):
+        self._screen_size = (int(size[0]), int(size[1]))
+        rw = max(1, int(size[0] * render_scale))
+        rh = max(1, int(size[1] * render_scale))
+        self._render_size = (rw, rh)
         self._shader_name = shader_name
 
         # request GL 3.3 core to match `#version 330 core` shaders
@@ -46,15 +49,35 @@ class ShaderPipeline:
         flags = pygame.OPENGL | pygame.DOUBLEBUF
         if fullscreen:
             flags |= pygame.FULLSCREEN
-        pygame.display.set_mode(self._size, flags)
+        pygame.display.set_mode(self._screen_size, flags)
 
         self._ctx = moderngl.create_context()
         self._ctx.enable(moderngl.BLEND)
 
         self._build_quad()
-        self._program = self._compile_program(shader_name)
-        self._vao = self._make_vao(self._program)
-        self._build_texture()
+
+        # scene pass: upload texture -> scene framebuffer
+        self._scene_program = self._compile_program(shader_name)
+        self._scene_vao = self._make_vao(self._scene_program)
+
+        # screen pass: scene framebuffer -> default fbo
+        self._screen_program = self._compile_program("screen")
+        self._screen_vao = self._make_vao(self._screen_program)
+
+        # upload texture — surface bytes land here
+        self._upload_tex = self._ctx.texture(self._render_size, 4)
+        self._upload_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        self._upload_tex.repeat_x = False
+        self._upload_tex.repeat_y = False
+        # surface bytes are BGRA — remap so shader's .rgba is correct
+        self._upload_tex.swizzle = "BGRA"
+
+        # scene framebuffer — scene pass writes here, screen pass samples it
+        self._scene_tex = self._ctx.texture(self._render_size, 4)
+        self._scene_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        self._scene_tex.repeat_x = False
+        self._scene_tex.repeat_y = False
+        self._scene_fbo = self._ctx.framebuffer(color_attachments=[self._scene_tex])
 
         self._start_time = time.perf_counter()
         self._enabled = True
@@ -63,7 +86,7 @@ class ShaderPipeline:
 
         # explicit BGRA layout — raw buffer uploads with no conversion
         self._surface = pygame.Surface(
-            self._size, 0, 32,
+            self._render_size, 0, 32,
             (0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000),
         )
 
@@ -78,9 +101,9 @@ class ShaderPipeline:
         self._vbo = self._ctx.buffer(verts.tobytes())
 
     def _compile_program(self, name):
-        with open(os.path.join(SHADER_DIR, "passthrough.vert"), "r", encoding="utf-8") as f:
+        with open(os.path.join(SHADER_DIR, "vertex.glsl"), "r", encoding="utf-8") as f:
             vert_src = f.read()
-        with open(os.path.join(SHADER_DIR, f"{name}.frag"), "r", encoding="utf-8") as f:
+        with open(os.path.join(SHADER_DIR, f"{name}.glsl"), "r", encoding="utf-8") as f:
             frag_src = f.read()
         return self._ctx.program(vertex_shader=vert_src, fragment_shader=frag_src)
 
@@ -88,14 +111,6 @@ class ShaderPipeline:
         return self._ctx.vertex_array(
             program, [(self._vbo, "2f 2f", "vert", "tex_coord")]
         )
-
-    def _build_texture(self):
-        self._tex = self._ctx.texture(self._size, 4)
-        self._tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
-        self._tex.repeat_x = False
-        self._tex.repeat_y = False
-        # surface bytes are BGRA — remap so shader's .rgba is correct
-        self._tex.swizzle = "BGRA"
 
     @property
     def surface(self):
@@ -109,10 +124,10 @@ class ShaderPipeline:
         except Exception as exc:
             print(f"[shader] failed to swap to '{name}': {exc}")
             return
-        self._program.release()
-        self._vao.release()
-        self._program = new_program
-        self._vao = self._make_vao(self._program)
+        self._scene_program.release()
+        self._scene_vao.release()
+        self._scene_program = new_program
+        self._scene_vao = self._make_vao(self._scene_program)
         self._shader_name = name
 
     def set_enabled(self, enabled):
@@ -127,17 +142,28 @@ class ShaderPipeline:
 
     def present(self):
         # zero-copy upload via buffer protocol
-        self._tex.write(self._surface.get_buffer())
-        self._tex.use(0)
+        self._upload_tex.write(self._surface.get_buffer())
 
-        self._set_uniform("u_texture", 0)
-        self._set_uniform("u_time", time.perf_counter() - self._start_time)
-        self._set_uniform("u_resolution", self._size)
-        self._set_uniform("u_intensity", 1.0 if self._enabled else 0.0)
-        self._set_uniform("u_glitch", self._glitch)
+        # pass 1 — scene shader writes into the scene framebuffer
+        self._scene_fbo.use()
+        self._ctx.viewport = (0, 0, self._render_size[0], self._render_size[1])
+        self._upload_tex.use(0)
+        self._set_uniform(self._scene_program, "u_texture", 0)
+        self._set_uniform(self._scene_program, "u_time", time.perf_counter() - self._start_time)
+        self._set_uniform(self._scene_program, "u_resolution", self._render_size)
+        self._set_uniform(self._scene_program, "u_intensity", 1.0 if self._enabled else 0.0)
+        self._set_uniform(self._scene_program, "u_glitch", self._glitch)
+        self._scene_vao.render(mode=moderngl.TRIANGLE_STRIP)
 
-        self._ctx.clear(0.0, 0.0, 0.0, 1.0)
-        self._vao.render(mode=moderngl.TRIANGLE_STRIP)
+        # pass 2 — screen shader upscales scene texture to the window
+        self._ctx.screen.use()
+        self._ctx.viewport = (0, 0, self._screen_size[0], self._screen_size[1])
+        self._scene_tex.use(0)
+        self._set_uniform(self._screen_program, "u_texture", 0)
+        self._set_uniform(self._screen_program, "u_time", time.perf_counter() - self._start_time)
+        self._set_uniform(self._screen_program, "u_resolution", self._screen_size)
+        self._screen_vao.render(mode=moderngl.TRIANGLE_STRIP)
+
         pygame.display.flip()
 
         self._glitch *= self._glitch_decay
@@ -146,18 +172,22 @@ class ShaderPipeline:
 
     def shutdown(self):
         try:
-            self._tex.release()
-            self._vao.release()
-            self._program.release()
+            self._scene_fbo.release()
+            self._scene_tex.release()
+            self._upload_tex.release()
+            self._scene_vao.release()
+            self._screen_vao.release()
+            self._scene_program.release()
+            self._screen_program.release()
             self._vbo.release()
             self._ctx.release()
         except Exception:
             pass
 
-    def _set_uniform(self, name, value):
-        # silently skip uniforms the shader doesn't declare
+    def _set_uniform(self, program, name, value):
+        # silently skip uniforms a shader doesn't declare
         try:
-            self._program[name].value = value
+            program[name].value = value
         except KeyError:
             pass
 
