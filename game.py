@@ -97,7 +97,6 @@ class Game:
             self._clock.tick(FPS)
 
         self._score_log.save_score(self._player)
-        pygame.quit()
 
     def _handle_events(self):
         for event in pygame.event.get():
@@ -395,3 +394,4 @@ class Game:
 if __name__ == "__main__":
     game = Game("TestSpēlētājs")
     game.run()
+    pygame.quit()

@@ -84,9 +84,6 @@ class LevelEditor:
             self._draw()
             self._clock.tick(FPS)
 
-        pygame.quit()
-        sys.exit()
-
     # === NOTIKUMI ===
     def _handle_events(self):
         for event in pygame.event.get():
@@ -467,3 +464,5 @@ class LevelEditor:
 if __name__ == "__main__":
     editor = LevelEditor()
     editor.run()
+    pygame.quit()
+    sys.exit()
