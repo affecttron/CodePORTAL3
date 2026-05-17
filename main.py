@@ -5,6 +5,7 @@ import pygame
 from game import Game
 from level_editor import LevelEditor
 from score_log import ScoreLog
+from shader_pipeline import ShaderPipeline
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, FULLSCREEN,
     WHITE, BLACK, GRAY,
@@ -22,8 +23,10 @@ class MainMenu:
 
     def __init__(self):
         pygame.init()
-        flags = pygame.FULLSCREEN if FULLSCREEN else 0
-        self._screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
+        self._pipeline = ShaderPipeline.create(
+            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu"
+        )
+        self._screen = self._pipeline.surface
         pygame.display.set_caption(TITLE)
         self._clock = pygame.time.Clock()
 
@@ -59,6 +62,7 @@ class MainMenu:
             self._update()
             self._draw()
             self._clock.tick(FPS)
+        self._pipeline.shutdown()
         pygame.quit()
         sys.exit()
 
@@ -95,6 +99,9 @@ class MainMenu:
 
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 self._click(e.pos)
+
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_F1:
+                self._pipeline.toggle()
 
     def _menu_key(self, e):
         if e.key == pygame.K_ESCAPE:
@@ -157,10 +164,14 @@ class MainMenu:
 
     def _launch(self, fn):
         self._fade(out=True)
+        # tear down GL before subscreen takes over
+        self._pipeline.shutdown()
         fn()
-        # Subscreen may have changed display mode / caption — restore.
-        flags = pygame.FULLSCREEN if FULLSCREEN else 0
-        self._screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
+        # subscreen changed display — rebuild
+        self._pipeline = ShaderPipeline.create(
+            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu"
+        )
+        self._screen = self._pipeline.surface
         pygame.display.set_caption(TITLE)
         pygame.mouse.set_visible(True)
         self._draw()
@@ -175,7 +186,7 @@ class MainMenu:
             self._screen.blit(snap, (0, 0))
             veil.set_alpha(int(255 * i / frames))
             self._screen.blit(veil, (0, 0))
-            pygame.display.flip()
+            self._pipeline.present()
             self._clock.tick(FPS)
 
     # layoutrs
@@ -202,7 +213,7 @@ class MainMenu:
         self._draw_footer()
         if self._show_scores:
             self._draw_scores()
-        pygame.display.flip()
+        self._pipeline.present()
 
     def _draw_title(self):
         cx = SCREEN_WIDTH // 2
@@ -257,7 +268,7 @@ class MainMenu:
     def _draw_footer(self):
         cx = SCREEN_WIDTH // 2
         y = SCREEN_HEIGHT - 50
-        hint = "↑↓/WS  navigate     ENTER  select     N  rename     ESC  exit"
+        hint = "↑↓/WS  navigate     ENTER  select     N  rename     F1  shaders     ESC  exit"
         t = self._font_small.render(hint, True, DIM)
         self._screen.blit(t, t.get_rect(center=(cx, y)))
 
