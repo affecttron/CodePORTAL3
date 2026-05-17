@@ -22,6 +22,7 @@ GRAVITY = 0.8                     # Cik ātri spēlētājs krīt
 JUMP_STRENGTH = -16               # Lēciena spēks (negatīvs = uz augšu)
 MOVE_SPEED = 6                    # Staigāšanas ātrums (px/kadrā)
 MAX_FALL_SPEED = 18               # Maksimālais kritiena ātrums
+CLIMB_SPEED = 5                   # Rāpšanās ātrums pa kāpnēm (px/kadrā)
 
 
 

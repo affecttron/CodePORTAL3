@@ -16,6 +16,7 @@ class World:
         self._platforms = []
         self._portals = []
         self._hazards = []
+        self._climbables = []
         self._spawn_x = PLAYER_SPAWN_X
         self._spawn_y = PLAYER_SPAWN_Y
         self._world_width = WORLD_WIDTH
@@ -49,6 +50,9 @@ class World:
         elif isinstance(new_tile, HazardTile):
             self._hazards.append(new_tile)
 
+        if new_tile.is_climbable():
+            self._climbables.append(new_tile)
+
     def remove_tile(self, grid_x, grid_y):
         tile_to_remove = None
         for t in self._tiles:
@@ -64,6 +68,8 @@ class World:
                 self._portals.remove(tile_to_remove)
             if tile_to_remove in self._hazards:
                 self._hazards.remove(tile_to_remove)
+            if tile_to_remove in self._climbables:
+                self._climbables.remove(tile_to_remove)
 
     def get_tile_at(self, grid_x, grid_y):
         for t in self._tiles:
@@ -76,6 +82,7 @@ class World:
         self._platforms.clear()
         self._portals.clear()
         self._hazards.clear()
+        self._climbables.clear()
 
     # === ZĪMĒŠANA ===
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
@@ -90,6 +97,9 @@ class World:
     # === SADURSMES ===
     def get_solid_rects(self):
         return [p.get_rect() for p in self._platforms]
+
+    def get_climbable_rects(self):
+        return [c.get_rect() for c in self._climbables]
 
     def check_portal_collision(self, player_rect):
         for portal in self._portals:
