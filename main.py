@@ -51,6 +51,7 @@ class MainMenu:
 
         self._sound = SoundManager()
         self._sound.play_music()
+        self._sound.start_ambience()
 
         self._running = True
         pygame.mouse.set_visible(True)
@@ -63,11 +64,14 @@ class MainMenu:
             self._update()
             self._draw()
             self._clock.tick(FPS)
+        self._sound.stop_ambience()
+        self._sound.stop_music()
         pygame.quit()
         sys.exit()
 
     def _update(self):
         self._anim += (self._selected - self._anim) * 0.25
+        self._sound.update_ambience()
 
     # input
 
@@ -161,6 +165,7 @@ class MainMenu:
     # fullscreen/ fade
 
     def _launch(self, fn):
+        self._sound.stop_ambience()
         self._fade(out=True)
         fn()
         # Subscreen may have changed display mode / caption — restore.
@@ -169,6 +174,7 @@ class MainMenu:
         pygame.display.set_caption(TITLE)
         pygame.mouse.set_visible(True)
         self._sound.play_music()
+        self._sound.start_ambience()
         self._draw()
         self._fade(out=False)
 

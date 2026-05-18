@@ -63,6 +63,7 @@ class Game:
 
         self._sound = SoundManager()
         self._sound.play_music()
+        self._sound.start_ambience()
         self._win_sound_played = False
 
         self._state = STATE_PLAYING
@@ -102,6 +103,7 @@ class Game:
             self._clock.tick(FPS)
 
         self._sound.stop_music()
+        self._sound.stop_ambience()
         self._score_log.save_score(self._player)
 
     def _handle_events(self):
@@ -189,6 +191,8 @@ class Game:
 
         if self._portal_cooldown > 0:
             self._portal_cooldown -= 1
+
+        self._sound.update_ambience()
 
     def _update_playing(self):
         self._player_sprite.update(
