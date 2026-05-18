@@ -7,6 +7,7 @@ import pygame
 from game import Game
 from level_editor import LevelEditor
 from score_log import ScoreLog
+from sound_manager import SoundManager
 from shader_pipeline import ShaderPipeline
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, FULLSCREEN,
@@ -66,6 +67,10 @@ class MainMenu:
         self._scores = ScoreLog()
         self._show_scores = False
 
+        self._sound = SoundManager()
+        self._sound.play_music()
+        self._sound.start_ambience()
+
         self._running = True
         pygame.mouse.set_visible(True)
 
@@ -75,11 +80,17 @@ class MainMenu:
             self._update()
             self._draw()
             self._clock.tick(FPS)
+            
+        self._sound.stop_ambience()
+        self._sound.stop_music()
         self._pipeline.shutdown()
+        
         pygame.quit()
         sys.exit()
 
     def _update(self):
+        self._anim += (self._selected - self._anim) * 0.25
+        self._sound.update_ambience()
         for i in range(len(self._items)):
             target = 1.0 if i == self._selected else 0.0
             self._hover_amounts[i] += (target - self._hover_amounts[i]) * 0.20
@@ -177,6 +188,7 @@ class MainMenu:
 
     def _activate(self):
         action = self._items[self._selected][0]
+        self._sound.play_sound("menu_click")
         if action == PLAY:
             self._launch(lambda: Game(self._player_name).run())
         elif action == EDITOR:
@@ -187,6 +199,7 @@ class MainMenu:
             self._running = False
 
     def _launch(self, fn):
+        self._sound.stop_ambience()
         self._fade(out=True)
         self._pipeline.shutdown()
         fn()
@@ -196,6 +209,9 @@ class MainMenu:
         self._screen = self._pipeline.surface
         pygame.display.set_caption(TITLE)
         pygame.mouse.set_visible(True)
+        
+        self._sound.play_music()
+        self._sound.start_ambience()
         self._cursor_state = None
         self._draw()
         self._fade(out=False)

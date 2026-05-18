@@ -9,6 +9,7 @@ from tile_registry import TileRegistry
 from parallax_background import ParallaxBackground
 from level import create_level
 from score_log import ScoreLog
+from sound_manager import SoundManager
 from shader_pipeline import ShaderPipeline
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, BACKGROUND_COLOR, FULLSCREEN,
@@ -64,6 +65,11 @@ class Game:
 
         self._score_log = ScoreLog()
 
+        self._sound = SoundManager()
+        self._sound.play_music()
+        self._sound.start_ambience()
+        self._win_sound_played = False
+
         self._state = STATE_PLAYING
         self._running = True
         pygame.key.stop_text_input()
@@ -100,6 +106,8 @@ class Game:
             self._draw()
             self._clock.tick(FPS)
 
+        self._sound.stop_music()
+        self._sound.stop_ambience()
         self._score_log.save_score(self._player)
         self._pipeline.shutdown()
 
@@ -123,8 +131,10 @@ class Game:
                 if self._state == STATE_PLAYING:
                     if event.key == pygame.K_SPACE:
                         self._player_sprite.jump()
+                        self._sound.play_sound("jump")
                     elif event.key == pygame.K_UP:
                         self._player_sprite.jump()
+                        self._sound.play_sound("jump")
                     elif event.key == pygame.K_r:
                         spawn_x, spawn_y = self._world.get_spawn_position()
                         self._player_sprite.respawn(spawn_x, spawn_y)
@@ -190,6 +200,8 @@ class Game:
         if self._portal_cooldown > 0:
             self._portal_cooldown -= 1
 
+        self._sound.update_ambience()
+
     def _update_playing(self):
         self._player_sprite.update(
             self._world.get_solid_rects(),
@@ -199,6 +211,7 @@ class Game:
 
         hazard = self._world.check_hazard_collision(self._player_sprite.get_rect())
         if hazard:
+            self._sound.play_sound("death")
             spawn_x, spawn_y = self._world.get_spawn_position()
             self._player_sprite.respawn(spawn_x, spawn_y)
             self._show_feedback("NĀVE! Mēģini vēlreiz!", NEON_RED)
@@ -219,6 +232,7 @@ class Game:
         self._input_text = ""
         self._player.reset_attempts()
         pygame.key.start_text_input()
+        self._sound.play_sound("portal_open")
         print(f"🌀 Portāls atvērts: Līmenis {level_id}")
 
     def _submit_answer(self):
@@ -237,6 +251,7 @@ class Game:
             points = task.calculate_points(attempts, 10)
             self._player.add_score(points)
 
+            self._sound.play_sound("correct")
             self._show_feedback(f"PAREIZI! +{points} punkti!", NEON_GREEN)
             self._input_text = ""
             self._player.reset_attempts()
@@ -249,6 +264,8 @@ class Game:
             self._player.increment_attempts()
             self._player.deduct_score(5)
             attempts = self._player.get_attempts()
+
+            self._sound.play_sound("wrong")
 
             if not self._player.has_attempts_left():
                 self._show_feedback("Pārāk daudz kļūdu! -5 punkti!", NEON_RED)
@@ -267,6 +284,7 @@ class Game:
             self._current_portal.deactivate()
             self._completed_portals.add(id(self._current_portal))
             self._player.advance_level()
+            self._sound.play_sound("portal_complete")
 
             if len(self._completed_portals) >= 3:
                 self._state = STATE_WIN
@@ -302,6 +320,10 @@ class Game:
             self._draw_playing()
             self._draw_task_ui()
         elif self._state == STATE_WIN:
+            if not self._win_sound_played:
+                self._sound.stop_music()
+                self._sound.play_sound("win")
+                self._win_sound_played = True
             self._draw_playing()
             self._draw_win_screen()
         elif self._state == STATE_GAME_OVER:

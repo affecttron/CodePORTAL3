@@ -83,6 +83,13 @@ IMAGES_FOLDER = "assets/images"
 SOUNDS_FOLDER = "assets/sounds"
 FONTS_FOLDER = "assets/fonts"
 
+# SKAŅA
+SOUND_VOLUME = 0.7
+MUSIC_VOLUME = 0.3
+AMBIENCE_VOLUME = 0.1         # Fona ambient skaņas — klusas
+AMBIENCE_MIN_GAP_MS = 8000        # Min pauze starp ambient skaņām
+AMBIENCE_MAX_GAP_MS = 25000       # Max pauze starp ambient skaņām
+
 
 
 EDITOR_TOOLBAR_HEIGHT = 100
