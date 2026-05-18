@@ -89,7 +89,7 @@ class MainMenu:
         sys.exit()
 
     def _update(self):
-        self._anim += (self._selected - self._anim) * 0.25
+        # self._anim += (self._selected - self._anim) * 0.25
         self._sound.update_ambience()
         for i in range(len(self._items)):
             target = 1.0 if i == self._selected else 0.0
