@@ -5,6 +5,7 @@ import pygame
 from game import Game
 from level_editor import LevelEditor
 from score_log import ScoreLog
+from sound_manager import SoundManager
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, FULLSCREEN,
     WHITE, BLACK, GRAY,
@@ -47,6 +48,9 @@ class MainMenu:
 
         self._scores = ScoreLog()
         self._show_scores = False
+
+        self._sound = SoundManager()
+        self._sound.play_music()
 
         self._running = True
         pygame.mouse.set_visible(True)
@@ -144,6 +148,7 @@ class MainMenu:
 
     def _activate(self):
         action = self._items[self._selected][0]
+        self._sound.play_sound("menu_click")
         if action == PLAY:
             self._launch(lambda: Game(self._player_name).run())
         elif action == EDITOR:
@@ -163,6 +168,7 @@ class MainMenu:
         self._screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
         pygame.display.set_caption(TITLE)
         pygame.mouse.set_visible(True)
+        self._sound.play_music()
         self._draw()
         self._fade(out=False)
 

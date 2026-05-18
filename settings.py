@@ -83,6 +83,10 @@ IMAGES_FOLDER = "assets/images"
 SOUNDS_FOLDER = "assets/sounds"
 FONTS_FOLDER = "assets/fonts"
 
+# SKAŅA
+SOUND_VOLUME = 0.7
+MUSIC_VOLUME = 0.4
+
 
 
 EDITOR_TOOLBAR_HEIGHT = 100
