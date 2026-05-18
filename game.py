@@ -9,8 +9,9 @@ from tile_registry import TileRegistry
 from parallax_background import ParallaxBackground
 from level import create_level
 from score_log import ScoreLog
+from shader_pipeline import ShaderPipeline
 from settings import (
-    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, BACKGROUND_COLOR,
+    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, BACKGROUND_COLOR, FULLSCREEN,
     PLAYER_SPAWN_X, PLAYER_SPAWN_Y,
     WHITE, BLACK, NEON_CYAN, NEON_PINK, NEON_GREEN, NEON_RED, NEON_YELLOW,
     DARK_GRAY, GRAY,
@@ -28,7 +29,10 @@ class Game:
 
     def __init__(self, player_name="Spēlētājs"):
         pygame.init()
-        self._screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self._pipeline = ShaderPipeline.create(
+            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="cyberpunk"
+        )
+        self._screen = self._pipeline.surface
         pygame.display.set_caption(TITLE)
         self._clock = pygame.time.Clock()
 
@@ -76,7 +80,7 @@ class Game:
 
         self._portal_cooldown = 0
 
-        # Backspace hold-to-delete (frames pie 60 FPS)
+        # Backspace hold-to-delete
         self._backspace_held_frames = 0
         self._BACKSPACE_INITIAL_DELAY = 25
         self._BACKSPACE_REPEAT_RATE = 3
@@ -97,6 +101,7 @@ class Game:
             self._clock.tick(FPS)
 
         self._score_log.save_score(self._player)
+        self._pipeline.shutdown()
 
     def _handle_events(self):
         for event in pygame.event.get():
@@ -109,6 +114,10 @@ class Game:
                         self._close_task_cancel()
                     else:
                         self._running = False
+                    continue
+
+                if event.key == pygame.K_F1:
+                    self._pipeline.toggle()
                     continue
 
                 if self._state == STATE_PLAYING:
@@ -130,8 +139,7 @@ class Game:
                     if event.key == pygame.K_RETURN:
                         self._running = False
 
-            # TEXTINPUT handles dead-key composition (e.g. Latvian ' + a → ā)
-            # so we use it instead of event.unicode from KEYDOWN
+            # TEXTINPUT — dead-key composition (Latvian ' + a → ā)
             if event.type == pygame.TEXTINPUT:
                 if self._state == STATE_TASK and len(self._input_text) < 50:
                     self._input_text += event.text
@@ -150,7 +158,7 @@ class Game:
         else:
             self._player_sprite.stop()
 
-        # Rāpšanās pa kāpnēm (W = augšup, S = lejup)
+        # Rāpšanās (W=augšup, S=lejup)
         if keys[pygame.K_w]:
             self._player_sprite.climb_up()
         elif keys[pygame.K_s]:
@@ -194,11 +202,13 @@ class Game:
             spawn_x, spawn_y = self._world.get_spawn_position()
             self._player_sprite.respawn(spawn_x, spawn_y)
             self._show_feedback("NĀVE! Mēģini vēlreiz!", NEON_RED)
+            self._pipeline.pulse_glitch(1.0)
 
         if self._portal_cooldown == 0:
             portal = self._world.check_portal_collision(self._player_sprite.get_rect())
             if portal and id(portal) not in self._completed_portals:
                 self._open_task(portal)
+                self._pipeline.pulse_glitch(0.8)
 
     def _open_task(self, portal):
         level_id = portal.get_level_id()
@@ -242,12 +252,14 @@ class Game:
 
             if not self._player.has_attempts_left():
                 self._show_feedback("Pārāk daudz kļūdu! -5 punkti!", NEON_RED)
+                self._pipeline.pulse_glitch(1.0)
                 self._close_task_fail()
             else:
                 remaining = 3 - attempts
                 hint = task.get_hint() if attempts >= 2 else ""
                 msg = f"Nepareizi! -5 punkti! Vēl {remaining} mēģ. {hint}"
                 self._show_feedback(msg, NEON_YELLOW)
+                self._pipeline.pulse_glitch(0.45)
                 self._input_text = ""
 
     def _close_task_success(self):
@@ -296,7 +308,7 @@ class Game:
             self._draw_playing()
             self._draw_game_over_screen()
 
-        pygame.display.flip()
+        self._pipeline.present()
 
     def _draw_playing(self):
         cam_x, cam_y = self._camera.get_offset()
@@ -326,9 +338,9 @@ class Game:
         text = self._font.render(portals_text, True, NEON_CYAN)
         self._screen.blit(text, (500, 20))
 
-        controls = "A/D = staigāt | SPACE = lekt | W/S = rāpties | R = respawn | ESC = iziet"
+        controls = "A/D = staigāt | SPACE = lekt | W/S = rāpties | R = respawn | F1 = FX | ESC = iziet"
         text = self._font_small.render(controls, True, GRAY)
-        self._screen.blit(text, (SCREEN_WIDTH - 560, 25))
+        self._screen.blit(text, (SCREEN_WIDTH - 640, 25))
 
     def _draw_feedback(self):
         text = self._font_big.render(self._feedback_message, True, self._feedback_color)
