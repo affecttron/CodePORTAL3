@@ -14,6 +14,10 @@ class Tile:
         self._registry = registry
         self._definition = registry.get_tile(tile_id)
         self._animation_frame = 0
+        # Tile position is immutable — build the rect once and reuse it.
+        self._rect = pygame.Rect(
+            grid_x * TILE_SIZE, grid_y * TILE_SIZE, TILE_SIZE, TILE_SIZE
+        )
 
     def get_pixel_x(self):
         return self._grid_x * TILE_SIZE
@@ -22,12 +26,7 @@ class Tile:
         return self._grid_y * TILE_SIZE
 
     def get_rect(self):
-        return pygame.Rect(
-            self.get_pixel_x(),
-            self.get_pixel_y(),
-            TILE_SIZE,
-            TILE_SIZE
-        )
+        return self._rect
 
     def get_grid_x(self):
         return self._grid_x

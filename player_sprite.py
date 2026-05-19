@@ -92,21 +92,22 @@ class PlayerSprite:
     def _move_horizontal(self, platforms):
         self._x += self._vel_x
 
+        player_rect = self.get_rect()
         for platform_rect in platforms:
-            player_rect = self.get_rect()
             if player_rect.colliderect(platform_rect):
                 if self._vel_x > 0:
                     self._x = platform_rect.left - self._width
                 elif self._vel_x < 0:
                     self._x = platform_rect.right
                 self._vel_x = 0
+                player_rect.x = int(self._x)
 
     def _move_vertical(self, platforms):
         self._y += self._vel_y
         self._on_ground = False
 
+        player_rect = self.get_rect()
         for platform_rect in platforms:
-            player_rect = self.get_rect()
             if player_rect.colliderect(platform_rect):
                 if self._vel_y > 0:  # Krīt uz leju
                     self._y = platform_rect.top - self._height
@@ -117,6 +118,7 @@ class PlayerSprite:
                     self._y = platform_rect.bottom
                     self._vel_y = 0
                     self._is_jumping = False
+                player_rect.y = int(self._y)
 
     def _check_world_bounds(self):
         if self._x < 0:

@@ -18,6 +18,9 @@ class World:
         self._portals = []
         self._hazards = []
         self._climbables = []
+        # Per-frame collision lists — rebuilt lazily, invalidated on edits.
+        self._solid_rects_cache = None
+        self._climbable_rects_cache = None
         self._spawn_x = PLAYER_SPAWN_X
         self._spawn_y = PLAYER_SPAWN_Y
         self._world_width = WORLD_WIDTH
@@ -47,6 +50,7 @@ class World:
         # Sadalām pa sarakstiem
         if isinstance(new_tile, SolidTile):
             self._platforms.append(new_tile)
+            self._solid_rects_cache = None
         elif isinstance(new_tile, PortalTile):
             self._portals.append(new_tile)
         elif isinstance(new_tile, HazardTile):
@@ -54,6 +58,7 @@ class World:
 
         if new_tile.is_climbable():
             self._climbables.append(new_tile)
+            self._climbable_rects_cache = None
 
     def remove_tile(self, grid_x, grid_y):
         tile_to_remove = self._tile_at.pop((grid_x, grid_y), None)
@@ -63,12 +68,14 @@ class World:
         self._tiles.remove(tile_to_remove)
         if tile_to_remove in self._platforms:
             self._platforms.remove(tile_to_remove)
+            self._solid_rects_cache = None
         if tile_to_remove in self._portals:
             self._portals.remove(tile_to_remove)
         if tile_to_remove in self._hazards:
             self._hazards.remove(tile_to_remove)
         if tile_to_remove in self._climbables:
             self._climbables.remove(tile_to_remove)
+            self._climbable_rects_cache = None
 
     def get_tile_at(self, grid_x, grid_y):
         return self._tile_at.get((grid_x, grid_y))
@@ -80,6 +87,8 @@ class World:
         self._portals.clear()
         self._hazards.clear()
         self._climbables.clear()
+        self._solid_rects_cache = None
+        self._climbable_rects_cache = None
 
     # === ZĪMĒŠANA ===
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
@@ -96,10 +105,14 @@ class World:
 
     # === SADURSMES ===
     def get_solid_rects(self):
-        return [p.get_rect() for p in self._platforms]
+        if self._solid_rects_cache is None:
+            self._solid_rects_cache = [p.get_rect() for p in self._platforms]
+        return self._solid_rects_cache
 
     def get_climbable_rects(self):
-        return [c.get_rect() for c in self._climbables]
+        if self._climbable_rects_cache is None:
+            self._climbable_rects_cache = [c.get_rect() for c in self._climbables]
+        return self._climbable_rects_cache
 
     def check_portal_collision(self, player_rect):
         for portal in self._portals:
