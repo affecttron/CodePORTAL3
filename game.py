@@ -14,7 +14,7 @@ from shader_pipeline import ShaderPipeline
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT,
     FPS, TITLE, FULLSCREEN,
-    WHITE, BLACK, NEON_CYAN, NEON_PINK, NEON_GREEN, NEON_RED, NEON_YELLOW,
+    WHITE, BLACK, NEON_CYAN, NEON_GREEN, NEON_RED, NEON_YELLOW,
     GRAY,
     LEVELS_FOLDER,
 )
@@ -42,6 +42,8 @@ class Game:
         self._font_big = pygame.font.SysFont("Arial", 36, bold=True)
         self._font = pygame.font.SysFont("Arial", 24)
         self._font_code = pygame.font.SysFont("Consolas", 20)
+        self._font_code_bold = pygame.font.SysFont("Consolas", 20, bold=True)
+        self._font_code_small = pygame.font.SysFont("Consolas", 15, bold=True)
         self._font_small = pygame.font.SysFont("Arial", 18)
 
         self._player = Player(player_name)
@@ -386,33 +388,58 @@ class Game:
         if self._current_level is None:
             return
 
-        self._current_level.display_task(self._screen, self._font_big, self._font_code)
+        layout = self._current_level.display_task(
+            self._screen, self._font_big, self._font_code,
+            attempts=self._player.get_attempts(),
+        )
+        if layout is None:
+            return
 
-        panel_y = (SCREEN_HEIGHT - 600) // 2 + 490
+        self._draw_terminal_input(layout)
+        self._draw_terminal_hints(layout)
 
-        label = self._font.render("Tava atbilde:", True, WHITE)
-        self._screen.blit(label, (SCREEN_WIDTH // 2 - 400, panel_y))
+    def _draw_terminal_input(self, layout):
+        rect = layout["input"]
+        color = self._current_level.get_theme_color()
+        dim = tuple(int(c * 0.4) for c in color)
 
-        input_rect = pygame.Rect(SCREEN_WIDTH // 2 - 400, panel_y + 35, 800, 50)
-        pygame.draw.rect(self._screen, BLACK, input_rect)
-        pygame.draw.rect(self._screen, self._current_level.get_theme_color(), input_rect, 3)
+        pygame.draw.rect(self._screen, BLACK, rect)
+        pygame.draw.rect(self._screen, dim, rect, 1)
+        pygame.draw.line(self._screen, color, (rect.x, rect.y), (rect.x, rect.bottom), 3)
 
-        # Kursors
-        cursor = "_" if (pygame.time.get_ticks() // 500) % 2 == 0 else ""
-        input_text = self._font.render(self._input_text + cursor, True, NEON_CYAN)
-        self._screen.blit(input_text, (input_rect.x + 10, input_rect.y + 12))
+        prompt_surf = self._font_code_bold.render(">>>", True, color)
+        prompt_x = rect.x + 16
+        prompt_y = rect.y + (rect.h - prompt_surf.get_height()) // 2
+        self._screen.blit(prompt_surf, (prompt_x, prompt_y))
 
-        # Padoms
-        hint = "ENTER = atbildēt | ESC = atcelt"
-        hint_text = self._font_small.render(hint, True, GRAY)
-        hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, panel_y + 110))
-        self._screen.blit(hint_text, hint_rect)
+        text_x = prompt_x + prompt_surf.get_width() + 10
+        text_y = prompt_y
+        text_surf = self._font_code.render(self._input_text, True, WHITE)
+        self._screen.blit(text_surf, (text_x, text_y))
 
-        # Mēģinājumi
-        attempts_text = f"Mēģinājumi: {self._player.get_attempts()} / 3"
-        text = self._font.render(attempts_text, True, NEON_PINK)
-        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, panel_y - 30))
-        self._screen.blit(text, text_rect)
+        if (pygame.time.get_ticks() // 400) % 2 == 0:
+            cursor_x = text_x + text_surf.get_width() + 1
+            cursor_w = max(8, self._font_code.size("M")[0])
+            cursor_h = self._font_code.get_height() - 4
+            pygame.draw.rect(self._screen, color, (cursor_x, text_y + 2, cursor_w, cursor_h))
+
+    def _draw_terminal_hints(self, layout):
+        rect = layout["hint"]
+        color = self._current_level.get_theme_color()
+        dim_text = (140, 142, 148)
+
+        parts = [
+            ("[ENTER]", color), (" execute    ", dim_text),
+            ("[ESC]",   color), (" disconnect    ", dim_text),
+            ("[TAB]",   color), (" skip",            dim_text),
+        ]
+        total_w = sum(self._font_code_small.size(t)[0] for t, _ in parts)
+        x = rect.centerx - total_w // 2
+        y = rect.y
+        for text, c in parts:
+            surf = self._font_code_small.render(text, True, c)
+            self._screen.blit(surf, (x, y))
+            x += surf.get_width()
 
     def _draw_win_screen(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
