@@ -28,7 +28,6 @@ BUTTON_SPACING = 8
 class LevelEditor:
 
     def __init__(self):
-        pygame.init()
         self._pipeline = ShaderPipeline.create_passthrough(
             (SCREEN_WIDTH, SCREEN_HEIGHT),
             fullscreen=False,
@@ -469,6 +468,7 @@ class LevelEditor:
 
 
 if __name__ == "__main__":
+    pygame.init()
     editor = LevelEditor()
     editor.run()
     pygame.quit()

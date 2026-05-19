@@ -88,20 +88,15 @@ NEON_YELLOW = (255, 215, 0)       # 2. līmenis
 NEON_GREEN = (0, 255, 65)         # 3. līmenis
 NEON_PINK = (255, 16, 240)
 NEON_CYAN = (0, 255, 255)
-NEON_PURPLE = (157, 0, 255)
 
 # Fons
-BACKGROUND_COLOR = (10, 10, 25)   
-PLATFORM_COLOR = (60, 70, 90)     
-GROUND_COLOR = (30, 30, 50)
+BACKGROUND_COLOR = (10, 10, 25)
 
 
 
 # UZDEVUMU SISTĒMA
 TIME_LIMIT_PER_TASK = 60          # Sekundes vienam uzdevumam
 MAX_ATTEMPTS = 3                  # Mēģinājumu skaits
-SPEED_BONUS_TIME = 15             # Sekundes ātruma bonusam
-SPEED_BONUS_POINTS = 25
 
 
 TASKS_FILE = os.path.join(BASE_DIR, "data", "tasks.json")
@@ -124,9 +119,7 @@ AMBIENCE_MAX_GAP_MS = 25000       # Max pauze starp ambient skaņām
 
 
 
-EDITOR_TOOLBAR_HEIGHT = 100
 EDITOR_GRID_COLOR = (60, 60, 80)
-EDITOR_HIGHLIGHT_COLOR = (255, 255, 0, 128)   # Dzeltens ar caurspīdību
 
 
 

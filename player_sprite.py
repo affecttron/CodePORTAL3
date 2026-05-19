@@ -15,6 +15,10 @@ class PlayerSprite:
     def __init__(self, x, y):
         self._x = float(x)
         self._y = float(y)
+        # Remember the last respawn
+
+        self._spawn_x = float(x)
+        self._spawn_y = float(y)
 
         # setingu importi
         self._width = PLAYER_WIDTH
@@ -119,9 +123,9 @@ class PlayerSprite:
             self._x = 0
         if self._x + self._width > WORLD_WIDTH:
             self._x = WORLD_WIDTH - self._width
-        # Ja iekrīt bedrē - atgriež uz sākumu
+        # Ja iekrīt bedrē - atgriež uz pēdējo spawn punktu
         if self._y > WORLD_HEIGHT:
-            self.respawn(100, 500)
+            self.respawn(self._spawn_x, self._spawn_y)
 
  # kustibas
 
@@ -174,8 +178,14 @@ class PlayerSprite:
     def respawn(self, x, y):
         self._x = float(x)
         self._y = float(y)
+        self._spawn_x = float(x)
+        self._spawn_y = float(y)
         self._vel_x = 0
         self._vel_y = 0
+
+    def nudge(self, dx, dy=0):
+        self._x += dx
+        self._y += dy
 
 
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):

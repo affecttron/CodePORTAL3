@@ -13,6 +13,7 @@ class World:
 
     def __init__(self, registry=None):
         self._tiles = []
+        self._tile_at = {}
         self._platforms = []
         self._portals = []
         self._hazards = []
@@ -41,6 +42,7 @@ class World:
         # Izveidojam jaunu
         new_tile = create_tile(tile_type, grid_x, grid_y, self._registry)
         self._tiles.append(new_tile)
+        self._tile_at[(grid_x, grid_y)] = new_tile
 
         # Sadalām pa sarakstiem
         if isinstance(new_tile, SolidTile):
@@ -54,31 +56,26 @@ class World:
             self._climbables.append(new_tile)
 
     def remove_tile(self, grid_x, grid_y):
-        tile_to_remove = None
-        for t in self._tiles:
-            if t.get_grid_x() == grid_x and t.get_grid_y() == grid_y:
-                tile_to_remove = t
-                break
+        tile_to_remove = self._tile_at.pop((grid_x, grid_y), None)
+        if tile_to_remove is None:
+            return
 
-        if tile_to_remove:
-            self._tiles.remove(tile_to_remove)
-            if tile_to_remove in self._platforms:
-                self._platforms.remove(tile_to_remove)
-            if tile_to_remove in self._portals:
-                self._portals.remove(tile_to_remove)
-            if tile_to_remove in self._hazards:
-                self._hazards.remove(tile_to_remove)
-            if tile_to_remove in self._climbables:
-                self._climbables.remove(tile_to_remove)
+        self._tiles.remove(tile_to_remove)
+        if tile_to_remove in self._platforms:
+            self._platforms.remove(tile_to_remove)
+        if tile_to_remove in self._portals:
+            self._portals.remove(tile_to_remove)
+        if tile_to_remove in self._hazards:
+            self._hazards.remove(tile_to_remove)
+        if tile_to_remove in self._climbables:
+            self._climbables.remove(tile_to_remove)
 
     def get_tile_at(self, grid_x, grid_y):
-        for t in self._tiles:
-            if t.get_grid_x() == grid_x and t.get_grid_y() == grid_y:
-                return t
-        return None
+        return self._tile_at.get((grid_x, grid_y))
 
     def clear(self):
         self._tiles.clear()
+        self._tile_at.clear()
         self._platforms.clear()
         self._portals.clear()
         self._hazards.clear()
@@ -86,13 +83,16 @@ class World:
 
     # === ZĪMĒŠANA ===
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
-        for t in self._tiles:
-            tile_x = t.get_pixel_x() - camera_offset_x
-            tile_y = t.get_pixel_y() - camera_offset_y
-            # Tikai redzamos
-            if -TILE_SIZE <= tile_x <= screen.get_width() and \
-               -TILE_SIZE <= tile_y <= screen.get_height():
-                t.draw(screen, camera_offset_x, camera_offset_y)
+        sw, sh = screen.get_size()
+        gx_min = camera_offset_x // TILE_SIZE
+        gy_min = camera_offset_y // TILE_SIZE
+        gx_max = (camera_offset_x + sw) // TILE_SIZE
+        gy_max = (camera_offset_y + sh) // TILE_SIZE
+        for gy in range(gy_min, gy_max + 1):
+            for gx in range(gx_min, gx_max + 1):
+                t = self._tile_at.get((gx, gy))
+                if t is not None:
+                    t.draw(screen, camera_offset_x, camera_offset_y)
 
     # === SADURSMES ===
     def get_solid_rects(self):

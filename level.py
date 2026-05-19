@@ -4,10 +4,10 @@ import random
 import pygame
 from task import Task
 from settings import (
-    TASKS_FILE, TIME_LIMIT_PER_TASK, MAX_ATTEMPTS,
+    TASKS_FILE, TIME_LIMIT_PER_TASK,
     SCREEN_WIDTH, SCREEN_HEIGHT,
-    NEON_RED, NEON_YELLOW, NEON_GREEN, NEON_CYAN, NEON_PINK,
-    WHITE, BLACK, GRAY, DARK_GRAY,
+    NEON_RED, NEON_YELLOW, NEON_GREEN, NEON_CYAN,
+    WHITE, BLACK, DARK_GRAY,
 )
 
 
@@ -20,6 +20,9 @@ class Level:
         self._time_limit = time_limit
         self._current_task_index = 0
         self._theme_color = NEON_CYAN
+        # Local RNG so shuffling tasks doesn't perturb the global random stream
+        # used by other systems (e.g. parallax silhouette generation).
+        self._rng = random.Random()
 
     def load_tasks(self, tasks_file=TASKS_FILE):
         if not os.path.exists(tasks_file):
@@ -40,7 +43,7 @@ class Level:
                     )
                     self._tasks.append(task)
 
-                random.shuffle(self._tasks)
+                self._rng.shuffle(self._tasks)
                 print(f"✅ Ielādēti {len(self._tasks)} uzdevumi līmenim {self._level_id}")
                 return True
 
@@ -57,6 +60,9 @@ class Level:
         return self.get_current_task()
 
     def is_complete(self):
+        # An empty task list means load failed — don't auto-complete in that case.
+        if not self._tasks:
+            return False
         return self._current_task_index >= len(self._tasks)
 
     def check_answer(self, ans):

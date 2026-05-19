@@ -13,10 +13,9 @@ from sound_manager import SoundManager
 from shader_pipeline import ShaderPipeline
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT,
-    FPS, TITLE, BACKGROUND_COLOR, FULLSCREEN,
-    PLAYER_SPAWN_X, PLAYER_SPAWN_Y,
+    FPS, TITLE, FULLSCREEN,
     WHITE, BLACK, NEON_CYAN, NEON_PINK, NEON_GREEN, NEON_RED, NEON_YELLOW,
-    DARK_GRAY, GRAY,
+    GRAY,
     LEVELS_FOLDER,
 )
 
@@ -30,7 +29,6 @@ STATE_WIN = "win"
 class Game:
 
     def __init__(self, player_name="Spēlētājs"):
-        pygame.init()
         self._pipeline = ShaderPipeline.create(
             (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="cyberpunk",
             display_size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
@@ -250,7 +248,7 @@ class Game:
             # PAREIZI
             self._player.increment_attempts()
             attempts = self._player.get_attempts()
-            points = task.calculate_points(attempts, 10)
+            points = task.calculate_points(attempts)
             self._player.add_score(points)
 
             self._sound.play_sound("correct")
@@ -308,7 +306,8 @@ class Game:
         self._portal_cooldown = 60
         pygame.key.stop_text_input()
 
-        self._player_sprite._x -= 100
+        # Push the player away from the portal so they don't re-trigger it.
+        self._player_sprite.nudge(-100)
 
     def _show_feedback(self, msg, color):
         self._feedback_message = msg
@@ -440,6 +439,7 @@ class Game:
 
 
 if __name__ == "__main__":
+    pygame.init()
     game = Game("TestSpēlētājs")
     game.run()
     pygame.quit()
