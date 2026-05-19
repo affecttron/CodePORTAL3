@@ -4,8 +4,10 @@ import os
 from world import World
 from camera import Camera
 from tile_registry import TileRegistry
+from shader_pipeline import ShaderPipeline
 from settings import (
-    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, BACKGROUND_COLOR, TILE_SIZE,
+    SCREEN_WIDTH, SCREEN_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT,
+    FPS, BACKGROUND_COLOR, TILE_SIZE,
     EDITOR_GRID_COLOR,
     NEON_CYAN, NEON_YELLOW, WHITE, BLACK, GRAY, DARK_GRAY,
     LEVELS_FOLDER,
@@ -27,7 +29,12 @@ class LevelEditor:
 
     def __init__(self):
         pygame.init()
-        self._screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self._pipeline = ShaderPipeline.create_passthrough(
+            (SCREEN_WIDTH, SCREEN_HEIGHT),
+            fullscreen=False,
+            display_size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
+        )
+        self._screen = self._pipeline.surface
         pygame.display.set_caption("CODE Portal 3 - Level Editor")
         self._clock = pygame.time.Clock()
 
@@ -97,7 +104,7 @@ class LevelEditor:
                 self._handle_mouse_click(event)
 
             if event.type == pygame.MOUSEWHEEL:
-                mouse_y = pygame.mouse.get_pos()[1]
+                mouse_y = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())[1]
                 if mouse_y >= SCREEN_HEIGHT - TOOLBAR_HEIGHT:
                     self._toolbar_scroll -= event.y * 50
                     self._clamp_scroll()
@@ -141,7 +148,7 @@ class LevelEditor:
                 self._switch_level("level_3.json", force=shift_pressed)
 
     def _handle_mouse_click(self, event):
-        screen_x, screen_y = event.pos
+        screen_x, screen_y = self._pipeline.scale_mouse_pos(event.pos)
 
         if screen_y < TOP_BAR_HEIGHT:
             return
@@ -212,7 +219,7 @@ class LevelEditor:
 
         # ja tur peli
         mouse_buttons = pygame.mouse.get_pressed()
-        mouse_y = pygame.mouse.get_pos()[1]
+        mouse_y = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())[1]
 
 
         if mouse_y < SCREEN_HEIGHT - TOOLBAR_HEIGHT and mouse_y > TOP_BAR_HEIGHT + CATEGORY_BAR_HEIGHT:
@@ -222,7 +229,7 @@ class LevelEditor:
                 self._paint_at_mouse(add=False)
 
     def _paint_at_mouse(self, add=True):
-        screen_x, screen_y = pygame.mouse.get_pos()
+        screen_x, screen_y = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())
         world_x, world_y = self._camera.screen_to_world(screen_x, screen_y)
         grid_x = int(world_x // TILE_SIZE)
         grid_y = int(world_y // TILE_SIZE)
@@ -250,7 +257,7 @@ class LevelEditor:
             self._toolbar_scroll = max_scroll
 
     def _update(self):
-        self._mouse_pos = pygame.mouse.get_pos()
+        self._mouse_pos = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())
         self._camera.update()
 
         if self._message_timer > 0:
@@ -283,7 +290,7 @@ class LevelEditor:
         if self._message_timer > 0:
             self._draw_message()
 
-        pygame.display.flip()
+        self._pipeline.present()
 
     def _draw_grid(self, cam_x, cam_y):
         start_x = -(cam_x % TILE_SIZE)

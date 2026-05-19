@@ -32,6 +32,12 @@ class ShaderPipeline:
             print(f"[shader] disabled ({exc.__class__.__name__}: {exc}) — falling back.")
             return _PassthroughPipeline(size, fullscreen, display_size=display_size)
 
+    @classmethod
+    def create_passthrough(cls, size, fullscreen=False, display_size=None):
+        # Explicit passthrough — useful for tools (e.g. level editor) that want
+        # the auto-scale behavior without any shader distortion.
+        return _PassthroughPipeline(size, fullscreen, display_size=display_size)
+
     def __init__(self, size, fullscreen, shader_name, render_scale, display_size=None):
         # render_size = the virtual canvas the game draws to (design resolution)
         # screen_size = the actual window/fullscreen size on the user's display
@@ -146,6 +152,15 @@ class ShaderPipeline:
     def pulse_glitch(self, amount=1.0):
         self._glitch = max(self._glitch, float(amount))
 
+    def scale_mouse_pos(self, pos):
+        # Pygame mouse events arrive in display-space; UI hit-tests use the
+        # render (design) canvas, so map them back.
+        sw, sh = self._screen_size
+        rw, rh = self._render_size
+        if sw == rw and sh == rh:
+            return (int(pos[0]), int(pos[1]))
+        return (int(pos[0] * rw / sw), int(pos[1] * rh / sh))
+
     def present(self):
         # zero-copy upload via buffer protocol
         self._upload_tex.write(self._surface.get_buffer())
@@ -228,6 +243,13 @@ class _PassthroughPipeline:
 
     def pulse_glitch(self, _a=1.0):
         pass
+
+    def scale_mouse_pos(self, pos):
+        sw, sh = self._display_size
+        rw, rh = self._render_size
+        if sw == rw and sh == rh:
+            return (int(pos[0]), int(pos[1]))
+        return (int(pos[0] * rw / sw), int(pos[1] * rh / sh))
 
     def present(self):
         if self._needs_scale:

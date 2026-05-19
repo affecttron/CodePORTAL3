@@ -96,7 +96,7 @@ class MainMenu:
             target = 1.0 if i == self._selected else 0.0
             self._hover_amounts[i] += (target - self._hover_amounts[i]) * 0.20
 
-        pos = pygame.mouse.get_pos()
+        pos = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())
 
         name_t = 1.0 if (self._editing or self._name_rect().collidepoint(pos)) else 0.0
         self._name_hover += (name_t - self._name_hover) * 0.18
@@ -133,10 +133,10 @@ class MainMenu:
                     self._player_name += e.text
 
             elif e.type == pygame.MOUSEMOTION:
-                self._hover(e.pos)
+                self._hover(self._pipeline.scale_mouse_pos(e.pos))
 
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                self._click(e.pos)
+                self._click(self._pipeline.scale_mouse_pos(e.pos))
 
             if e.type == pygame.KEYDOWN and e.key == pygame.K_F1:
                 self._pipeline.toggle()
