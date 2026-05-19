@@ -3,12 +3,17 @@ import os
 import random
 import pygame
 from task import Task
+from sound_manager import SoundManager
 from settings import (
     TASKS_FILE, TIME_LIMIT_PER_TASK,
     SCREEN_WIDTH, SCREEN_HEIGHT,
     NEON_RED, NEON_YELLOW, NEON_GREEN, NEON_CYAN,
     WHITE, BLACK, DARK_GRAY,
 )
+
+
+TYPEWRITER_CHARS_PER_SEC = 55
+TYPEWRITER_BLIP_EVERY = 2
 
 
 class Level:
@@ -23,6 +28,12 @@ class Level:
         # Local RNG so shuffling tasks doesn't perturb the global random stream
         # used by other systems (e.g. parallax silhouette generation).
         self._rng = random.Random()
+
+        self._tw_wrapped = None
+        self._tw_total = 0
+        self._tw_revealed = 0.0
+        self._tw_last_ms = None
+        self._tw_blip_counter = 0
 
     def load_tasks(self, tasks_file=TASKS_FILE):
         if not os.path.exists(tasks_file):
@@ -57,7 +68,22 @@ class Level:
 
     def next_task(self):
         self._current_task_index += 1
+        self.reset_typewriter()
         return self.get_current_task()
+
+    def reset_typewriter(self):
+        self._tw_wrapped = None
+        self._tw_total = 0
+        self._tw_revealed = 0.0
+        self._tw_last_ms = None
+        self._tw_blip_counter = 0
+
+    def skip_typewriter(self):
+        if self._tw_wrapped is not None:
+            self._tw_revealed = float(self._tw_total)
+
+    def is_typewriter_complete(self):
+        return self._tw_wrapped is not None and self._tw_revealed >= self._tw_total
 
     def is_complete(self):
         # An empty task list means load failed — don't auto-complete in that case.
@@ -124,33 +150,97 @@ class Level:
         label = font_normal.render(label_text, True, color)
         screen.blit(label, (code_x + 10, code_y - 30))
 
-        question_lines = task.get_question().split("\n")
         max_width = code_w - 40
-        line_y = code_y + 15
+        if self._tw_wrapped is None:
+            self._tw_wrapped = self._wrap_question_lines(
+                task.get_question(), font_normal, max_width
+            )
+            self._tw_total = sum(len(line) for line in self._tw_wrapped)
+            self._tw_revealed = 0.0
+            self._tw_last_ms = None
+            self._tw_blip_counter = 0
 
-        for line in question_lines:
-            text_surface = font_normal.render(line, True, color)
-            if text_surface.get_width() <= max_width:
-                screen.blit(text_surface, (code_x + 20, line_y))
-                line_y += 26
+        self._tick_typewriter()
+
+        revealed_int = int(self._tw_revealed)
+        chars_left = revealed_int
+        line_y = code_y + 15
+        last_line_text = ""
+        for line in self._tw_wrapped:
+            if chars_left <= 0:
+                break
+            if chars_left >= len(line):
+                shown = line
+                chars_left -= len(line)
             else:
-                words = line.split(" ")
-                current_line = ""
-                for word in words:
-                    test_line = current_line + word + " "
-                    test_surface = font_normal.render(test_line, True, color)
-                    if test_surface.get_width() <= max_width:
-                        current_line = test_line
-                    else:
-                        if current_line:
-                            text = font_normal.render(current_line, True, color)
-                            screen.blit(text, (code_x + 20, line_y))
-                            line_y += 26
-                        current_line = word + " "
-                if current_line:
-                    text = font_normal.render(current_line, True, color)
-                    screen.blit(text, (code_x + 20, line_y))
-                    line_y += 26
+                shown = line[:chars_left]
+                chars_left = 0
+            if shown:
+                text = font_normal.render(shown, True, color)
+                screen.blit(text, (code_x + 20, line_y))
+            last_line_text = shown
+            line_y += 26
+
+        if not self.is_typewriter_complete():
+            caret_x = code_x + 20 + font_normal.size(last_line_text)[0]
+            caret_y = line_y - 26
+            blink_on = (pygame.time.get_ticks() // 250) % 2 == 0
+            if blink_on:
+                caret_w = max(8, font_normal.size("M")[0] // 2)
+                caret_h = font_normal.get_height() - 4
+                pygame.draw.rect(screen, color, (caret_x, caret_y + 2, caret_w, caret_h))
+
+    def _wrap_question_lines(self, question, font, max_width):
+        wrapped = []
+        for raw_line in question.split("\n"):
+            if font.size(raw_line)[0] <= max_width:
+                wrapped.append(raw_line)
+                continue
+            words = raw_line.split(" ")
+            current = ""
+            for word in words:
+                candidate = current + word + " "
+                if font.size(candidate)[0] <= max_width:
+                    current = candidate
+                else:
+                    if current:
+                        wrapped.append(current.rstrip())
+                    current = word + " "
+            if current:
+                wrapped.append(current.rstrip())
+        return wrapped
+
+    def _tick_typewriter(self):
+        if self._tw_total == 0 or self._tw_revealed >= self._tw_total:
+            return
+        now = pygame.time.get_ticks()
+        if self._tw_last_ms is None:
+            self._tw_last_ms = now
+            return
+        dt_ms = now - self._tw_last_ms
+        self._tw_last_ms = now
+        if dt_ms <= 0:
+            return
+
+        prev_int = int(self._tw_revealed)
+        self._tw_revealed = min(
+            float(self._tw_total),
+            self._tw_revealed + dt_ms * TYPEWRITER_CHARS_PER_SEC / 1000.0,
+        )
+        new_int = int(self._tw_revealed)
+
+        if new_int > prev_int:
+            flat = "".join(self._tw_wrapped)
+            blipped = False
+            for i in range(prev_int, new_int):
+                if i >= len(flat):
+                    break
+                if flat[i].isspace():
+                    continue
+                self._tw_blip_counter += 1
+                if self._tw_blip_counter % TYPEWRITER_BLIP_EVERY == 0 and not blipped:
+                    SoundManager().play_sound("keystroke")
+                    blipped = True
 
     def get_level_id(self):
         return self._level_id

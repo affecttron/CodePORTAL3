@@ -18,6 +18,12 @@ SOUND_FILES = {
     "death": "death.wav",
     "win": "win.wav",
     "menu_click": "menu_click.wav",
+    "keystroke": "keystroke.wav",
+}
+
+# Per-sound volume multipliers, applied on top of the global sound volume.
+SOUND_VOLUME_OVERRIDES = {
+    "keystroke": 0.25,
 }
 
 MUSIC_FILE = "background_music.mp3"
@@ -72,7 +78,8 @@ class SoundManager:
                 continue
             try:
                 sound = pygame.mixer.Sound(path)
-                sound.set_volume(self._sound_volume)
+                multiplier = SOUND_VOLUME_OVERRIDES.get(name, 1.0)
+                sound.set_volume(self._sound_volume * multiplier)
                 self._sounds[name] = sound
             except pygame.error as e:
                 print(f"[SoundManager] '{filename}' ielāde neizdevās: {e}")
@@ -173,8 +180,9 @@ class SoundManager:
 
     def set_volume(self, volume):
         self._sound_volume = max(0.0, min(1.0, float(volume)))
-        for sound in self._sounds.values():
-            sound.set_volume(self._sound_volume)
+        for name, sound in self._sounds.items():
+            multiplier = SOUND_VOLUME_OVERRIDES.get(name, 1.0)
+            sound.set_volume(self._sound_volume * multiplier)
 
     def set_music_volume(self, volume):
         self._music_volume = max(0.0, min(1.0, float(volume)))

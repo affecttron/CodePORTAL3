@@ -141,7 +141,13 @@ class Game:
 
                 elif self._state == STATE_TASK:
                     if event.key == pygame.K_RETURN:
-                        self._submit_answer()
+                        if self._current_level and not self._current_level.is_typewriter_complete():
+                            self._current_level.skip_typewriter()
+                        else:
+                            self._submit_answer()
+                    elif event.key == pygame.K_TAB:
+                        if self._current_level:
+                            self._current_level.skip_typewriter()
                     elif event.key == pygame.K_BACKSPACE:
                         self._input_text = self._input_text[:-1]
 
@@ -227,6 +233,7 @@ class Game:
         level_id = portal.get_level_id()
         self._current_level = create_level(level_id)
         self._current_level.load_tasks()
+        self._current_level.reset_typewriter()
         self._current_portal = portal
         self._state = STATE_TASK
         self._input_text = ""
