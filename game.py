@@ -12,7 +12,8 @@ from score_log import ScoreLog
 from sound_manager import SoundManager
 from shader_pipeline import ShaderPipeline
 from settings import (
-    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, BACKGROUND_COLOR, FULLSCREEN,
+    SCREEN_WIDTH, SCREEN_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT,
+    FPS, TITLE, BACKGROUND_COLOR, FULLSCREEN,
     PLAYER_SPAWN_X, PLAYER_SPAWN_Y,
     WHITE, BLACK, NEON_CYAN, NEON_PINK, NEON_GREEN, NEON_RED, NEON_YELLOW,
     DARK_GRAY, GRAY,
@@ -31,7 +32,8 @@ class Game:
     def __init__(self, player_name="Spēlētājs"):
         pygame.init()
         self._pipeline = ShaderPipeline.create(
-            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="cyberpunk"
+            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="cyberpunk",
+            display_size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
         )
         self._screen = self._pipeline.surface
         pygame.display.set_caption(TITLE)

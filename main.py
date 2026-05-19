@@ -10,7 +10,7 @@ from score_log import ScoreLog
 from sound_manager import SoundManager
 from shader_pipeline import ShaderPipeline
 from settings import (
-    SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, FULLSCREEN,
+    SCREEN_WIDTH, SCREEN_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, FPS, TITLE, FULLSCREEN,
     WHITE, BLACK, GRAY,
 )
 
@@ -34,7 +34,8 @@ class MainMenu:
     def __init__(self):
         pygame.init()
         self._pipeline = ShaderPipeline.create(
-            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu"
+            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu",
+            display_size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
         )
         self._screen = self._pipeline.surface
         pygame.display.set_caption(TITLE)
@@ -204,7 +205,8 @@ class MainMenu:
         self._pipeline.shutdown()
         fn()
         self._pipeline = ShaderPipeline.create(
-            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu"
+            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu",
+            display_size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
         )
         self._screen = self._pipeline.surface
         pygame.display.set_caption(TITLE)

@@ -1,7 +1,7 @@
 import json
 import os
 import pygame
-from settings import TILE_SIZE, IMAGES_FOLDER
+from settings import TILE_SIZE, IMAGES_FOLDER, TILES_REGISTRY_FILE
 
 
 class TileDefinition:
@@ -68,7 +68,7 @@ class TileDefinition:
 
 class TileRegistry:
 
-    def __init__(self, registry_file="data/tiles_registry.json"):
+    def __init__(self, registry_file=TILES_REGISTRY_FILE):
         self._registry_file = registry_file
         self._categories = []          # Saraksts ar kategorijām (nosaukumi)
         self._tiles_by_id = {}          # {id: TileDefinition}

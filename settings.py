@@ -1,6 +1,37 @@
+import os
 
-SCREEN_WIDTH = 2560
-SCREEN_HEIGHT = 1440
+import pygame
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+# Design resolution
+
+DESIGN_WIDTH = 2560
+DESIGN_HEIGHT = 1440
+
+
+def _detect_display_size():
+    try:
+        if not pygame.display.get_init():
+            pygame.display.init()
+        info = pygame.display.Info()
+        w, h = int(info.current_w), int(info.current_h)
+        if w > 0 and h > 0:
+            return w, h
+    except pygame.error as exc:
+        print(f"[settings] display detection failed ({exc}) — falling back to design size")
+    return DESIGN_WIDTH, DESIGN_HEIGHT
+
+
+DISPLAY_WIDTH, DISPLAY_HEIGHT = _detect_display_size()
+
+# SCREEN_WIDTH/HEIGHT remain the virtual canvas size so all existing layout
+# code keeps working unchanged. The display window uses DISPLAY_WIDTH/HEIGHT.
+SCREEN_WIDTH = DESIGN_WIDTH
+SCREEN_HEIGHT = DESIGN_HEIGHT
+
 FPS = 60
 TITLE = "CODE Portal 3"
 FULLSCREEN = True
@@ -73,15 +104,16 @@ SPEED_BONUS_TIME = 15             # Sekundes ātruma bonusam
 SPEED_BONUS_POINTS = 25
 
 
-TASKS_FILE = "data/tasks.json"
-SCORES_FILE = "data/scores.csv"
-LOG_FILE = "data/log.txt"
-LEVELS_FOLDER = "data/levels"
+TASKS_FILE = os.path.join(BASE_DIR, "data", "tasks.json")
+SCORES_FILE = os.path.join(BASE_DIR, "data", "scores.csv")
+LOG_FILE = os.path.join(BASE_DIR, "data", "log.txt")
+LEVELS_FOLDER = os.path.join(BASE_DIR, "data", "levels")
+TILES_REGISTRY_FILE = os.path.join(BASE_DIR, "data", "tiles_registry.json")
 
 # Resursu mapes
-IMAGES_FOLDER = "assets/images"
-SOUNDS_FOLDER = "assets/sounds"
-FONTS_FOLDER = "assets/fonts"
+IMAGES_FOLDER = os.path.join(BASE_DIR, "assets", "images")
+SOUNDS_FOLDER = os.path.join(BASE_DIR, "assets", "sounds")
+FONTS_FOLDER = os.path.join(BASE_DIR, "assets", "fonts")
 
 # SKAŅA
 SOUND_VOLUME = 0.7

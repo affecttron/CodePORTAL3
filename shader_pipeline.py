@@ -20,22 +20,28 @@ SHADER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shaders")
 class ShaderPipeline:
 
     @classmethod
-    def create(cls, size, fullscreen=False, shader="cyberpunk", render_scale=1.0):
+    def create(cls, size, fullscreen=False, shader="cyberpunk", render_scale=1.0,
+               display_size=None):
         # falls back to plain blitting if moderngl is missing/broken
         if not _MODERNGL_AVAILABLE:
             print("[shader] moderngl not installed — running without post-FX.")
-            return _PassthroughPipeline(size, fullscreen)
+            return _PassthroughPipeline(size, fullscreen, display_size=display_size)
         try:
-            return cls(size, fullscreen, shader, render_scale)
+            return cls(size, fullscreen, shader, render_scale, display_size)
         except Exception as exc:
             print(f"[shader] disabled ({exc.__class__.__name__}: {exc}) — falling back.")
-            return _PassthroughPipeline(size, fullscreen)
+            return _PassthroughPipeline(size, fullscreen, display_size=display_size)
 
-    def __init__(self, size, fullscreen, shader_name, render_scale):
-        self._screen_size = (int(size[0]), int(size[1]))
+    def __init__(self, size, fullscreen, shader_name, render_scale, display_size=None):
+        # render_size = the virtual canvas the game draws to (design resolution)
+        # screen_size = the actual window/fullscreen size on the user's display
         rw = max(1, int(size[0] * render_scale))
         rh = max(1, int(size[1] * render_scale))
         self._render_size = (rw, rh)
+        if display_size is None:
+            self._screen_size = (int(size[0]), int(size[1]))
+        else:
+            self._screen_size = (int(display_size[0]), int(display_size[1]))
         self._shader_name = shader_name
 
         # request GL 3.3 core to match `#version 330 core` shaders
@@ -193,13 +199,19 @@ class ShaderPipeline:
 
 
 class _PassthroughPipeline:
-    """Fallback when ModernGL is unavailable."""
+    """Fallback when ModernGL is unavailable. Renders to a virtual surface and
+    scales to the actual display so the game runs at any resolution."""
 
-    def __init__(self, size, fullscreen):
-        self._size = (int(size[0]), int(size[1]))
+    def __init__(self, size, fullscreen, display_size=None):
+        self._render_size = (int(size[0]), int(size[1]))
+        if display_size is None:
+            self._display_size = self._render_size
+        else:
+            self._display_size = (int(display_size[0]), int(display_size[1]))
         flags = pygame.FULLSCREEN if fullscreen else 0
-        self._display = pygame.display.set_mode(self._size, flags)
-        self._surface = pygame.Surface(self._size).convert()
+        self._display = pygame.display.set_mode(self._display_size, flags)
+        self._surface = pygame.Surface(self._render_size).convert()
+        self._needs_scale = self._render_size != self._display_size
 
     @property
     def surface(self):
@@ -218,7 +230,10 @@ class _PassthroughPipeline:
         pass
 
     def present(self):
-        self._display.blit(self._surface, (0, 0))
+        if self._needs_scale:
+            pygame.transform.smoothscale(self._surface, self._display_size, self._display)
+        else:
+            self._display.blit(self._surface, (0, 0))
         pygame.display.flip()
 
     def shutdown(self):
