@@ -5,6 +5,7 @@ import pygame
 from settings import (
     SOUNDS_FOLDER, SOUND_VOLUME, MUSIC_VOLUME,
     AMBIENCE_VOLUME, AMBIENCE_MIN_GAP_MS, AMBIENCE_MAX_GAP_MS,
+    AMBIENCE_INITIAL_DELAY_MS,
 )
 
 
@@ -131,9 +132,10 @@ class SoundManager:
         self._schedule_next_ambience(initial=False)
 
     def _schedule_next_ambience(self, initial):
-        gap = random.randint(AMBIENCE_MIN_GAP_MS, AMBIENCE_MAX_GAP_MS)
         if initial:
-            gap = random.randint(1000, max(3000, AMBIENCE_MIN_GAP_MS // 2))
+            gap = AMBIENCE_INITIAL_DELAY_MS
+        else:
+            gap = random.randint(AMBIENCE_MIN_GAP_MS, AMBIENCE_MAX_GAP_MS)
         self._next_ambience_ms = pygame.time.get_ticks() + gap
 
     def set_ambience_volume(self, volume):

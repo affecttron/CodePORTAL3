@@ -113,9 +113,10 @@ FONTS_FOLDER = os.path.join(BASE_DIR, "assets", "fonts")
 # SKAŅA
 SOUND_VOLUME = 0.7
 MUSIC_VOLUME = 0.3
-AMBIENCE_VOLUME = 0.1         # Fona ambient skaņas — klusas
+AMBIENCE_VOLUME = 0.04        # Fona ambient skaņas — ļoti klusas
 AMBIENCE_MIN_GAP_MS = 8000        # Min pauze starp ambient skaņām
 AMBIENCE_MAX_GAP_MS = 25000       # Max pauze starp ambient skaņām
+AMBIENCE_INITIAL_DELAY_MS = 30000 # Pauze pirms pirmās ambient skaņas
 
 
 
