@@ -258,10 +258,15 @@ class Game:
             self._player.increment_attempts()
             attempts = self._player.get_attempts()
             points = task.calculate_points(attempts)
-            self._player.add_score(points)
+            oc_bonus = self._current_level.consume_overclock_bonus()
+            self._player.add_score(points + oc_bonus)
 
             self._sound.play_sound("correct")
-            self._show_feedback(f"PAREIZI! +{points} punkti!", NEON_GREEN)
+            if oc_bonus:
+                msg = f"PAREIZI! +{points} punkti! [+{oc_bonus} OVERCLOCK]"
+            else:
+                msg = f"PAREIZI! +{points} punkti!"
+            self._show_feedback(msg, NEON_GREEN)
             self._input_text = ""
             self._player.reset_attempts()
 
@@ -273,6 +278,7 @@ class Game:
             self._player.increment_attempts()
             self._player.deduct_score(5)
             attempts = self._player.get_attempts()
+            self._current_level.void_overclock()
 
             self._sound.play_sound("wrong")
 

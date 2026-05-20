@@ -100,6 +100,11 @@ TIME_LIMIT_PER_TASK = 60          # Sekundes vienam uzdevumam
 MAX_ATTEMPTS = 3                  # Mēģinājumu skaits
 
 
+# OVERCLOCK — laika logs papildus punktiem par ātru izpildi
+OVERCLOCK_DURATION_MS = 15000     # 15 sekundes logam (sākas pēc typewriter)
+OVERCLOCK_BONUS_POINTS = 10       # Papildu punkti, ja iesniegts logā
+
+
 TASKS_FILE = os.path.join(BASE_DIR, "data", "tasks.json")
 SCORES_FILE = os.path.join(BASE_DIR, "data", "scores.csv")
 LOG_FILE = os.path.join(BASE_DIR, "data", "log.txt")

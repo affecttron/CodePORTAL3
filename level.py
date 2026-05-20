@@ -8,6 +8,7 @@ from settings import (
     TASKS_FILE, TIME_LIMIT_PER_TASK,
     SCREEN_WIDTH, SCREEN_HEIGHT,
     NEON_RED, NEON_YELLOW, NEON_GREEN, NEON_CYAN,
+    OVERCLOCK_DURATION_MS, OVERCLOCK_BONUS_POINTS,
 )
 
 
@@ -22,6 +23,7 @@ SUBTITLE_BAR_HEIGHT = 28
 CODE_BLOCK_HEIGHT = 360
 INPUT_AREA_HEIGHT = 56
 HINT_AREA_HEIGHT = 22
+OVERCLOCK_AREA_HEIGHT = 32
 PANEL_BG = (10, 12, 16)
 CODE_BG = (6, 8, 10)
 
@@ -46,6 +48,11 @@ class Level:
         self._tw_revealed = 0.0
         self._tw_last_ms = None
         self._tw_blip_counter = 0
+
+        # OVERCLOCK — per-task countdown for the +OVERCLOCK_BONUS_POINTS window.
+        self._oc_started_ms = None
+        self._oc_consumed = False
+        self._oc_voided = False
 
     def load_tasks(self, tasks_file=TASKS_FILE):
         if not os.path.exists(tasks_file):
@@ -89,6 +96,9 @@ class Level:
         self._tw_revealed = 0.0
         self._tw_last_ms = None
         self._tw_blip_counter = 0
+        self._oc_started_ms = None
+        self._oc_consumed = False
+        self._oc_voided = False
 
     def skip_typewriter(self):
         if self._tw_wrapped is not None:
@@ -113,6 +123,8 @@ class Level:
         layout = self.get_panel_layout()
         self._draw_base_ui(screen, layout, attempts)
         self._draw_code_block(screen, font_normal, layout["code"])
+        self._ensure_overclock_started()
+        self._draw_overclock_strip(screen, layout["overclock"])
         return layout
 
     def get_panel_layout(self):
@@ -125,9 +137,15 @@ class Level:
             PANEL_WIDTH - 2 * PANEL_PADDING_X,
             CODE_BLOCK_HEIGHT,
         )
+        overclock = pygame.Rect(
+            panel_x + PANEL_PADDING_X,
+            code.bottom + 12,
+            PANEL_WIDTH - 2 * PANEL_PADDING_X,
+            OVERCLOCK_AREA_HEIGHT,
+        )
         input_rect = pygame.Rect(
             panel_x + PANEL_PADDING_X,
-            code.bottom + 16,
+            overclock.bottom + 10,
             PANEL_WIDTH - 2 * PANEL_PADDING_X,
             INPUT_AREA_HEIGHT,
         )
@@ -137,7 +155,13 @@ class Level:
             PANEL_WIDTH - 2 * PANEL_PADDING_X,
             HINT_AREA_HEIGHT,
         )
-        return {"panel": panel, "code": code, "input": input_rect, "hint": hint}
+        return {
+            "panel": panel,
+            "code": code,
+            "overclock": overclock,
+            "input": input_rect,
+            "hint": hint,
+        }
 
     def _dim_color(self, color, factor=0.4):
         return (
@@ -397,6 +421,172 @@ class Level:
                 if self._tw_blip_counter % TYPEWRITER_BLIP_EVERY == 0 and not blipped:
                     SoundManager().play_sound("keystroke")
                     blipped = True
+
+    # === OVERCLOCK ===
+    def _ensure_overclock_started(self):
+        if self._oc_started_ms is None and self.is_typewriter_complete():
+            self._oc_started_ms = pygame.time.get_ticks()
+
+    def get_overclock_remaining_ms(self):
+        if self._oc_started_ms is None:
+            return OVERCLOCK_DURATION_MS
+        elapsed = pygame.time.get_ticks() - self._oc_started_ms
+        return max(0, OVERCLOCK_DURATION_MS - elapsed)
+
+    def is_overclock_active(self):
+        return (
+            self._oc_started_ms is not None
+            and not self._oc_consumed
+            and not self._oc_voided
+            and self.get_overclock_remaining_ms() > 0
+        )
+
+    def consume_overclock_bonus(self):
+        if not self.is_overclock_active():
+            return 0
+        self._oc_consumed = True
+        return OVERCLOCK_BONUS_POINTS
+
+    def void_overclock(self):
+        # Forfeit the overclock window — called when the player submits a wrong answer.
+        self._oc_voided = True
+
+    def _oc_state(self):
+        if not self.is_typewriter_complete() or self._oc_started_ms is None:
+            return "standby"
+        if self._oc_voided:
+            return "voided"
+        if self._oc_consumed or self.get_overclock_remaining_ms() <= 0:
+            return "expired"
+        frac = self.get_overclock_remaining_ms() / OVERCLOCK_DURATION_MS
+        if frac < 0.15:
+            return "critical"
+        if frac < 0.35:
+            return "warning"
+        return "active"
+
+    def _oc_palette(self, state):
+        color = self._theme_color
+        if state == "standby":
+            return (
+                self._dim_color(color, 0.45),
+                self._dim_color(color, 0.25),
+                self._dim_color(color, 0.30),
+                self._dim_color(color, 0.18),
+            )
+        if state == "critical":
+            return (NEON_RED, self._dim_color(NEON_RED, 0.45),
+                    NEON_RED, self._dim_color(NEON_RED, 0.20))
+        if state == "warning":
+            return (NEON_YELLOW, self._dim_color(NEON_YELLOW, 0.45),
+                    NEON_YELLOW, self._dim_color(NEON_YELLOW, 0.20))
+        if state == "expired":
+            return (self._dim_color(NEON_RED, 0.55),
+                    self._dim_color(NEON_RED, 0.30),
+                    self._dim_color(NEON_RED, 0.30),
+                    self._dim_color(NEON_RED, 0.15))
+        if state == "voided":
+            return (self._dim_color(NEON_RED, 0.75),
+                    self._dim_color(NEON_RED, 0.35),
+                    self._dim_color(NEON_RED, 0.35),
+                    self._dim_color(NEON_RED, 0.18))
+        return (color, self._dim_color(color, 0.45),
+                color, self._dim_color(color, 0.20))
+
+    def _oc_digits_text(self, state):
+        if state == "standby":
+            return "--.---s"
+        if state == "expired":
+            return "00.000s"
+        if state == "voided":
+            return "##.###s"
+        secs = max(0, self.get_overclock_remaining_ms()) / 1000.0
+        return f"{secs:06.3f}s"
+
+    def _oc_badge_text(self, state):
+        if state == "standby":
+            return "STANDBY"
+        if state == "expired":
+            return "EXPIRED"
+        if state == "voided":
+            return "VOIDED"
+        return f"+{OVERCLOCK_BONUS_POINTS} PT"
+
+    def _draw_overclock_strip(self, screen, rect):
+        state = self._oc_state()
+        primary, accent, bar_color, bar_dim = self._oc_palette(state)
+        now = pygame.time.get_ticks()
+
+        pygame.draw.rect(screen, CODE_BG, rect)
+
+        border_color = primary
+        if state == "critical" and (now // 100) % 2:
+            border_color = accent
+        pygame.draw.rect(screen, border_color, rect, 1)
+
+        # Left vertical accent stripe
+        pygame.draw.line(screen, primary, (rect.x, rect.y), (rect.x, rect.bottom), 3)
+
+        label_font = self._mono_font(15, bold=True)
+        label_surf = label_font.render("OVERCLOCK", True, primary)
+        label_x = rect.x + 14
+        label_y = rect.y + (rect.h - label_surf.get_height()) // 2
+        screen.blit(label_surf, (label_x, label_y))
+
+        sep_x = label_x + label_surf.get_width() + 8
+        sep_surf = label_font.render("::", True, accent)
+        screen.blit(sep_surf, (sep_x, label_y))
+
+        digit_font = self._mono_font(17, bold=True)
+        digits_text = self._oc_digits_text(state)
+        digit_jitter = 1 if (state == "critical" and (now // 80) % 3 == 0) else 0
+        digits_surf = digit_font.render(digits_text, True, primary)
+        digit_x = sep_x + sep_surf.get_width() + 10
+        digit_y = rect.y + (rect.h - digits_surf.get_height()) // 2
+        screen.blit(digits_surf, (digit_x + digit_jitter, digit_y))
+
+        badge_font = self._mono_font(14, bold=True)
+        badge_text = self._oc_badge_text(state)
+        badge_surf = badge_font.render(badge_text, True, primary)
+        badge_w = badge_surf.get_width()
+        badge_pad = 18
+
+        # Bar starts after a fixed-width digit reservation so ticking doesn't shift it.
+        bar_x = digit_x + digit_font.size("00.000s")[0] + 22
+        bar_right = rect.right - badge_pad - badge_w - 26
+        bar_w = max(0, bar_right - bar_x)
+        bar_h = 12
+        bar_y = rect.y + (rect.h - bar_h) // 2
+
+        n_segments = 24
+        seg_gap = 2
+        seg_w = max(2.0, (bar_w - (n_segments - 1) * seg_gap) / n_segments)
+
+        if state == "standby":
+            fraction = 1.0
+        elif state in ("expired", "voided"):
+            fraction = 0.0
+        else:
+            fraction = self.get_overclock_remaining_ms() / OVERCLOCK_DURATION_MS
+
+        filled = int(round(fraction * n_segments))
+        for i in range(n_segments):
+            sx = bar_x + i * (seg_w + seg_gap)
+            seg_rect = pygame.Rect(int(sx), bar_y, int(seg_w), bar_h)
+            if i < filled:
+                fill = bar_dim if state == "standby" else bar_color
+                pygame.draw.rect(screen, fill, seg_rect)
+            else:
+                pygame.draw.rect(screen, bar_dim, seg_rect, 1)
+
+        # Bracketed badge on the right — "[ +10 PT ]" / "[ STANDBY ]" / "[ EXPIRED ]"
+        badge_x = rect.right - badge_pad - badge_w
+        badge_y = rect.y + (rect.h - badge_surf.get_height()) // 2
+        open_b = badge_font.render("[", True, accent)
+        close_b = badge_font.render("]", True, accent)
+        screen.blit(open_b, (badge_x - open_b.get_width() - 4, badge_y))
+        screen.blit(badge_surf, (badge_x, badge_y))
+        screen.blit(close_b, (badge_x + badge_w + 4, badge_y))
 
     def get_level_id(self):
         return self._level_id
