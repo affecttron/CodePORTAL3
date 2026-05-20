@@ -60,6 +60,7 @@ CLIMB_SPEED = 5                   # Rāpšanās ātrums pa kāpnēm (px/kadrā)
 
 CAMERA_SMOOTHNESS_X = 0.11        # Cik strauji kamera seko horizontāli (mazāks = vienmērīgāks)
 CAMERA_SMOOTHNESS_Y = 0.18        # Vertikāli — nedaudz straujāks (lai redz, kur lec)
+CAMERA_VERTICAL_ANCHOR = 0.56     # Spēlētāja vertikālā pozīcija ekrānā (0.5 = centrā, >0.5 = zemāk)
 CAMERA_LOOKAHEAD_MAX = 220        # Cik tālu kamera "skatās uz priekšu" kustības virzienā (px)
 CAMERA_LOOKAHEAD_LERP = 0.04      # Cik lēni kamera pielāgo look-ahead vērtību
 CAMERA_MOTION_BLUR = True         # Vai motion-blur trail efekts ir ieslēgts

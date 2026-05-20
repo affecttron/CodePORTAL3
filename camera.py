@@ -2,7 +2,7 @@ import pygame
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT,
     MOVE_SPEED,
-    CAMERA_SMOOTHNESS_X, CAMERA_SMOOTHNESS_Y,
+    CAMERA_SMOOTHNESS_X, CAMERA_SMOOTHNESS_Y, CAMERA_VERTICAL_ANCHOR,
     CAMERA_LOOKAHEAD_MAX, CAMERA_LOOKAHEAD_LERP,
     CAMERA_MOTION_BLUR, CAMERA_BLUR_MIN_SPEED,
     CAMERA_BLUR_ALPHA_GAIN, CAMERA_BLUR_ALPHA_MAX,
@@ -56,7 +56,7 @@ class Camera:
 
         if self._target is not None and self._is_following:
             target_x = self._target.get_center_x() - self._screen_width // 2
-            target_y = self._target.get_center_y() - self._screen_height // 2
+            target_y = self._target.get_center_y() - int(self._screen_height * CAMERA_VERTICAL_ANCHOR)
 
 
             if hasattr(self._target, "get_vel_x") and MOVE_SPEED > 0:
