@@ -389,7 +389,7 @@ class Game:
             return
 
         layout = self._current_level.display_task(
-            self._screen, self._font_big, self._font_code,
+            self._screen, self._font_code,
             attempts=self._player.get_attempts(),
         )
         if layout is None:

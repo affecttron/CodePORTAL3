@@ -42,9 +42,9 @@ FULLSCREEN = True
 
 TILE_SIZE = 64                    # Viens tile = 64x64 pikseļi
 WORLD_WIDTH_TILES = 120            # Pasaule platumā (tiles)
-WORLD_HEIGHT_TILES = 17           # Pasaule augstumā (tiles)
+WORLD_HEIGHT_TILES = 40           # Pasaule augstumā (tiles) — 17 spēles, atlikušais bedrēm
 WORLD_WIDTH = WORLD_WIDTH_TILES * TILE_SIZE     # = 3840 px
-WORLD_HEIGHT = WORLD_HEIGHT_TILES * TILE_SIZE   # = 1088 px
+WORLD_HEIGHT = WORLD_HEIGHT_TILES * TILE_SIZE   # = 2560 px
 
 
 # FIZIKA 

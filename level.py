@@ -38,8 +38,7 @@ class Level:
         self._time_limit = time_limit
         self._current_task_index = 0
         self._theme_color = NEON_CYAN
-        # Local RNG so shuffling tasks doesn't perturb the global random stream
-        # used by other systems (e.g. parallax silhouette generation).
+        # rng lai mainitu tasks
         self._rng = random.Random()
 
         self._tw_wrapped = None
@@ -110,9 +109,10 @@ class Level:
             return False
         return task.verify(ans)
 
-    def display_task(self, screen, font_big, font_normal, attempts=0):
+    def display_task(self, screen, font_normal, attempts=0):
         layout = self.get_panel_layout()
         self._draw_base_ui(screen, layout, attempts)
+        self._draw_code_block(screen, font_normal, layout["code"])
         return layout
 
     def get_panel_layout(self):
@@ -429,12 +429,6 @@ class ConditionLevel(Level):
         self._branch_type = "if/else"
         self._theme_color = NEON_RED
 
-    def display_task(self, screen, font_big, font_normal, attempts=0):
-        layout = self.get_panel_layout()
-        self._draw_base_ui(screen, layout, attempts)
-        self._draw_code_block(screen, font_normal, layout["code"])
-        return layout
-
 
 class LoopLevel(Level):
 
@@ -445,12 +439,6 @@ class LoopLevel(Level):
         self._loop_type = "for/while"
         self._theme_color = NEON_YELLOW
 
-    def display_task(self, screen, font_big, font_normal, attempts=0):
-        layout = self.get_panel_layout()
-        self._draw_base_ui(screen, layout, attempts)
-        self._draw_code_block(screen, font_normal, layout["code"])
-        return layout
-
 
 class FunctionLevel(Level):
 
@@ -460,12 +448,6 @@ class FunctionLevel(Level):
         super().__init__(level_id, title)
         self._func_name = ""
         self._theme_color = NEON_GREEN
-
-    def display_task(self, screen, font_big, font_normal, attempts=0):
-        layout = self.get_panel_layout()
-        self._draw_base_ui(screen, layout, attempts)
-        self._draw_code_block(screen, font_normal, layout["code"])
-        return layout
 
 
 def create_level(level_id):
