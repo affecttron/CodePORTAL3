@@ -1,7 +1,6 @@
 import math
 import os
 import sys
-
 import pygame
 
 from game import Game
@@ -14,23 +13,70 @@ from settings import (
     WHITE, BLACK, GRAY,
 )
 
-
 PLAY, EDITOR, SCORES, QUIT = "play", "editor", "scores", "quit"
 
-BG       = (12,  12,  14)
-DIM      = (128, 128, 132)
-DIM_SOFT = (78,  78,  84)
-DIM_DARK = (38,  38,  44)
+BG = (12, 12, 14)
+DIM = (128, 128, 132)
+DIM_SOFT = (78, 78, 84)
+DIM_DARK = (38, 38, 44)
+PALE = (210, 212, 216)
+COLD = (150, 162, 172)
+AMBER = (188, 172, 148)
+RED = (178, 78, 68)
+ACCENT = (170, 174, 180)
 
-PALE     = (210, 212, 216)
-COLD     = (150, 162, 172)
-AMBER    = (188, 172, 148)
-RED      = (178, 78,  68)
-ACCENT   = (170, 174, 180)
+
+def _load_loading_image(screen_size):
+    assets_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+    extensions = [".png", ".jpg", ".jpeg", ".bmp", ".gif"]
+    for ext in extensions:
+        path = os.path.join(assets_dir, f"loading{ext}")
+        if os.path.exists(path):
+            try:
+                img = pygame.image.load(path).convert_alpha()
+                sw, sh = screen_size
+                iw, ih = img.get_size()
+                scale = min(sw / iw, sh / ih)
+                new_size = (max(1, int(iw * scale)), max(1, int(ih * scale)))
+                return pygame.transform.smoothscale(img, new_size)
+            except Exception as exc:
+                print(f"[loading] Nevarēja ielādēt {path}: {exc}")
+    return None
+
+
+def show_loading_screen(surface, pipeline, clock, going_out=True):
+    loading_img = _load_loading_image((SCREEN_WIDTH, SCREEN_HEIGHT))
+    font = pygame.font.SysFont("Consolas", 22, bold=True)
+    fade_frames = 60
+
+    def draw_frame(alpha):
+        surface.fill(BLACK)
+        if loading_img is not None:
+            img_rect = loading_img.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            img_copy = loading_img.copy()
+            img_copy.set_alpha(255 - alpha)
+            surface.blit(img_copy, img_rect)
+        else:
+            pulse = 0.5 + 0.5 * math.sin(pygame.time.get_ticks() / 300.0)
+            dot_color = (int(80 + 120 * pulse), int(80 + 120 * pulse), int(100 + 132 * pulse))
+            label = font.render("IELĀDĒ...", True, dot_color)
+            surface.blit(label, label.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)))
+        veil = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        veil.fill(BLACK)
+        veil.set_alpha(alpha)
+        surface.blit(veil, (0, 0))
+        pipeline.present()
+        clock.tick(FPS)
+
+    if going_out:
+        for i in range(fade_frames + 1):
+            draw_frame(int(255 * i / fade_frames))
+    else:
+        for i in range(fade_frames + 1):
+            draw_frame(int(255 * (fade_frames - i) / fade_frames))
 
 
 class MainMenu:
-
     def __init__(self):
         self._pipeline = ShaderPipeline.create(
             (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu",
@@ -40,26 +86,25 @@ class MainMenu:
         pygame.display.set_caption(TITLE)
         self._clock = pygame.time.Clock()
 
-        self._font_title = pygame.font.SysFont("Arial",    140, bold=True)
-        self._font_item  = pygame.font.SysFont("Arial",    56,  bold=True)
-        self._font_idx   = pygame.font.SysFont("Consolas", 20,  bold=True)
-        self._font_tag   = pygame.font.SysFont("Consolas", 22,  bold=True)
-        self._font       = pygame.font.SysFont("Arial",    28)
-        self._font_small = pygame.font.SysFont("Arial",    22)
+        self._font_title = pygame.font.SysFont("Arial", 140, bold=True)
+        self._font_item = pygame.font.SysFont("Arial", 56, bold=True)
+        self._font_idx = pygame.font.SysFont("Consolas", 20, bold=True)
+        self._font_tag = pygame.font.SysFont("Consolas", 22, bold=True)
+        self._font = pygame.font.SysFont("Arial", 28)
+        self._font_small = pygame.font.SysFont("Arial", 22)
 
         self._items = [
-            (PLAY,   "SPĒLĒT",            PALE),
-            (EDITOR, "LĪMEŅU REDAKTORS",  COLD),
-            (SCORES, "REZULTĀTI",         AMBER),
-            (QUIT,   "IZIET",             RED),
+            (PLAY, "SPĒLĒT", PALE),
+            (EDITOR, "LĪMEŅU REDAKTORS", COLD),
+            (SCORES, "REZULTĀTI", AMBER),
+            (QUIT, "IZIET", RED),
         ]
 
         self._logo = self._load_logo(target_h=240)
-
         self._selected = 0
         self._hover_amounts = [0.0] * len(self._items)
-        self._name_hover    = 0.0
-        self._cursor_state  = None
+        self._name_hover = 0.0
+        self._cursor_state = None
 
         self._player_name = "Spēlētājs"
         self._editing = False
@@ -80,23 +125,19 @@ class MainMenu:
             self._update()
             self._draw()
             self._clock.tick(FPS)
-            
         self._sound.stop_ambience()
         self._sound.stop_music()
         self._pipeline.shutdown()
-        
         pygame.quit()
         sys.exit()
 
     def _update(self):
-        # self._anim += (self._selected - self._anim) * 0.25
         self._sound.update_ambience()
         for i in range(len(self._items)):
             target = 1.0 if i == self._selected else 0.0
             self._hover_amounts[i] += (target - self._hover_amounts[i]) * 0.20
 
         pos = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())
-
         name_t = 1.0 if (self._editing or self._name_rect().collidepoint(pos)) else 0.0
         self._name_hover += (name_t - self._name_hover) * 0.18
 
@@ -200,7 +241,9 @@ class MainMenu:
 
     def _launch(self, fn):
         self._sound.stop_ambience()
-        self._fade(out=True)
+
+        show_loading_screen(self._screen, self._pipeline, self._clock, going_out=True)
+
         self._pipeline.shutdown()
         try:
             fn()
@@ -213,24 +256,11 @@ class MainMenu:
             pygame.display.set_caption(TITLE)
             pygame.mouse.set_visible(True)
             self._cursor_state = None
+            self._sound.play_music()
+            self._sound.start_ambience()
 
-        self._sound.play_music()
-        self._sound.start_ambience()
-        self._draw()
-        self._fade(out=False)
-
-    def _fade(self, out, frames=10):
-        snap = self._screen.copy()
-        veil = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-        veil.fill(BLACK)
-        rng = range(1, frames + 1) if out else range(frames, -1, -1)
-        for i in rng:
-            self._screen.blit(snap, (0, 0))
-            veil.set_alpha(int(255 * i / frames))
-            self._screen.blit(veil, (0, 0))
-            self._pipeline.present()
-            self._clock.tick(FPS)
-
+            self._draw()
+            show_loading_screen(self._screen, self._pipeline, self._clock, going_out=False)
 
     def _item_rect(self, i):
         w, h, gap = 680, 82, 24
@@ -256,8 +286,7 @@ class MainMenu:
 
     def _draw_title(self):
         cx = SCREEN_WIDTH // 2
-
-        pre = self._font_tag.render("//  S Y S T E M . O N L I N E  //", True, ACCENT)
+        pre = self._font_tag.render("// S Y S T E M . O N L I N E //", True, ACCENT)
         self._screen.blit(pre, pre.get_rect(center=(cx, 180)))
 
         if self._logo is not None:
@@ -267,25 +296,23 @@ class MainMenu:
             title = self._font_title.render("CODE PORTAL 3", True, WHITE)
             title_rect = title.get_rect(center=(cx, 300))
             self._screen.blit(title, title_rect)
-
-        frame = title_rect.inflate(140, 56)
-        self._draw_brackets(frame, ACCENT, DIM_SOFT, arm=40, thickness=4)
-
+            frame = title_rect.inflate(140, 56)
+            self._draw_brackets(frame, ACCENT, DIM_SOFT, arm=40, thickness=4)
 
     def _draw_brackets(self, rect, c_top, c_bot, arm=24, thickness=3):
-        pygame.draw.line(self._screen, c_top, (rect.left,  rect.top), (rect.left + arm, rect.top), thickness)
-        pygame.draw.line(self._screen, c_top, (rect.left,  rect.top), (rect.left, rect.top + arm), thickness)
+        pygame.draw.line(self._screen, c_top, (rect.left, rect.top), (rect.left + arm, rect.top), thickness)
+        pygame.draw.line(self._screen, c_top, (rect.left, rect.top), (rect.left, rect.top + arm), thickness)
         pygame.draw.line(self._screen, c_top, (rect.right, rect.top), (rect.right - arm, rect.top), thickness)
         pygame.draw.line(self._screen, c_top, (rect.right, rect.top), (rect.right, rect.top + arm), thickness)
-        pygame.draw.line(self._screen, c_bot, (rect.left,  rect.bottom), (rect.left + arm, rect.bottom), thickness)
-        pygame.draw.line(self._screen, c_bot, (rect.left,  rect.bottom), (rect.left, rect.bottom - arm), thickness)
+        pygame.draw.line(self._screen, c_bot, (rect.left, rect.bottom), (rect.left + arm, rect.bottom), thickness)
+        pygame.draw.line(self._screen, c_bot, (rect.left, rect.bottom), (rect.left, rect.bottom - arm), thickness)
         pygame.draw.line(self._screen, c_bot, (rect.right, rect.bottom), (rect.right - arm, rect.bottom), thickness)
         pygame.draw.line(self._screen, c_bot, (rect.right, rect.bottom), (rect.right, rect.bottom - arm), thickness)
 
     def _draw_items(self):
         for i, (_, label, c) in enumerate(self._items):
             rect = self._item_rect(i)
-            h    = self._hover_amounts[i]
+            h = self._hover_amounts[i]
 
             if h > 0.005:
                 for expand, alpha, radius in [
@@ -313,15 +340,14 @@ class MainMenu:
             pygame.draw.rect(self._screen, c, (rect.x, bar_y, 5, bar_h))
 
             idx_color = self._lerp_color(DIM_SOFT, c, h)
-            idx_text  = self._font_idx.render(f"0{i+1}", True, idx_color)
+            idx_text = self._font_idx.render(f"0{i+1}", True, idx_color)
             self._screen.blit(idx_text, (rect.x + 20, rect.y + 12))
-
             pygame.draw.circle(self._screen, idx_color,
-                               (rect.x + 22 + idx_text.get_width() + 6, rect.y + 23), 2)
+                                (rect.x + 22 + idx_text.get_width() + 6, rect.y + 23), 2)
 
             text_color = self._lerp_color(DIM, WHITE, h)
-            slide      = int(h * 18)
-            text       = self._font_item.render(label, True, text_color)
+            slide = int(h * 18)
+            text = self._font_item.render(label, True, text_color)
             self._screen.blit(text, text.get_rect(midleft=(rect.x + 60 + slide, rect.centery + 6)))
 
             if h > 0.02:
@@ -333,10 +359,9 @@ class MainMenu:
                 ])
                 self._screen.blit(chev, (cx, cy - 16))
 
-
     def _draw_name(self):
         rect = self._name_rect()
-        h    = self._name_hover
+        h = self._name_hover
 
         if h > 0.005:
             for expand, alpha, radius in [(20, 0.05, 16), (10, 0.12, 10)]:
@@ -357,11 +382,11 @@ class MainMenu:
         self._screen.blit(bord, rect.topleft)
 
         label_color = self._lerp_color(DIM, PALE, h)
-        label       = self._font_small.render("SPĒLĒTĀJS", True, label_color)
+        label = self._font_small.render("SPĒLĒTĀJS", True, label_color)
         self._screen.blit(label, (rect.x, rect.y - 28))
 
         caret_color = PALE if h > 0.05 else DIM_SOFT
-        caret       = self._font.render(">", True, caret_color)
+        caret = self._font.render(">", True, caret_color)
         self._screen.blit(caret, caret.get_rect(midleft=(rect.x + 14, rect.centery)))
 
         blink_on = self._editing and (pygame.time.get_ticks() // 500) % 2 == 0
@@ -374,17 +399,17 @@ class MainMenu:
 
     def _draw_footer(self):
         cx = SCREEN_WIDTH // 2
-        y  = SCREEN_HEIGHT - 50
+        y = SCREEN_HEIGHT - 50
 
         pulse = 0.5 + 0.5 * math.sin(pygame.time.get_ticks() / 1000.0 * 2.2)
-        dot   = pygame.Surface((14, 14), pygame.SRCALPHA)
+        dot = pygame.Surface((14, 14), pygame.SRCALPHA)
         pygame.draw.circle(dot, (*AMBER, int(140 + 90 * pulse)), (7, 7), 5)
         self._screen.blit(dot, (40, y - 7))
         status = self._font_small.render("ONLINE", True, AMBER)
         self._screen.blit(status, status.get_rect(midleft=(60, y)))
 
-        hint = "↑↓ / WS  pārvietoties     ENTER  izvēlēties     N  pārdēvēt     F1  ēnotāji     ESC  iziet"
-        t    = self._font_small.render(hint, True, DIM)
+        hint = "↑↓ / WS pārvietoties  ENTER izvēlēties  N pārdēvēt  F1 ēnotāji  ESC iziet"
+        t = self._font_small.render(hint, True, DIM)
         self._screen.blit(t, t.get_rect(center=(cx, y)))
 
         ver = self._font_small.render("v0.3", True, DIM_SOFT)
@@ -400,7 +425,7 @@ class MainMenu:
         title_rect = title.get_rect(center=(cx, 260))
         self._screen.blit(title, title_rect)
         self._draw_brackets(title_rect.inflate(120, 50), ACCENT, DIM_SOFT,
-                            arm=36, thickness=4)
+                             arm=36, thickness=4)
 
         scores = self._scores.get_top_scores(limit=10)
         if not scores:
@@ -410,7 +435,7 @@ class MainMenu:
             y = 460
             for i, e in enumerate(scores):
                 color = PALE if i == 0 else (COLD if i < 3 else DIM)
-                row = f"{i+1:>2}.  {e['name'][:18]:<20}{e['score']:>6} pts   {e['date']}"
+                row = f"{i+1:>2}. {e['name'][:18]:<20}{e['score']:>6} pts  {e['date']}"
                 t = self._font.render(row, True, color)
                 self._screen.blit(t, t.get_rect(center=(cx, y)))
                 y += 48
