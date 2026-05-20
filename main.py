@@ -271,16 +271,6 @@ class MainMenu:
         frame = title_rect.inflate(140, 56)
         self._draw_brackets(frame, ACCENT, DIM_SOFT, arm=40, thickness=4)
 
-        tag = self._font.render("// Python kodēšanas piedzīvojums //", True, DIM)
-        tag_rect = tag.get_rect(center=(cx, title_rect.bottom + 38))
-        self._screen.blit(tag, tag_rect)
-        line_w = 220
-        line_y = tag_rect.bottom + 14
-        pygame.draw.line(self._screen, DIM_SOFT,
-                         (cx - line_w // 2, line_y), (cx - 30, line_y), 2)
-        pygame.draw.line(self._screen, DIM_SOFT,
-                         (cx + 30, line_y), (cx + line_w // 2, line_y), 2)
-        pygame.draw.circle(self._screen, PALE, (cx, line_y), 3)
 
     def _draw_brackets(self, rect, c_top, c_bot, arm=24, thickness=3):
         pygame.draw.line(self._screen, c_top, (rect.left,  rect.top), (rect.left + arm, rect.top), thickness)

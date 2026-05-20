@@ -54,14 +54,14 @@ void main() {
         uv.x += (bandRand - 0.5) * 0.03 * tearGate;
     }
 
-    // subtle CA, slight at edges
+    // radial chromatic aberration — R disperses outward from center, B inward
     vec2  centered = uv - 0.5;
     float dist     = length(centered);
-    float ca       = (0.0004 + 0.0012 * dist) * fx + burst * 0.003;
-
-    float r = texture(u_texture, uv - vec2(ca, 0.0)).r;
+    vec2  caDir    = dist > 0.001 ? normalize(centered) : vec2(1.0, 0.0);
+    float caAmt    = (0.0004 + 0.0012 * dist) * fx + burst * 0.003;
+    float r = texture(u_texture, uv + caDir * caAmt).r;
     float g = texture(u_texture, uv).g;
-    float b = texture(u_texture, uv + vec2(ca, 0.0)).b;
+    float b = texture(u_texture, uv - caDir * caAmt).b;
     vec3 col = vec3(r, g, b);
 
     // soft scanlines

@@ -83,11 +83,14 @@ void main() {
         uv.x += (sliceRand - 0.5) * 0.035 * tearGate;
     }
 
-    // soft chromatic aberration
-    float ca = (0.0007 + 0.003 * burst) * fx;
-    float r = texture(u_texture, uv - vec2(ca, 0.0)).r;
+    // radial chromatic aberration — R disperses outward from center, B inward
+    vec2  centered = uv - 0.5;
+    float dist     = length(centered);
+    vec2  caDir    = dist > 0.001 ? normalize(centered) : vec2(1.0, 0.0);
+    float caAmt    = (0.0007 + 0.003 * burst) * fx;
+    float r = texture(u_texture, uv + caDir * caAmt).r;
     float g = texture(u_texture, uv).g;
-    float b = texture(u_texture, uv + vec2(ca, 0.0)).b;
+    float b = texture(u_texture, uv - caDir * caAmt).b;
     vec3 col = vec3(r, g, b);
 
     float lum = dot(col, vec3(0.299, 0.587, 0.114));
@@ -111,8 +114,24 @@ void main() {
     float scan = 0.97 + 0.03 * sin(v_uv.y * u_resolution.y * 1.0);
     col *= mix(1.0, scan, fx);
 
-    // soft bloom on bright UI pixels (text/logo)
-    col += col * smoothstep(0.55, 0.95, lum) * 0.22 * fx;
+    // ── multi-tap bloom — 8-sample cross+diagonal for real spread on bright UI ──
+    {
+        vec2  texel = 1.0 / u_resolution;
+        float br    = 3.0;
+        float bd    = br * 0.7071;
+        vec3  acc   = vec3(0.0);
+        acc += texture(u_texture, uv + texel * vec2( br,  0.0)).rgb;
+        acc += texture(u_texture, uv + texel * vec2(-br,  0.0)).rgb;
+        acc += texture(u_texture, uv + texel * vec2( 0.0,  br)).rgb;
+        acc += texture(u_texture, uv + texel * vec2( 0.0, -br)).rgb;
+        acc += texture(u_texture, uv + texel * vec2( bd,  bd)).rgb;
+        acc += texture(u_texture, uv + texel * vec2(-bd,  bd)).rgb;
+        acc += texture(u_texture, uv + texel * vec2( bd, -bd)).rgb;
+        acc += texture(u_texture, uv + texel * vec2(-bd, -bd)).rgb;
+        acc /= 8.0;
+        float bloomLum = dot(acc, vec3(0.299, 0.587, 0.114));
+        col += acc * smoothstep(0.40, 0.88, bloomLum) * 0.45 * fx;
+    }
 
     // desaturation pull — kills any residual color cast for the grim look
     {
