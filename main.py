@@ -343,9 +343,6 @@ class MainMenu:
                 ])
                 self._screen.blit(chev, (cx, cy - 16))
 
-                hint = self._font_idx.render("[ENTER]", True, c)
-                hint.set_alpha(int(200 * h))
-                self._screen.blit(hint, hint.get_rect(midright=(rect.right - 22, rect.bottom - 14)))
 
     def _draw_name(self):
         rect = self._name_rect()
