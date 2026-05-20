@@ -202,18 +202,20 @@ class MainMenu:
         self._sound.stop_ambience()
         self._fade(out=True)
         self._pipeline.shutdown()
-        fn()
-        self._pipeline = ShaderPipeline.create(
-            (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu",
-            display_size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
-        )
-        self._screen = self._pipeline.surface
-        pygame.display.set_caption(TITLE)
-        pygame.mouse.set_visible(True)
-        
+        try:
+            fn()
+        finally:
+            self._pipeline = ShaderPipeline.create(
+                (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu",
+                display_size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
+            )
+            self._screen = self._pipeline.surface
+            pygame.display.set_caption(TITLE)
+            pygame.mouse.set_visible(True)
+            self._cursor_state = None
+
         self._sound.play_music()
         self._sound.start_ambience()
-        self._cursor_state = None
         self._draw()
         self._fade(out=False)
 
@@ -228,6 +230,7 @@ class MainMenu:
             self._screen.blit(veil, (0, 0))
             self._pipeline.present()
             self._clock.tick(FPS)
+
 
     def _item_rect(self, i):
         w, h, gap = 680, 82, 24
