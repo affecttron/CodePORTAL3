@@ -70,6 +70,33 @@ class LevelEditor:
 
         self._mouse_pos = (0, 0)
 
+        # Cached preview tile surface
+        self._preview_surf = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
+
+        # Pre-render all tile name labels (static text, reused every frame)
+        self._tile_name_surfs = {}
+        for _cat in self._registry.get_categories():
+            for _td in self._registry.get_tiles_in_category(_cat):
+                _tid = _td.get_id()
+                if _tid not in self._tile_name_surfs:
+                    self._tile_name_surfs[_tid] = self._font_small.render(
+                        _td.get_name()[:9], True, WHITE
+                    )
+
+        # Pre-render static toolbar control-hint lines
+        self._toolbar_ctrl_surfs = [
+            self._font_small.render(line, True, WHITE) for line in [
+                "MOUSE: Kreisais=likt, Labais=dzēst",
+                "WASD/Bultiņas: Kamera",
+                "TAB: Nākamā kategorija",
+                "Ctrl+S: Saglabāt | Ctrl+N: Jauns | G: Režģis",
+            ]
+        ]
+
+        # Top-bar string cache (invalidated when state changes)
+        self._top_bar_surf = None
+        self._top_bar_cache_key = None
+
     def _select_first_tile(self):
         category = self._categories[self._current_category_index]
         tiles = self._registry.get_tiles_in_category(category)
@@ -345,9 +372,8 @@ class LevelEditor:
         tile_def = self._registry.get_tile(self._current_tile_id)
         if tile_def:
             color = tile_def.get_fallback_color()
-            preview_surface = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
-            preview_surface.fill((*color, 128))
-            self._screen.blit(preview_surface, (preview_x, preview_y))
+            self._preview_surf.fill((*color, 128))
+            self._screen.blit(self._preview_surf, (preview_x, preview_y))
 
         # Maliņa
         pygame.draw.rect(self._screen, WHITE,
@@ -361,16 +387,20 @@ class LevelEditor:
         pygame.draw.rect(self._screen, DARK_GRAY, (0, 0, SCREEN_WIDTH, TOP_BAR_HEIGHT))
         pygame.draw.line(self._screen, GRAY, (0, TOP_BAR_HEIGHT), (SCREEN_WIDTH, TOP_BAR_HEIGHT), 2)
 
-        unsaved_mark = " *" if self._unsaved_changes else ""
         current_name = ""
         if self._current_tile_id:
             tile_def = self._registry.get_tile(self._current_tile_id)
             if tile_def:
                 current_name = tile_def.get_name()
 
-        info = f"LEVEL EDITOR | Fails: {self._current_filename}{unsaved_mark} | Izvēlēts: {current_name} | Tiles: {self._world.get_tile_count()}"
-        text = self._font.render(info, True, WHITE)
-        self._screen.blit(text, (20, 10))
+        tile_count = self._world.get_tile_count()
+        cache_key = (self._unsaved_changes, self._current_filename, self._current_tile_id, tile_count)
+        if self._top_bar_cache_key != cache_key:
+            unsaved_mark = " *" if self._unsaved_changes else ""
+            info = f"LEVEL EDITOR | Fails: {self._current_filename}{unsaved_mark} | Izvēlēts: {current_name} | Tiles: {tile_count}"
+            self._top_bar_surf = self._font.render(info, True, WHITE)
+            self._top_bar_cache_key = cache_key
+        self._screen.blit(self._top_bar_surf, (20, 10))
 
     def _draw_category_bar(self):
         y = TOP_BAR_HEIGHT
@@ -421,22 +451,16 @@ class LevelEditor:
                 pygame.draw.rect(self._screen, border_color,
                                  (btn_x, btn_y, BUTTON_SIZE, BUTTON_SIZE), border_width)
 
-                name_text = self._font_small.render(tile_def.get_name()[:9], True, WHITE)
-                self._screen.blit(name_text, (btn_x, btn_y + BUTTON_SIZE + 4))
+                name_text = self._tile_name_surfs.get(tile_def.get_id())
+                if name_text:
+                    self._screen.blit(name_text, (btn_x, btn_y + BUTTON_SIZE + 4))
 
             x_offset += BUTTON_SIZE + BUTTON_SPACING
 
         controls_x = SCREEN_WIDTH - 380
         controls_y = toolbar_y + 10
-        controls = [
-            "MOUSE: Kreisais=likt, Labais=dzēst",
-            "WASD/Bultiņas: Kamera",
-            "TAB: Nākamā kategorija",
-            "Ctrl+S: Saglabāt | Ctrl+N: Jauns | G: Režģis",
-        ]
-        for i, line in enumerate(controls):
-            text = self._font_small.render(line, True, WHITE)
-            self._screen.blit(text, (controls_x, controls_y + i * 18))
+        for i, surf in enumerate(self._toolbar_ctrl_surfs):
+            self._screen.blit(surf, (controls_x, controls_y + i * 18))
 
     def _draw_message(self):
         text = self._font_big.render(self._message, True, NEON_YELLOW)

@@ -4,6 +4,7 @@ import random
 import pygame
 from task import Task
 from sound_manager import SoundManager
+from ui_utils import dim_color, draw_corner_accents
 from settings import (
     TASKS_FILE, TIME_LIMIT_PER_TASK,
     SCREEN_WIDTH, SCREEN_HEIGHT,
@@ -49,10 +50,19 @@ class Level:
         self._tw_last_ms = None
         self._tw_blip_counter = 0
 
-        # OVERCLOCK — per-task countdown for the +OVERCLOCK_BONUS_POINTS window.
+        # OVERCLOCK - per-task countdown for the +OVERCLOCK_BONUS_POINTS window.
         self._oc_started_ms = None
         self._oc_consumed = False
         self._oc_voided = False
+
+        # Cached surfaces - allocated once, built lazily after theme_color is set.
+        self._sound = SoundManager()
+        self._overlay_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self._overlay_surf.fill((0, 0, 0, 215))
+        self._title_tint_surf = None
+        self._scanline_surf = None
+        self._code_label_surf = None
+        self._oc_surf_cache = {}
 
     def load_tasks(self, tasks_file=TASKS_FILE):
         if not os.path.exists(tasks_file):
@@ -164,11 +174,7 @@ class Level:
         }
 
     def _dim_color(self, color, factor=0.4):
-        return (
-            max(0, min(255, int(color[0] * factor))),
-            max(0, min(255, int(color[1] * factor))),
-            max(0, min(255, int(color[2] * factor))),
-        )
+        return dim_color(color, factor)
 
     def _mono_font(self, size, bold=False):
         if not hasattr(self, "_mono_cache"):
@@ -191,16 +197,15 @@ class Level:
         dim = self._dim_color(color, 0.45)
         dimmer = self._dim_color(color, 0.22)
 
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 215))
-        screen.blit(overlay, (0, 0))
+        screen.blit(self._overlay_surf, (0, 0))
 
         pygame.draw.rect(screen, PANEL_BG, panel)
 
         title_bar = pygame.Rect(panel.x, panel.y, panel.w, TITLE_BAR_HEIGHT)
-        tint = pygame.Surface((title_bar.w, title_bar.h), pygame.SRCALPHA)
-        tint.fill((color[0], color[1], color[2], 26))
-        screen.blit(tint, title_bar.topleft)
+        if self._title_tint_surf is None:
+            self._title_tint_surf = pygame.Surface((title_bar.w, title_bar.h), pygame.SRCALPHA)
+            self._title_tint_surf.fill((color[0], color[1], color[2], 26))
+        screen.blit(self._title_tint_surf, title_bar.topleft)
         pygame.draw.line(
             screen, dim,
             (title_bar.left, title_bar.bottom - 1),
@@ -244,7 +249,7 @@ class Level:
         )
 
         pygame.draw.rect(screen, color, panel, 2)
-        self._draw_corner_accents(screen, panel, color)
+        draw_corner_accents(screen, panel, color)
 
     def _draw_attempt_dots(self, screen, panel, attempts):
         color = self._theme_color
@@ -264,28 +269,14 @@ class Level:
             else:
                 pygame.draw.circle(screen, dim, (cx, dot_y), 5, 1)
 
-    def _draw_corner_accents(self, screen, rect, color, size=14, thickness=3):
-        for x_dir, x_anchor in ((1, rect.left), (-1, rect.right - 1)):
-            for y_dir, y_anchor in ((1, rect.top), (-1, rect.bottom - 1)):
-                pygame.draw.line(
-                    screen, color,
-                    (x_anchor, y_anchor),
-                    (x_anchor + x_dir * size, y_anchor),
-                    thickness,
-                )
-                pygame.draw.line(
-                    screen, color,
-                    (x_anchor, y_anchor),
-                    (x_anchor, y_anchor + y_dir * size),
-                    thickness,
-                )
-
     def _draw_scanlines(self, screen, rect, color):
-        surf = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
-        line_color = (color[0], color[1], color[2], 14)
-        for y in range(0, rect.h, 3):
-            pygame.draw.line(surf, line_color, (0, y), (rect.w, y))
-        screen.blit(surf, rect.topleft)
+        if self._scanline_surf is None:
+            surf = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            line_color = (color[0], color[1], color[2], 14)
+            for y in range(0, rect.h, 3):
+                pygame.draw.line(surf, line_color, (0, y), (rect.w, y))
+            self._scanline_surf = surf
+        screen.blit(self._scanline_surf, rect.topleft)
 
     def _draw_code_block(self, screen, font_normal, code_rect):
         task = self.get_current_task()
@@ -299,9 +290,10 @@ class Level:
         pygame.draw.rect(screen, CODE_BG, code_rect)
         pygame.draw.rect(screen, dim, code_rect, 1)
 
-        font_label = self._mono_font(14, bold=True)
-        label_text = f"[ {self._code_label} ]"
-        label_surf = font_label.render(label_text, True, color)
+        if self._code_label_surf is None:
+            _font_label = self._mono_font(14, bold=True)
+            self._code_label_surf = _font_label.render(f"[ {self._code_label} ]", True, color)
+        label_surf = self._code_label_surf
         label_bg = pygame.Rect(code_rect.x + 12, code_rect.y - label_surf.get_height() // 2,
                                label_surf.get_width() + 12, label_surf.get_height())
         pygame.draw.rect(screen, PANEL_BG, label_bg)
@@ -419,7 +411,7 @@ class Level:
                     continue
                 self._tw_blip_counter += 1
                 if self._tw_blip_counter % TYPEWRITER_BLIP_EVERY == 0 and not blipped:
-                    SoundManager().play_sound("keystroke")
+                    self._sound.play_sound("keystroke")
                     blipped = True
 
     # === OVERCLOCK ===
@@ -527,14 +519,26 @@ class Level:
         # Left vertical accent stripe
         pygame.draw.line(screen, primary, (rect.x, rect.y), (rect.x, rect.bottom), 3)
 
-        label_font = self._mono_font(15, bold=True)
-        label_surf = label_font.render("OVERCLOCK", True, primary)
+        # Build state-keyed cache for all static text surfaces on first visit.
+        if state not in self._oc_surf_cache:
+            label_font = self._mono_font(15, bold=True)
+            badge_font = self._mono_font(14, bold=True)
+            self._oc_surf_cache[state] = {
+                "label":   label_font.render("OVERCLOCK", True, primary),
+                "sep":     label_font.render("::", True, accent),
+                "badge":   badge_font.render(self._oc_badge_text(state), True, primary),
+                "open_b":  badge_font.render("[", True, accent),
+                "close_b": badge_font.render("]", True, accent),
+            }
+        cached = self._oc_surf_cache[state]
+
+        label_surf = cached["label"]
         label_x = rect.x + 14
         label_y = rect.y + (rect.h - label_surf.get_height()) // 2
         screen.blit(label_surf, (label_x, label_y))
 
         sep_x = label_x + label_surf.get_width() + 8
-        sep_surf = label_font.render("::", True, accent)
+        sep_surf = cached["sep"]
         screen.blit(sep_surf, (sep_x, label_y))
 
         digit_font = self._mono_font(17, bold=True)
@@ -545,9 +549,7 @@ class Level:
         digit_y = rect.y + (rect.h - digits_surf.get_height()) // 2
         screen.blit(digits_surf, (digit_x + digit_jitter, digit_y))
 
-        badge_font = self._mono_font(14, bold=True)
-        badge_text = self._oc_badge_text(state)
-        badge_surf = badge_font.render(badge_text, True, primary)
+        badge_surf = cached["badge"]
         badge_w = badge_surf.get_width()
         badge_pad = 18
 
@@ -580,11 +582,11 @@ class Level:
                 pygame.draw.rect(screen, bar_dim, seg_rect, 1)
 
         # Bracketed badge on the right — "[ +10 PT ]" / "[ STANDBY ]" / "[ EXPIRED ]"
+        open_b  = cached["open_b"]
+        close_b = cached["close_b"]
         badge_x = rect.right - badge_pad - badge_w
         badge_y = rect.y + (rect.h - badge_surf.get_height()) // 2
-        open_b = badge_font.render("[", True, accent)
-        close_b = badge_font.render("]", True, accent)
-        screen.blit(open_b, (badge_x - open_b.get_width() - 4, badge_y))
+        screen.blit(open_b,  (badge_x - open_b.get_width() - 4, badge_y))
         screen.blit(badge_surf, (badge_x, badge_y))
         screen.blit(close_b, (badge_x + badge_w + 4, badge_y))
 
