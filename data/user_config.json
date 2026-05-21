@@ -1,0 +1,10 @@
+{
+  "resolution": [
+    1280,
+    720
+  ],
+  "window_mode": "windowed",
+  "sound_volume": 0.32,
+  "music_volume": 0.05,
+  "ambience_volume": 0.0
+}

@@ -8,12 +8,14 @@ from level_editor import LevelEditor
 from score_log import ScoreLog
 from sound_manager import SoundManager
 from shader_pipeline import ShaderPipeline
+from settings_menu import SettingsMenu
+import user_config as cfg_mod
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT, FPS, TITLE, FULLSCREEN,
     WHITE, BLACK, GRAY,
 )
 
-PLAY, EDITOR, SCORES, QUIT = "play", "editor", "scores", "quit"
+PLAY, EDITOR, SCORES, SETTINGS, QUIT = "play", "editor", "scores", "settings", "quit"
 
 BG = (12, 12, 14)
 DIM = (128, 128, 132)
@@ -47,7 +49,8 @@ def _load_loading_image(screen_size):
 def show_loading_screen(surface, pipeline, clock, going_out=True):
     loading_img = _load_loading_image((SCREEN_WIDTH, SCREEN_HEIGHT))
     font = pygame.font.SysFont("Consolas", 22, bold=True)
-    fade_frames = 60
+    fade_frames = 25
+    hold_frames = 60
 
     def draw_frame(alpha):
         surface.fill(BLACK)
@@ -71,7 +74,11 @@ def show_loading_screen(surface, pipeline, clock, going_out=True):
     if going_out:
         for i in range(fade_frames + 1):
             draw_frame(int(255 * i / fade_frames))
+        for _ in range(hold_frames):
+            draw_frame(0)
     else:
+        for i in range(hold_frames):
+            draw_frame(0)
         for i in range(fade_frames + 1):
             draw_frame(int(255 * (fade_frames - i) / fade_frames))
 
@@ -84,6 +91,7 @@ class MainMenu:
         )
         self._screen = self._pipeline.surface
         pygame.display.set_caption(TITLE)
+
         self._clock = pygame.time.Clock()
 
         self._font_title = pygame.font.SysFont("Arial", 140, bold=True)
@@ -97,6 +105,7 @@ class MainMenu:
             (PLAY, "SPĒLĒT", PALE),
             (EDITOR, "LĪMEŅU REDAKTORS", COLD),
             (SCORES, "REZULTĀTI", AMBER),
+            (SETTINGS, "IESTATĪJUMI", ACCENT),
             (QUIT, "IZIET", RED),
         ]
 
@@ -125,6 +134,7 @@ class MainMenu:
             self._update()
             self._draw()
             self._clock.tick(FPS)
+
         self._sound.stop_ambience()
         self._sound.stop_music()
         self._pipeline.shutdown()
@@ -133,6 +143,7 @@ class MainMenu:
 
     def _update(self):
         self._sound.update_ambience()
+
         for i in range(len(self._items)):
             target = 1.0 if i == self._selected else 0.0
             self._hover_amounts[i] += (target - self._hover_amounts[i]) * 0.20
@@ -160,12 +171,14 @@ class MainMenu:
                     if e.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_SPACE):
                         self._show_scores = False
                     continue
+
                 if self._editing:
                     if e.key in (pygame.K_RETURN, pygame.K_ESCAPE):
                         self._stop_edit()
                     elif e.key == pygame.K_BACKSPACE:
                         self._player_name = self._player_name[:-1]
                     continue
+
                 self._menu_key(e)
 
             elif e.type == pygame.TEXTINPUT and self._editing:
@@ -215,29 +228,61 @@ class MainMenu:
         if self._show_scores:
             self._show_scores = False
             return
+
         if self._editing:
             if not self._name_rect().collidepoint(pos):
                 self._stop_edit()
             return
+
         for i in range(len(self._items)):
             if self._item_rect(i).collidepoint(pos):
                 self._selected = i
                 self._activate()
                 return
+
         if self._name_rect().collidepoint(pos):
             self._start_edit()
 
     def _activate(self):
         action = self._items[self._selected][0]
         self._sound.play_sound("menu_click")
+
         if action == PLAY:
             self._launch(lambda: Game(self._player_name).run())
         elif action == EDITOR:
             self._launch(lambda: LevelEditor().run())
         elif action == SCORES:
             self._show_scores = True
+        elif action == SETTINGS:
+            self._open_settings()
         elif action == QUIT:
             self._running = False
+
+    def _open_settings(self):
+        sm = SettingsMenu(self._screen, self._pipeline, self._clock, self._sound)
+        saved = sm.run()
+        if saved:
+            self._restart_pipeline()
+        pygame.mouse.set_visible(True)
+        self._cursor_state = None
+
+    def _restart_pipeline(self):
+        cfg = cfg_mod.load()
+        w, h = cfg["resolution"]
+        mode = cfg["window_mode"]
+
+        fullscreen = mode == "fullscreen"
+        display_size = (DISPLAY_WIDTH, DISPLAY_HEIGHT) if fullscreen else (w, h)
+
+        self._pipeline.shutdown()
+        self._pipeline = ShaderPipeline.create(
+            (SCREEN_WIDTH, SCREEN_HEIGHT),
+            fullscreen=fullscreen,
+            shader="menu",
+            display_size=display_size,
+        )
+        self._screen = self._pipeline.surface
+        pygame.display.set_caption(TITLE)
 
     def _launch(self, fn):
         self._sound.stop_ambience()
@@ -405,6 +450,7 @@ class MainMenu:
         dot = pygame.Surface((14, 14), pygame.SRCALPHA)
         pygame.draw.circle(dot, (*AMBER, int(140 + 90 * pulse)), (7, 7), 5)
         self._screen.blit(dot, (40, y - 7))
+
         status = self._font_small.render("ONLINE", True, AMBER)
         self._screen.blit(status, status.get_rect(midleft=(60, y)))
 
@@ -453,14 +499,17 @@ class MainMenu:
         except Exception as exc:
             print(f"[menu] logo failed to load ({exc}) — falling back to text title")
             return None
+
         bbox = img.get_bounding_rect()
         if bbox.width > 0 and bbox.height > 0 and bbox.size != img.get_size():
             img = img.subsurface(bbox).copy()
+
         h = img.get_height()
         if h != target_h and h > 0:
             ratio = target_h / h
             new_w = max(1, int(img.get_width() * ratio))
             img = pygame.transform.smoothscale(img, (new_w, target_h))
+
         return img
 
     @staticmethod

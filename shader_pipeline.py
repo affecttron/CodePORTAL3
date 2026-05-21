@@ -6,13 +6,11 @@ from array import array
 
 import pygame
 
-
 try:
     import moderngl
     _MODERNGL_AVAILABLE = True
 except Exception:
     _MODERNGL_AVAILABLE = False
-
 
 SHADER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shaders")
 
@@ -21,36 +19,36 @@ class ShaderPipeline:
 
     @classmethod
     def create(cls, size, fullscreen=False, shader="cyberpunk", render_scale=1.0,
-               display_size=None):
-        # falls back to plain blitting if moderngl is missing/broken
+               display_size=None, extra_flags=0):
         if not _MODERNGL_AVAILABLE:
             print("[shader] moderngl not installed — running without post-FX.")
-            return _PassthroughPipeline(size, fullscreen, display_size=display_size)
+            return _PassthroughPipeline(size, fullscreen, display_size=display_size,
+                                        extra_flags=extra_flags)
         try:
-            return cls(size, fullscreen, shader, render_scale, display_size)
+            return cls(size, fullscreen, shader, render_scale, display_size, extra_flags)
         except Exception as exc:
             print(f"[shader] disabled ({exc.__class__.__name__}: {exc}) — falling back.")
-            return _PassthroughPipeline(size, fullscreen, display_size=display_size)
+            return _PassthroughPipeline(size, fullscreen, display_size=display_size,
+                                        extra_flags=extra_flags)
 
     @classmethod
-    def create_passthrough(cls, size, fullscreen=False, display_size=None):
-        # Explicit passthrough — useful for tools (e.g. level editor) that want
-        # the auto-scale behavior without any shader distortion.
-        return _PassthroughPipeline(size, fullscreen, display_size=display_size)
+    def create_passthrough(cls, size, fullscreen=False, display_size=None, extra_flags=0):
+        return _PassthroughPipeline(size, fullscreen, display_size=display_size,
+                                    extra_flags=extra_flags)
 
-    def __init__(self, size, fullscreen, shader_name, render_scale, display_size=None):
-        # render_size = the virtual canvas the game draws to (design resolution)
-        # screen_size = the actual window/fullscreen size on the user's display
+    def __init__(self, size, fullscreen, shader_name, render_scale, display_size=None,
+                 extra_flags=0):
         rw = max(1, int(size[0] * render_scale))
         rh = max(1, int(size[1] * render_scale))
         self._render_size = (rw, rh)
+
         if display_size is None:
             self._screen_size = (int(size[0]), int(size[1]))
         else:
             self._screen_size = (int(display_size[0]), int(display_size[1]))
+
         self._shader_name = shader_name
 
-        # request GL 3.3 core to match `#version 330 core` shaders
         pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
         pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
         pygame.display.gl_set_attribute(
@@ -58,9 +56,10 @@ class ShaderPipeline:
         )
         pygame.display.gl_set_attribute(pygame.GL_DOUBLEBUFFER, 1)
 
-        flags = pygame.OPENGL | pygame.DOUBLEBUF
+        flags = pygame.OPENGL | pygame.DOUBLEBUF | extra_flags
         if fullscreen:
             flags |= pygame.FULLSCREEN
+
         pygame.display.set_mode(self._screen_size, flags)
 
         self._ctx = moderngl.create_context()
@@ -68,23 +67,18 @@ class ShaderPipeline:
 
         self._build_quad()
 
-        # scene pass: upload texture -> scene framebuffer
         self._scene_program = self._compile_program(shader_name)
         self._scene_vao = self._make_vao(self._scene_program)
 
-        # screen pass: scene framebuffer -> default fbo
         self._screen_program = self._compile_program("screen")
         self._screen_vao = self._make_vao(self._screen_program)
 
-        # upload texture — surface bytes land here
         self._upload_tex = self._ctx.texture(self._render_size, 4)
         self._upload_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self._upload_tex.repeat_x = False
         self._upload_tex.repeat_y = False
-        # surface bytes are BGRA — remap so shader's .rgba is correct
         self._upload_tex.swizzle = "BGRA"
 
-        # scene framebuffer — scene pass writes here, screen pass samples it
         self._scene_tex = self._ctx.texture(self._render_size, 4)
         self._scene_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self._scene_tex.repeat_x = False
@@ -96,14 +90,12 @@ class ShaderPipeline:
         self._glitch = 0.0
         self._glitch_decay = 0.85
 
-        # explicit BGRA layout — raw buffer uploads with no conversion
         self._surface = pygame.Surface(
             self._render_size, 0, 32,
             (0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000),
         )
 
     def _build_quad(self):
-        # x, y, u, v
         verts = array("f", [
             -1.0,  1.0, 0.0, 0.0,
              1.0,  1.0, 1.0, 0.0,
@@ -153,8 +145,6 @@ class ShaderPipeline:
         self._glitch = max(self._glitch, float(amount))
 
     def scale_mouse_pos(self, pos):
-        # Pygame mouse events arrive in display-space; UI hit-tests use the
-        # render (design) canvas, so map them back.
         sw, sh = self._screen_size
         rw, rh = self._render_size
         if sw == rw and sh == rh:
@@ -162,10 +152,8 @@ class ShaderPipeline:
         return (int(pos[0] * rw / sw), int(pos[1] * rh / sh))
 
     def present(self):
-        # zero-copy upload via buffer protocol
         self._upload_tex.write(self._surface.get_buffer())
 
-        # pass 1 — scene shader writes into the scene framebuffer
         self._scene_fbo.use()
         self._ctx.viewport = (0, 0, self._render_size[0], self._render_size[1])
         self._upload_tex.use(0)
@@ -176,7 +164,6 @@ class ShaderPipeline:
         self._set_uniform(self._scene_program, "u_glitch", self._glitch)
         self._scene_vao.render(mode=moderngl.TRIANGLE_STRIP)
 
-        # pass 2 — screen shader upscales scene texture to the window
         self._ctx.screen.use()
         self._ctx.viewport = (0, 0, self._screen_size[0], self._screen_size[1])
         self._scene_tex.use(0)
@@ -206,7 +193,6 @@ class ShaderPipeline:
             pass
 
     def _set_uniform(self, program, name, value):
-        # silently skip uniforms a shader doesn't declare
         try:
             program[name].value = value
         except KeyError:
@@ -214,16 +200,18 @@ class ShaderPipeline:
 
 
 class _PassthroughPipeline:
-    """Fallback when ModernGL is unavailable. Renders to a virtual surface and
-    scales to the actual display so the game runs at any resolution."""
 
-    def __init__(self, size, fullscreen, display_size=None):
+    def __init__(self, size, fullscreen, display_size=None, extra_flags=0):
         self._render_size = (int(size[0]), int(size[1]))
         if display_size is None:
             self._display_size = self._render_size
         else:
             self._display_size = (int(display_size[0]), int(display_size[1]))
-        flags = pygame.FULLSCREEN if fullscreen else 0
+
+        flags = extra_flags
+        if fullscreen:
+            flags |= pygame.FULLSCREEN
+
         self._display = pygame.display.set_mode(self._display_size, flags)
         self._surface = pygame.Surface(self._render_size).convert()
         self._needs_scale = self._render_size != self._display_size
