@@ -12,6 +12,7 @@ from settings import (
     EDITOR_GRID_COLOR,
     NEON_CYAN, NEON_YELLOW, WHITE, BLACK, GRAY, DARK_GRAY,
     LEVELS_FOLDER,
+    TILE_DOOR_EXIT,
 )
 
 
@@ -346,6 +347,9 @@ class LevelEditor:
                 return
             existing = self._world.get_tile_at(grid_x, grid_y)
             if existing is None or existing.get_type() != self._current_tile_id:
+                if self._current_tile_id == TILE_DOOR_EXIT:
+                    for dx, dy in [(0, 0), (1, 0), (0, 1), (1, 1)]:
+                        self._world.remove_tile(grid_x + dx, grid_y + dy)
                 self._world.add_tile(self._current_tile_id, grid_x, grid_y)
                 self._unsaved_changes = True
         else:

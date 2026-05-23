@@ -1,5 +1,6 @@
 
 
+import math
 import pygame
 from settings import TILE_SIZE
 
@@ -147,16 +148,95 @@ class HazardTile(Tile):
         return True
 
 
+class DoorExitTile(Tile):
+
+    def __init__(self, grid_x, grid_y, tile_id, registry):
+        super().__init__(grid_x, grid_y, tile_id, registry)
+        self._rect = pygame.Rect(
+            grid_x * TILE_SIZE, grid_y * TILE_SIZE,
+            TILE_SIZE * 2, TILE_SIZE * 2,
+        )
+        self._locked = True
+        self._font_label = pygame.font.SysFont("Consolas", 14, bold=True)
+        self._font_exit  = pygame.font.SysFont("Consolas", 28, bold=True)
+
+    def unlock(self):
+        self._locked = False
+
+    def lock(self):
+        self._locked = True
+
+    def is_locked(self):
+        return self._locked
+
+    def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
+        x = self.get_pixel_x() - camera_offset_x
+        y = self.get_pixel_y() - camera_offset_y
+        w = TILE_SIZE * 2
+        h = TILE_SIZE * 2
+
+        sw, sh = screen.get_size()
+        if x + w < 0 or x > sw or y + h < 0 or y > sh:
+            return
+
+        pygame.draw.rect(screen, (10, 12, 16), (x, y, w, h))
+        now = pygame.time.get_ticks()
+
+        if self._locked:
+            border_color = (255, 0, 64)
+            dim_red      = (60, 0, 15)
+            # Gate bars
+            pygame.draw.rect(screen, dim_red, (x + 8,     y + 8, 12, h - 16))
+            pygame.draw.rect(screen, dim_red, (x + w - 20, y + 8, 12, h - 16))
+            # Padlock shackle (U via 3 rects)
+            cx = x + w // 2
+            cy = y + h // 2
+            pygame.draw.rect(screen, border_color, (cx - 12, cy - 22, 6,  20))
+            pygame.draw.rect(screen, border_color, (cx +  6, cy - 22, 6,  20))
+            pygame.draw.rect(screen, border_color, (cx - 12, cy - 22, 24,  6))
+            # Padlock body
+            pygame.draw.rect(screen, border_color, (cx - 18, cy - 6, 36, 28))
+            # Label
+            lbl = self._font_label.render("LOCKED", True, border_color)
+            screen.blit(lbl, (x + w // 2 - lbl.get_width() // 2, y + h - 20))
+        else:
+            pulse = 0.5 + 0.5 * math.sin(now / 300.0)
+            g = int(200 + 55 * pulse)
+            border_color = (0, g, g)
+            # Scanline fill
+            for sy in range(y + 4, y + h - 4, 6):
+                pygame.draw.line(screen, (0, 50, 50), (x + 4, sy), (x + w - 4, sy))
+            # EXIT text (blinking)
+            if (now // 400) % 2 == 0:
+                exit_surf = self._font_exit.render("EXIT", True, (0, 255, 255))
+                screen.blit(exit_surf, (
+                    x + w // 2 - exit_surf.get_width() // 2,
+                    y + h // 2 - exit_surf.get_height() // 2,
+                ))
+            # Label
+            lbl = self._font_label.render("-> NEXT LEVEL", True, (0, 255, 255))
+            screen.blit(lbl, (x + w // 2 - lbl.get_width() // 2, y + h - 20))
+
+        # Border
+        pygame.draw.rect(screen, border_color, (x, y, w, h), 2)
+        # Corner accents (8 px lines at each corner)
+        al = 8
+        for cx2, cy2, dx, dy in [
+            (x,     y,     1,  1), (x + w - 1, y,     -1,  1),
+            (x,     y + h - 1, 1, -1), (x + w - 1, y + h - 1, -1, -1),
+        ]:
+            pygame.draw.line(screen, border_color, (cx2, cy2), (cx2 + dx * al, cy2))
+            pygame.draw.line(screen, border_color, (cx2, cy2), (cx2, cy2 + dy * al))
+
 
 def create_tile(tile_id, grid_x, grid_y, registry):
-    # Iegūstam definīciju
     definition = registry.get_tile(tile_id)
     if definition is None:
-        # Nezināms tile - parastā Tile klase
         return Tile(grid_x, grid_y, tile_id, registry)
 
-    # Izvēlamies klasi pēc rekvizītiem
-    if definition.is_portal():
+    if definition.is_door_exit():
+        return DoorExitTile(grid_x, grid_y, tile_id, registry)
+    elif definition.is_portal():
         return PortalTile(grid_x, grid_y, tile_id, registry)
     elif definition.kills_player():
         return HazardTile(grid_x, grid_y, tile_id, registry)

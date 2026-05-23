@@ -34,11 +34,12 @@ class Level:
     _code_label = "DECODE: payload"
 
 
-    def __init__(self, level_id, title, time_limit=TIME_LIMIT_PER_TASK):
+    def __init__(self, level_id, title, time_limit=TIME_LIMIT_PER_TASK, overclock_ms=OVERCLOCK_DURATION_MS):
         self._level_id = level_id
         self._title = title
         self._tasks = []
         self._time_limit = time_limit
+        self._overclock_duration_ms = overclock_ms
         self._current_task_index = 0
         self._theme_color = NEON_CYAN
         # rng lai mainitu tasks
@@ -89,6 +90,13 @@ class Level:
 
         print(f"❌ Līmenis {self._level_id} nav atrasts")
         return False
+
+    def set_task_limit(self, n):
+        if n < len(self._tasks):
+            self._tasks = self._tasks[:n]
+
+    def get_overclock_duration_ms(self):
+        return self._overclock_duration_ms
 
     def get_current_task(self):
         if self._current_task_index < len(self._tasks):
@@ -421,9 +429,9 @@ class Level:
 
     def get_overclock_remaining_ms(self):
         if self._oc_started_ms is None:
-            return OVERCLOCK_DURATION_MS
+            return self._overclock_duration_ms
         elapsed = pygame.time.get_ticks() - self._oc_started_ms
-        return max(0, OVERCLOCK_DURATION_MS - elapsed)
+        return max(0, self._overclock_duration_ms - elapsed)
 
     def is_overclock_active(self):
         return (
@@ -450,7 +458,7 @@ class Level:
             return "voided"
         if self._oc_consumed or self.get_overclock_remaining_ms() <= 0:
             return "expired"
-        frac = self.get_overclock_remaining_ms() / OVERCLOCK_DURATION_MS
+        frac = self.get_overclock_remaining_ms() / self._overclock_duration_ms
         if frac < 0.15:
             return "critical"
         if frac < 0.35:
@@ -569,7 +577,7 @@ class Level:
         elif state in ("expired", "voided"):
             fraction = 0.0
         else:
-            fraction = self.get_overclock_remaining_ms() / OVERCLOCK_DURATION_MS
+            fraction = self.get_overclock_remaining_ms() / self._overclock_duration_ms
 
         filled = int(round(fraction * n_segments))
         for i in range(n_segments):
@@ -616,8 +624,8 @@ class ConditionLevel(Level):
 
     _code_label = "DECODE: python.if_else"
 
-    def __init__(self, level_id=1, title="Drošības vārti - if/else"):
-        super().__init__(level_id, title)
+    def __init__(self, level_id=1, title="Drošības vārti - if/else", overclock_ms=OVERCLOCK_DURATION_MS):
+        super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._branch_type = "if/else"
         self._theme_color = NEON_RED
 
@@ -626,8 +634,8 @@ class LoopLevel(Level):
 
     _code_label = "DECODE: python.loop"
 
-    def __init__(self, level_id=2, title="Datu tunelis - cikli"):
-        super().__init__(level_id, title)
+    def __init__(self, level_id=2, title="Datu tunelis - cikli", overclock_ms=OVERCLOCK_DURATION_MS):
+        super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._loop_type = "for/while"
         self._theme_color = NEON_YELLOW
 
@@ -636,18 +644,18 @@ class FunctionLevel(Level):
 
     _code_label = "DECODE: python.function"
 
-    def __init__(self, level_id=3, title="Galvenā servera istaba - funkcijas"):
-        super().__init__(level_id, title)
+    def __init__(self, level_id=3, title="Galvenā servera istaba - funkcijas", overclock_ms=OVERCLOCK_DURATION_MS):
+        super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._func_name = ""
         self._theme_color = NEON_GREEN
 
 
-def create_level(level_id):
+def create_level(level_id, overclock_ms=OVERCLOCK_DURATION_MS):
     if level_id == 1:
-        return ConditionLevel()
+        return ConditionLevel(overclock_ms=overclock_ms)
     elif level_id == 2:
-        return LoopLevel()
+        return LoopLevel(overclock_ms=overclock_ms)
     elif level_id == 3:
-        return FunctionLevel()
+        return FunctionLevel(overclock_ms=overclock_ms)
     else:
-        return Level(level_id, f"Līmenis {level_id}")
+        return Level(level_id, f"Līmenis {level_id}", overclock_ms=overclock_ms)

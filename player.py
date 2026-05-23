@@ -6,6 +6,7 @@ class Player:
         self._name = name
         self._score = 0
         self._attempts = 0
+        self._max_attempts = MAX_ATTEMPTS
         self._level_reached = 1
         self._tasks_completed = 0  # Cik uzdevumi atrisināti kopā
 
@@ -20,11 +21,14 @@ class Player:
     def reset_attempts(self):
         self._attempts = 0
 
+    def set_max_attempts(self, n):
+        self._max_attempts = n
+
     def increment_attempts(self):
         self._attempts += 1
 
     def has_attempts_left(self):
-        return self._attempts < MAX_ATTEMPTS
+        return self._attempts < self._max_attempts
 
     def advance_level(self):
         self._level_reached += 1

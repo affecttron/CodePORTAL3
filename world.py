@@ -1,7 +1,7 @@
 import json
 import os
 import pygame
-from tile import create_tile, SolidTile, PortalTile, HazardTile
+from tile import create_tile, SolidTile, PortalTile, HazardTile, DoorExitTile
 from settings import (
     WORLD_WIDTH, WORLD_HEIGHT, TILE_SIZE,
     TILE_SPAWN, PLAYER_SPAWN_X, PLAYER_SPAWN_Y,
@@ -18,6 +18,7 @@ class World:
         self._portals = []
         self._hazards = []
         self._climbables = []
+        self._doors = []
         # Per-frame collision lists — rebuilt lazily, invalidated on edits.
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
@@ -55,6 +56,12 @@ class World:
             self._portals.append(new_tile)
         elif isinstance(new_tile, HazardTile):
             self._hazards.append(new_tile)
+        elif isinstance(new_tile, DoorExitTile):
+            self._doors.append(new_tile)
+            # Register all 4 grid cells so any cell can be right-clicked to remove
+            self._tile_at[(grid_x + 1, grid_y    )] = new_tile
+            self._tile_at[(grid_x,     grid_y + 1)] = new_tile
+            self._tile_at[(grid_x + 1, grid_y + 1)] = new_tile
 
         if new_tile.is_climbable():
             self._climbables.append(new_tile)
@@ -64,6 +71,14 @@ class World:
         tile_to_remove = self._tile_at.pop((grid_x, grid_y), None)
         if tile_to_remove is None:
             return
+
+        if isinstance(tile_to_remove, DoorExitTile):
+            root_gx = tile_to_remove.get_grid_x()
+            root_gy = tile_to_remove.get_grid_y()
+            for dx, dy in [(0, 0), (1, 0), (0, 1), (1, 1)]:
+                self._tile_at.pop((root_gx + dx, root_gy + dy), None)
+            if tile_to_remove in self._doors:
+                self._doors.remove(tile_to_remove)
 
         self._tiles.remove(tile_to_remove)
         if tile_to_remove in self._platforms:
@@ -87,6 +102,7 @@ class World:
         self._portals.clear()
         self._hazards.clear()
         self._climbables.clear()
+        self._doors.clear()
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
 
@@ -97,10 +113,12 @@ class World:
         gy_min = camera_offset_y // TILE_SIZE
         gx_max = (camera_offset_x + sw) // TILE_SIZE
         gy_max = (camera_offset_y + sh) // TILE_SIZE
+        seen = set()
         for gy in range(gy_min, gy_max + 1):
             for gx in range(gx_min, gx_max + 1):
                 t = self._tile_at.get((gx, gy))
-                if t is not None:
+                if t is not None and id(t) not in seen:
+                    seen.add(id(t))
                     t.draw(screen, camera_offset_x, camera_offset_y)
 
     # === SADURSMES ===
@@ -125,6 +143,26 @@ class World:
             if player_rect.colliderect(hazard.get_rect()):
                 return hazard
         return None
+
+    def check_door_collision(self, player_rect):
+        for door in self._doors:
+            if player_rect.colliderect(door.get_rect()):
+                return True
+        return False
+
+    def unlock_door(self):
+        for door in self._doors:
+            door.unlock()
+
+    def lock_doors(self):
+        for door in self._doors:
+            door.lock()
+
+    def get_portal_count(self):
+        return len(self._portals)
+
+    def get_doors(self):
+        return self._doors
 
     # === JSON SAGLABĀŠANA ===
     def save_to_file(self, filename):

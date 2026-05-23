@@ -148,3 +148,29 @@ ALL_TILE_TYPES = [
     TILE_PORTAL_GREEN,
     TILE_SPAWN,
 ]
+
+# EXIT DOOR
+TILE_DOOR_EXIT = "door_exit"
+
+# Pasaules Grutibas
+WORLD_LABELS = ["INITIATION", "INFILTRATION", "CORE BREACH"]
+
+WORLD_CONFIGS = [
+    # world_index 0
+    {"task_count": 1, "overclock_ms": 15000, "max_attempts": 3},
+    # world_index 1
+    {"task_count": 2, "overclock_ms": 12000, "max_attempts": 3},
+    # world_index 2
+    {"task_count": 3, "overclock_ms":  9000, "max_attempts": 2},
+]
+
+
+def get_world_config(world_index):
+    if world_index < len(WORLD_CONFIGS):
+        return WORLD_CONFIGS[world_index]
+    extra = world_index - len(WORLD_CONFIGS)
+    return {
+        "task_count":   WORLD_CONFIGS[-1]["task_count"]   + extra + 1,
+        "overclock_ms": max(3000, WORLD_CONFIGS[-1]["overclock_ms"] - (extra + 1) * 1000),
+        "max_attempts": 2,
+    }

@@ -17,6 +17,7 @@ from settings import (
     WHITE, BLACK, NEON_CYAN, NEON_GREEN, NEON_RED, NEON_YELLOW,
     GRAY,
     LEVELS_FOLDER,
+    TILE_DOOR_EXIT, WORLD_CONFIGS, WORLD_LABELS, get_world_config,
 )
 from ui_utils import dim_color, draw_corner_accents
 
@@ -25,6 +26,7 @@ STATE_PLAYING = "playing"
 STATE_TASK = "task"
 STATE_GAME_OVER = "game_over"
 STATE_WIN = "win"
+STATE_TRANSITION = "transition"
 
 
 class Game:
@@ -48,6 +50,15 @@ class Game:
         self._font_small = pygame.font.SysFont("Arial", 18)
 
         self._player = Player(player_name)
+
+        self._world_index = 0
+        self._current_world_config = get_world_config(0)
+        self._door_unlocked = False
+        self._transition_timer = 0
+        self._next_world_index = 1
+        self._endless_mode = False
+
+        self._player.set_max_attempts(self._current_world_config["max_attempts"])
 
         self._registry = TileRegistry()
         self._registry.load()
@@ -83,9 +94,6 @@ class Game:
         self._feedback_message = ""
         self._feedback_color = WHITE
         self._feedback_timer = 0
-
-        # Statistika
-        self._completed_portals = set()
 
         self._portal_cooldown = 0
 
@@ -150,13 +158,24 @@ class Game:
         self._ctrl_surfs_row1 = [self._font_code_small.render(t, True, c) for t, c in _row1_data]
         self._ctrl_surfs_row2 = [self._font_code_small.render(t, True, c) for t, c in _row2_data]
 
-    def _load_world(self):
-        level_file = "level_1.json"
+    def _load_world(self, world_index=0):
+        self._world_index = world_index
+        self._current_world_config = get_world_config(world_index)
+
+        level_file = f"level_{world_index + 1}.json"
+        if not os.path.exists(os.path.join(LEVELS_FOLDER, level_file)):
+            level_file = "level_1.json"
+
         filepath = os.path.join(LEVELS_FOLDER, level_file)
         if os.path.exists(filepath):
             self._world.load_from_file(level_file)
         else:
             self._world.create_demo_world()
+
+        self._completed_portals = set()
+        self._door_unlocked = False
+        self._world.lock_doors()
+        self._player.set_max_attempts(self._current_world_config["max_attempts"])
 
     def run(self):
         while self._running:
@@ -210,7 +229,16 @@ class Game:
                     elif event.key == pygame.K_BACKSPACE:
                         self._input_text = self._input_text[:-1]
 
-                elif self._state in [STATE_GAME_OVER, STATE_WIN]:
+                elif self._state == STATE_WIN:
+                    if event.key == pygame.K_RETURN:
+                        self._endless_mode = True
+                        self._load_world(3)
+                        spawn_x, spawn_y = self._world.get_spawn_position()
+                        self._player_sprite.respawn(spawn_x, spawn_y)
+                        self._state = STATE_PLAYING
+                    elif event.key == pygame.K_ESCAPE:
+                        self._running = False
+                elif self._state == STATE_GAME_OVER:
                     if event.key == pygame.K_RETURN:
                         self._running = False
 
@@ -258,6 +286,8 @@ class Game:
             self._update_playing()
         elif self._state == STATE_TASK:
             self._handle_task_hold_input()
+        elif self._state == STATE_TRANSITION:
+            self._update_transition()
 
         if self._feedback_timer > 0:
             self._feedback_timer -= 1
@@ -288,9 +318,32 @@ class Game:
                 self._open_task(portal)
                 self._pipeline.pulse_glitch(0.8)
 
+        if self._door_unlocked and self._portal_cooldown == 0:
+            if self._world.check_door_collision(self._player_sprite.get_rect()):
+                self._next_world_index = self._world_index + 1
+                self._transition_timer = 0
+                self._state = STATE_TRANSITION
+                self._pipeline.pulse_glitch(1.0)
+
+    def _update_transition(self):
+        self._transition_timer += 1
+        # After completing world 2 (index 2): door walk leads to win screen, not world 4
+        if self._next_world_index == 3 and not self._endless_mode:
+            if self._transition_timer >= 30:
+                self._state = STATE_WIN
+            return
+        # Normal: show title card then load next world
+        if self._transition_timer >= 121:
+            self._load_world(self._next_world_index)
+            spawn_x, spawn_y = self._world.get_spawn_position()
+            self._player_sprite.respawn(spawn_x, spawn_y)
+            self._portal_cooldown = 60
+            self._state = STATE_PLAYING
+
     def _open_task(self, portal):
         level_id = portal.get_level_id()
-        self._current_level = create_level(level_id)
+        overclock_ms = self._current_world_config["overclock_ms"]
+        self._current_level = create_level(level_id, overclock_ms=overclock_ms)
         self._current_level.load_tasks()
         self._current_level.reset_typewriter()
         self._current_portal = portal
@@ -358,8 +411,11 @@ class Game:
             self._player.advance_level()
             self._sound.play_sound("portal_complete")
 
-            if len(self._completed_portals) >= 3:
-                self._state = STATE_WIN
+            if len(self._completed_portals) >= self._world.get_portal_count():
+                self._door_unlocked = True
+                self._world.unlock_door()
+                self._show_feedback("DURVIS ATSLĒGTAS — sasniedz izeju!", NEON_CYAN)
+                self._return_to_playing()
                 return
 
         self._return_to_playing()
@@ -402,6 +458,10 @@ class Game:
         elif self._state == STATE_GAME_OVER:
             self._draw_playing()
             self._draw_game_over_screen()
+        elif self._state == STATE_TRANSITION:
+            self._draw_playing()
+            if self._transition_timer >= 31:
+                self._draw_transition_screen()
 
         self._pipeline.present()
 
@@ -565,7 +625,11 @@ class Game:
         completed = len(self._completed_portals)
         portal_colors = (NEON_RED, NEON_YELLOW, NEON_GREEN)
         seg_w, seg_h, seg_gap = 38, 14, 8
-        seg_y = sect.y + 36
+        world_label = self._font_code_small.render(
+            f"WORLD {self._world_index + 1}", True, (0, 140, 140)
+        )
+        self._screen.blit(world_label, (sect.x + 18, sect.y + 20))
+        seg_y = sect.y + 50
         pulse = self._hud_pulse(self._hud_portal_pulse_ms, duration=700)
 
         for i in range(3):
@@ -587,7 +651,7 @@ class Game:
             else:
                 pygame.draw.rect(self._screen, self._hud_dim(portal_colors[i], 0.3), seg_rect, 1)
 
-        count_surf = self._font_code.render(f"{completed} / 3", True, color)
+        count_surf = self._font_code.render(f"{completed} / {self._world.get_portal_count()}", True, color)
         seg_total_w = 3 * seg_w + 2 * seg_gap
         self._screen.blit(count_surf, (sect.x + 18 + seg_total_w + 14, seg_y - 4))
 
@@ -677,20 +741,51 @@ class Game:
         self._screen.blit(overlay, (0, 0))
 
         win_text = self._font_huge.render("UZVARA!", True, NEON_GREEN)
-        win_rect = win_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100))
+        win_rect = win_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 120))
         self._screen.blit(win_text, win_rect)
 
         score_text = self._font_big.render(f"Punkti: {self._player.get_score()}", True, NEON_YELLOW)
-        score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 30))
         self._screen.blit(score_text, score_rect)
 
+        worlds_text = self._font.render(f"Pasaules: {self._world_index}", True, WHITE)
+        worlds_rect = worlds_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30))
+        self._screen.blit(worlds_text, worlds_rect)
+
         portals_text = self._font.render("Pabeigti visi 3 portāli!", True, WHITE)
-        portals_rect = portals_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
+        portals_rect = portals_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 80))
         self._screen.blit(portals_text, portals_rect)
 
-        hint = self._font.render("Nospied ENTER, lai izietu", True, GRAY)
-        hint_rect = hint.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150))
+        hint = self._font.render("ENTER: turpināt (ENDLESS) | ESC: iziet", True, GRAY)
+        hint_rect = hint.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 160))
         self._screen.blit(hint, hint_rect)
+
+    def _draw_transition_screen(self):
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 220))
+        self._screen.blit(overlay, (0, 0))
+
+        nwi = self._next_world_index
+        if nwi < len(WORLD_LABELS):
+            title_text = f"WORLD {nwi + 1}"
+            label_text = WORLD_LABELS[nwi]
+        else:
+            loop_n = nwi - len(WORLD_LABELS) + 1
+            title_text = "ENDLESS"
+            label_text = f"ENDLESS // LOOP_{loop_n}"
+
+        title_surf = self._font_huge.render(title_text, True, NEON_CYAN)
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 80))
+        self._screen.blit(title_surf, title_rect)
+
+        dim_cyan = (0, 140, 140)
+        label_surf = self._font_big.render(label_text, True, dim_cyan)
+        label_rect = label_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        self._screen.blit(label_surf, label_rect)
+
+        score_surf = self._font.render(f"Punkti: {self._player.get_score()}", True, NEON_YELLOW)
+        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 80))
+        self._screen.blit(score_surf, score_rect)
 
     def _draw_game_over_screen(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)

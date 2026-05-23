@@ -231,6 +231,14 @@
           "kills": false,
           "special": "spawn",
           "fallback_color": [255, 16, 240]
+        },
+        {
+          "id": "door_exit",
+          "name": "Izejas durvis",
+          "solid": false,
+          "kills": false,
+          "door_exit": true,
+          "fallback_color": [0, 200, 200]
         }
       ]
     }
