@@ -472,10 +472,6 @@ class LevelEditor:
             self._top_bar_surf = self._font.render(info, True, WHITE)
             self._top_bar_cache_key = cache_key
         self._screen.blit(self._top_bar_surf, (20, 10))
-        info = (f"LEVEL EDITOR | Fails: {self._current_filename}{unsaved_mark} "
-                f"| Izvēlēts: {current_name} | Tiles: {self._world.get_tile_count()}")
-        text = self._font.render(info, True, WHITE)
-        self._screen.blit(text, (20, 10))
 
     def _draw_level_bar(self):
         y = TOP_BAR_HEIGHT
@@ -568,12 +564,9 @@ class LevelEditor:
                     pygame.draw.rect(self._screen, border_color,
                                      (btn_x, btn_y, BUTTON_SIZE, BUTTON_SIZE), border_width)
 
-                name_text = self._tile_name_surfs.get(tile_def.get_id())
-                if name_text:
-                    name = tile_def.get_name()
-                    label = name if len(name) <= 9 else name[:8] + "…"
-                    name_text = self._font_small.render(label, True, WHITE)
-                    self._screen.blit(name_text, (btn_x, btn_y + BUTTON_SIZE + 4))
+                    name_text = self._tile_name_surfs.get(tile_def.get_id())
+                    if name_text:
+                        self._screen.blit(name_text, (btn_x, btn_y + BUTTON_SIZE + 4))
 
                 x_offset += BUTTON_SIZE + BUTTON_SPACING
 
@@ -581,15 +574,6 @@ class LevelEditor:
         controls_y = toolbar_y + 10
         for i, surf in enumerate(self._toolbar_ctrl_surfs):
             self._screen.blit(surf, (controls_x, controls_y + i * 18))
-        controls = [
-            "MOUSE: Kreisais=likt, Labais=dzēst",
-            "WASD/Bultiņas: Kamera | TAB: Nākamā kategorija",
-            "Klikšķis uz cilnes: pārslēgt līmeni (Shift = piespiest)",
-            "Ctrl+S: Saglabāt | Ctrl+N: Jauns | Ctrl+1..9: Līmenis | G: Režģis",
-        ]
-        for i, line in enumerate(controls):
-            text = self._font_small.render(line, True, WHITE)
-            self._screen.blit(text, (controls_x, controls_y + i * 18))
 
     def _draw_message(self):
         text = self._font_big.render(self._message, True, NEON_YELLOW)
