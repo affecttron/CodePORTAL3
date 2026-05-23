@@ -17,6 +17,7 @@ from settings import (
 
 PLAY, EDITOR, SCORES, QUIT = "play", "editor", "scores", "quit"
 
+# Krāsu palete
 BG       = (12,  12,  14)
 DIM      = (128, 128, 132)
 DIM_SOFT = (78,  78,  84)
@@ -30,6 +31,9 @@ ACCENT   = (170, 174, 180)
 
 
 class MainMenu:
+
+    ITEM_GLOW_SPECS = ((34, 0.03, 22), (20, 0.07, 14), (10, 0.13, 10))
+    NAME_GLOW_SPECS = ((20, 0.05, 16), (10, 0.12, 10))
 
     def __init__(self):
         self._pipeline = ShaderPipeline.create(
@@ -47,6 +51,7 @@ class MainMenu:
         self._font       = pygame.font.SysFont("Arial",    28)
         self._font_small = pygame.font.SysFont("Arial",    22)
 
+        # Izvēlnes punkti
         self._items = [
             (PLAY,   "SPĒLĒT",            PALE),
             (EDITOR, "LĪMEŅU REDAKTORS",  COLD),
@@ -74,22 +79,48 @@ class MainMenu:
         self._running = True
         pygame.mouse.set_visible(True)
 
+        # Virsmu kešs
+        self._item_glow_surfs = []
+        self._item_tint_surfs = []
+        self._item_bord_surfs = []
+        for i in range(len(self._items)):
+            r = self._item_rect(i)
+            self._item_glow_surfs.append(self._build_glow(r, self.ITEM_GLOW_SPECS))
+            self._item_tint_surfs.append(pygame.Surface(r.size, pygame.SRCALPHA))
+            self._item_bord_surfs.append(pygame.Surface(r.size, pygame.SRCALPHA))
+        self._chev_surf = pygame.Surface((28, 32), pygame.SRCALPHA)
+
+        nr = self._name_rect()
+        self._name_glow_surfs = self._build_glow(nr, self.NAME_GLOW_SPECS)
+        self._name_bg_surf = pygame.Surface(nr.size, pygame.SRCALPHA)
+        pygame.draw.rect(self._name_bg_surf, (0, 0, 0, 220),
+                         self._name_bg_surf.get_rect(), border_radius=4)
+        self._name_bord_surf = pygame.Surface(nr.size, pygame.SRCALPHA)
+
+        self._dot_surf = pygame.Surface((14, 14), pygame.SRCALPHA)
+
+    @staticmethod
+    def _build_glow(rect, specs):
+        return [
+            (pygame.Surface((rect.width + e * 2, rect.height + e * 2), pygame.SRCALPHA), e, a, r)
+            for e, a, r in specs
+        ]
+
     def run(self):
         while self._running:
             self._events()
             self._update()
             self._draw()
             self._clock.tick(FPS)
-            
+
         self._sound.stop_ambience()
         self._sound.stop_music()
         self._pipeline.shutdown()
-        
+
         pygame.quit()
         sys.exit()
 
     def _update(self):
-        # self._anim += (self._selected - self._anim) * 0.25
         self._sound.update_ambience()
         for i in range(len(self._items)):
             target = 1.0 if i == self._selected else 0.0
@@ -108,39 +139,33 @@ class MainMenu:
             pygame.mouse.set_cursor(desired)
             self._cursor_state = desired
 
+    # Notikumu apstrāde
     def _events(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 self._running = False
                 return
-
             if e.type == pygame.KEYDOWN:
-                if self._show_scores:
-                    if e.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_SPACE):
-                        self._show_scores = False
-                    continue
-                if self._editing:
-                    if e.key in (pygame.K_RETURN, pygame.K_ESCAPE):
-                        self._stop_edit()
-                    elif e.key == pygame.K_BACKSPACE:
-                        self._player_name = self._player_name[:-1]
-                    continue
-                self._menu_key(e)
-
+                self._key(e)
             elif e.type == pygame.TEXTINPUT and self._editing:
                 if len(self._player_name) < 18:
                     self._player_name += e.text
-
             elif e.type == pygame.MOUSEMOTION:
                 self._hover(self._pipeline.scale_mouse_pos(e.pos))
-
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 self._click(self._pipeline.scale_mouse_pos(e.pos))
 
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_F1:
-                self._pipeline.toggle()
-
-    def _menu_key(self, e):
+    def _key(self, e):
+        if self._show_scores:
+            if e.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_SPACE):
+                self._show_scores = False
+            return
+        if self._editing:
+            if e.key in (pygame.K_RETURN, pygame.K_ESCAPE):
+                self._stop_edit()
+            elif e.key == pygame.K_BACKSPACE:
+                self._player_name = self._player_name[:-1]
+            return
         if e.key == pygame.K_ESCAPE:
             self._running = False
         elif e.key in (pygame.K_UP, pygame.K_w):
@@ -151,7 +176,10 @@ class MainMenu:
             self._activate()
         elif e.key == pygame.K_n:
             self._start_edit()
+        elif e.key == pygame.K_F1:
+            self._pipeline.toggle()
 
+    # Vārda rediģēšana
     def _start_edit(self):
         self._editing = True
         if self._player_name == "Spēlētājs":
@@ -186,6 +214,7 @@ class MainMenu:
         if self._name_rect().collidepoint(pos):
             self._start_edit()
 
+    # Darbības izpilde
     def _activate(self):
         action = self._items[self._selected][0]
         self._sound.play_sound("menu_click")
@@ -231,7 +260,6 @@ class MainMenu:
             self._pipeline.present()
             self._clock.tick(FPS)
 
-
     def _item_rect(self, i):
         w, h, gap = 680, 82, 24
         x = (SCREEN_WIDTH - w) // 2
@@ -271,42 +299,37 @@ class MainMenu:
         frame = title_rect.inflate(140, 56)
         self._draw_brackets(frame, ACCENT, DIM_SOFT, arm=40, thickness=4)
 
-
+    # Stūru iekavas
     def _draw_brackets(self, rect, c_top, c_bot, arm=24, thickness=3):
-        pygame.draw.line(self._screen, c_top, (rect.left,  rect.top), (rect.left + arm, rect.top), thickness)
-        pygame.draw.line(self._screen, c_top, (rect.left,  rect.top), (rect.left, rect.top + arm), thickness)
-        pygame.draw.line(self._screen, c_top, (rect.right, rect.top), (rect.right - arm, rect.top), thickness)
-        pygame.draw.line(self._screen, c_top, (rect.right, rect.top), (rect.right, rect.top + arm), thickness)
-        pygame.draw.line(self._screen, c_bot, (rect.left,  rect.bottom), (rect.left + arm, rect.bottom), thickness)
-        pygame.draw.line(self._screen, c_bot, (rect.left,  rect.bottom), (rect.left, rect.bottom - arm), thickness)
-        pygame.draw.line(self._screen, c_bot, (rect.right, rect.bottom), (rect.right - arm, rect.bottom), thickness)
-        pygame.draw.line(self._screen, c_bot, (rect.right, rect.bottom), (rect.right, rect.bottom - arm), thickness)
+        corners = (
+            (rect.left,  rect.top,    +1, +1, c_top),
+            (rect.right, rect.top,    -1, +1, c_top),
+            (rect.left,  rect.bottom, +1, -1, c_bot),
+            (rect.right, rect.bottom, -1, -1, c_bot),
+        )
+        for cx, cy, dx, dy, color in corners:
+            pygame.draw.line(self._screen, color, (cx, cy), (cx + dx * arm, cy), thickness)
+            pygame.draw.line(self._screen, color, (cx, cy), (cx, cy + dy * arm), thickness)
 
+    def _fill_rect(self, surf, color, pos, width=0, radius=0):
+        surf.fill((0, 0, 0, 0))
+        pygame.draw.rect(surf, color, surf.get_rect(), width=width, border_radius=radius)
+        self._screen.blit(surf, pos)
+
+    # Punktu saraksts
     def _draw_items(self):
         for i, (_, label, c) in enumerate(self._items):
             rect = self._item_rect(i)
             h    = self._hover_amounts[i]
 
             if h > 0.005:
-                for expand, alpha, radius in [
-                    (34, 0.03, 22),
-                    (20, 0.07, 14),
-                    (10, 0.13, 10),
-                ]:
-                    sz = (rect.width + expand * 2, rect.height + expand * 2)
-                    layer = pygame.Surface(sz, pygame.SRCALPHA)
-                    pygame.draw.rect(layer, (*c, int(255 * alpha * h)),
-                                     layer.get_rect(), border_radius=radius)
-                    self._screen.blit(layer, (rect.x - expand, rect.y - expand))
-
-                tint = pygame.Surface(rect.size, pygame.SRCALPHA)
-                pygame.draw.rect(tint, (*c, int(35 * h)), tint.get_rect(), border_radius=6)
-                self._screen.blit(tint, rect.topleft)
-
-                bord = pygame.Surface(rect.size, pygame.SRCALPHA)
-                pygame.draw.rect(bord, (*c, int(180 * h)),
-                                 bord.get_rect(), width=2, border_radius=6)
-                self._screen.blit(bord, rect.topleft)
+                for surf, expand, alpha, radius in self._item_glow_surfs[i]:
+                    self._fill_rect(surf, (*c, int(255 * alpha * h)),
+                                    (rect.x - expand, rect.y - expand), radius=radius)
+                self._fill_rect(self._item_tint_surfs[i], (*c, int(35 * h)),
+                                rect.topleft, radius=6)
+                self._fill_rect(self._item_bord_surfs[i], (*c, int(180 * h)),
+                                rect.topleft, width=2, radius=6)
 
             bar_h = int(rect.height * (0.42 + 0.50 * h))
             bar_y = rect.y + (rect.height - bar_h) // 2
@@ -327,34 +350,28 @@ class MainMenu:
             if h > 0.02:
                 cx = rect.right - 64 + int(h * 12)
                 cy = rect.centery
-                chev = pygame.Surface((28, 32), pygame.SRCALPHA)
+                chev = self._chev_surf
+                chev.fill((0, 0, 0, 0))
                 pygame.draw.polygon(chev, (*c, int(255 * min(h, 1.0))), [
                     (0, 0), (20, 16), (0, 32),
                 ])
                 self._screen.blit(chev, (cx, cy - 16))
 
-
+    # Vārda kaste
     def _draw_name(self):
         rect = self._name_rect()
         h    = self._name_hover
 
         if h > 0.005:
-            for expand, alpha, radius in [(20, 0.05, 16), (10, 0.12, 10)]:
-                sz = (rect.width + expand * 2, rect.height + expand * 2)
-                layer = pygame.Surface(sz, pygame.SRCALPHA)
-                pygame.draw.rect(layer, (*PALE, int(255 * alpha * h)),
-                                 layer.get_rect(), border_radius=radius)
-                self._screen.blit(layer, (rect.x - expand, rect.y - expand))
+            for surf, expand, alpha, radius in self._name_glow_surfs:
+                self._fill_rect(surf, (*PALE, int(255 * alpha * h)),
+                                (rect.x - expand, rect.y - expand), radius=radius)
 
-        bg = pygame.Surface(rect.size, pygame.SRCALPHA)
-        pygame.draw.rect(bg, (0, 0, 0, 220), bg.get_rect(), border_radius=4)
-        self._screen.blit(bg, rect.topleft)
+        self._screen.blit(self._name_bg_surf, rect.topleft)
 
         border_color = self._lerp_color(DIM_DARK, PALE, h)
-        bord = pygame.Surface(rect.size, pygame.SRCALPHA)
-        pygame.draw.rect(bord, (*border_color, 255), bord.get_rect(),
-                         width=2, border_radius=4)
-        self._screen.blit(bord, rect.topleft)
+        self._fill_rect(self._name_bord_surf, (*border_color, 255),
+                        rect.topleft, width=2, radius=4)
 
         label_color = self._lerp_color(DIM, PALE, h)
         label       = self._font_small.render("SPĒLĒTĀJS", True, label_color)
@@ -372,14 +389,15 @@ class MainMenu:
             hint = self._font_small.render("[N] mainīt", True, DIM)
             self._screen.blit(hint, hint.get_rect(midright=(rect.right - 18, rect.centery)))
 
+    # Apakšējā josla
     def _draw_footer(self):
         cx = SCREEN_WIDTH // 2
         y  = SCREEN_HEIGHT - 50
 
         pulse = 0.5 + 0.5 * math.sin(pygame.time.get_ticks() / 1000.0 * 2.2)
-        dot   = pygame.Surface((14, 14), pygame.SRCALPHA)
-        pygame.draw.circle(dot, (*AMBER, int(140 + 90 * pulse)), (7, 7), 5)
-        self._screen.blit(dot, (40, y - 7))
+        self._dot_surf.fill((0, 0, 0, 0))
+        pygame.draw.circle(self._dot_surf, (*AMBER, int(140 + 90 * pulse)), (7, 7), 5)
+        self._screen.blit(self._dot_surf, (40, y - 7))
         status = self._font_small.render("ONLINE", True, AMBER)
         self._screen.blit(status, status.get_rect(midleft=(60, y)))
 
@@ -390,6 +408,7 @@ class MainMenu:
         ver = self._font_small.render("v0.3", True, DIM_SOFT)
         self._screen.blit(ver, ver.get_rect(midright=(SCREEN_WIDTH - 40, y)))
 
+    # Rezultātu logs
     def _draw_scores(self):
         veil = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         veil.fill((0, 0, 0, 225))
@@ -426,7 +445,7 @@ class MainMenu:
         try:
             img = pygame.image.load(path).convert_alpha()
         except Exception as exc:
-            print(f"[menu] logo failed to load ({exc}) — falling back to text title")
+            print(f"[menu] logo failed to load ({exc}); falling back to text title")
             return None
         bbox = img.get_bounding_rect()
         if bbox.width > 0 and bbox.height > 0 and bbox.size != img.get_size():

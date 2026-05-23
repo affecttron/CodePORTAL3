@@ -18,6 +18,7 @@ from settings import (
     GRAY,
     LEVELS_FOLDER,
 )
+from ui_utils import dim_color, draw_corner_accents
 
 
 STATE_PLAYING = "playing"
@@ -92,6 +93,62 @@ class Game:
         self._backspace_held_frames = 0
         self._BACKSPACE_INITIAL_DELAY = 25
         self._BACKSPACE_REPEAT_RATE = 3
+
+        # HUD pulse state (score change flash + completion latch)
+        self._hud_last_score = self._player.get_score()
+        self._hud_score_pulse_ms = -10000
+        self._hud_score_delta = 0
+        self._hud_last_completed = 0
+        self._hud_portal_pulse_ms = -10000
+
+        # === Cached HUD surfaces (allocated once, reused every frame) ===
+        _hud_w = SCREEN_WIDTH - self.HUD_MARGIN_X * 2
+        _dim_cyan = dim_color(NEON_CYAN, 0.45)
+        _label_dim = (140, 142, 148)
+
+        self._hud_bg_surf = pygame.Surface((_hud_w, self.HUD_HEIGHT), pygame.SRCALPHA)
+        self._hud_bg_surf.fill(self.HUD_BG)
+
+        self._hud_title_tint_surf = pygame.Surface((_hud_w, self.HUD_TITLE_HEIGHT), pygame.SRCALPHA)
+        self._hud_title_tint_surf.fill((NEON_CYAN[0], NEON_CYAN[1], NEON_CYAN[2], 26))
+
+        self._hud_scanline_surf = pygame.Surface((_hud_w, self.HUD_HEIGHT), pygame.SRCALPHA)
+        _sl_color = (NEON_CYAN[0], NEON_CYAN[1], NEON_CYAN[2], 14)
+        for _y in range(0, self.HUD_HEIGHT, 3):
+            pygame.draw.line(self._hud_scanline_surf, _sl_color, (0, _y), (_hud_w, _y))
+
+        _score_max = self._font_code_bold.render("99999", True, NEON_YELLOW)
+        self._score_halo_surf = pygame.Surface(
+            (_score_max.get_width() + 28, _score_max.get_height() + 14), pygame.SRCALPHA
+        )
+        self._portal_halo_surf = pygame.Surface((52, 28), pygame.SRCALPHA)
+
+        self._hud_chip_surf = self._font_code_small.render("[ HUD // OPERATOR_LINK ]", True, NEON_CYAN)
+        _name = self._player.get_name()
+        _sid = sum(ord(c) for c in _name) & 0xFFFF
+        self._hud_prompt_surf = self._font_code_small.render(
+            f"root@portal:~# ./monitor --uid=0x{_sid:04X}", True, _dim_cyan
+        )
+        self._hud_sys_bright_surf = self._font_code_small.render("SYS: ONLINE", True, NEON_CYAN)
+        self._hud_sys_dim_surf    = self._font_code_small.render("SYS: ONLINE", True, _dim_cyan)
+
+        self._hud_section_label_surfs = [
+            self._font_code_small.render(lbl, True, _label_dim)
+            for lbl in ("OPERATOR", "SCORE", "PORTALS", "CONTROLS")
+        ]
+
+        _row1_data = [
+            ("[A/D]",   NEON_CYAN), (" staigāt  ", _label_dim),
+            ("[SPACE]", NEON_CYAN), (" lekt  ",    _label_dim),
+            ("[W/S]",   NEON_CYAN), (" rāpties",   _label_dim),
+        ]
+        _row2_data = [
+            ("[R]",   NEON_CYAN), (" respawn  ", _label_dim),
+            ("[F1]",  NEON_CYAN), (" FX  ",      _label_dim),
+            ("[ESC]", NEON_CYAN), (" iziet",      _label_dim),
+        ]
+        self._ctrl_surfs_row1 = [self._font_code_small.render(t, True, c) for t, c in _row1_data]
+        self._ctrl_surfs_row2 = [self._font_code_small.render(t, True, c) for t, c in _row2_data]
 
     def _load_world(self):
         level_file = "level_1.json"
@@ -258,10 +315,15 @@ class Game:
             self._player.increment_attempts()
             attempts = self._player.get_attempts()
             points = task.calculate_points(attempts)
-            self._player.add_score(points)
+            oc_bonus = self._current_level.consume_overclock_bonus()
+            self._player.add_score(points + oc_bonus)
 
             self._sound.play_sound("correct")
-            self._show_feedback(f"PAREIZI! +{points} punkti!", NEON_GREEN)
+            if oc_bonus:
+                msg = f"PAREIZI! +{points} punkti! [+{oc_bonus} OVERCLOCK]"
+            else:
+                msg = f"PAREIZI! +{points} punkti!"
+            self._show_feedback(msg, NEON_GREEN)
             self._input_text = ""
             self._player.reset_attempts()
 
@@ -273,6 +335,7 @@ class Game:
             self._player.increment_attempts()
             self._player.deduct_score(5)
             attempts = self._player.get_attempts()
+            self._current_level.void_overclock()
 
             self._sound.play_sound("wrong")
 
@@ -353,26 +416,193 @@ class Game:
         if self._feedback_timer > 0:
             self._draw_feedback()
 
+    # === HUD (bottom-anchored cyberpunk terminal) ===
+
+    HUD_MARGIN_X = 32
+    HUD_MARGIN_BOTTOM = 24
+    HUD_HEIGHT = 112
+    HUD_TITLE_HEIGHT = 32
+    HUD_BG = (10, 12, 16, 215)
+
+    def _hud_dim(self, color, factor):
+        return dim_color(color, factor)
+
+    def _hud_track_pulses(self):
+        now = pygame.time.get_ticks()
+        cur_score = self._player.get_score()
+        if cur_score != self._hud_last_score:
+            self._hud_score_delta = cur_score - self._hud_last_score
+            self._hud_score_pulse_ms = now
+            self._hud_last_score = cur_score
+        cur_done = len(self._completed_portals)
+        if cur_done != self._hud_last_completed:
+            self._hud_portal_pulse_ms = now
+            self._hud_last_completed = cur_done
+
+    def _hud_pulse(self, start_ms, duration=520):
+        if start_ms < 0:
+            return 0.0
+        elapsed = pygame.time.get_ticks() - start_ms
+        if elapsed < 0 or elapsed >= duration:
+            return 0.0
+        return 1.0 - elapsed / duration
+
     def _draw_hud(self):
-        bar = pygame.Surface((SCREEN_WIDTH, 60), pygame.SRCALPHA)
-        bar.fill((0, 0, 0, 180))
-        self._screen.blit(bar, (0, 0))
+        self._hud_track_pulses()
 
-        info = f"Spēlētājs: {self._player.get_name()}"
-        text = self._font.render(info, True, WHITE)
-        self._screen.blit(text, (20, 20))
+        color = NEON_CYAN
+        dim = self._hud_dim(color, 0.45)
+        dimmer = self._hud_dim(color, 0.22)
+        label_dim = (140, 142, 148)
 
-        score = f"Punkti: {self._player.get_score()}"
-        text = self._font.render(score, True, NEON_YELLOW)
-        self._screen.blit(text, (300, 20))
+        hud_w = SCREEN_WIDTH - self.HUD_MARGIN_X * 2
+        hud_x = self.HUD_MARGIN_X
+        hud_y = SCREEN_HEIGHT - self.HUD_HEIGHT - self.HUD_MARGIN_BOTTOM
+        hud_rect = pygame.Rect(hud_x, hud_y, hud_w, self.HUD_HEIGHT)
 
-        portals_text = f"Portāli: {len(self._completed_portals)} / 3"
-        text = self._font.render(portals_text, True, NEON_CYAN)
-        self._screen.blit(text, (500, 20))
+        self._screen.blit(self._hud_bg_surf, hud_rect.topleft)
 
-        controls = "A/D = staigāt | SPACE = lekt | W/S = rāpties | R = respawn | F1 = FX | ESC = iziet"
-        text = self._font_small.render(controls, True, GRAY)
-        self._screen.blit(text, (SCREEN_WIDTH - 640, 25))
+        self._draw_hud_title_bar(hud_rect, color, dim)
+
+        content_rect = pygame.Rect(
+            hud_x, hud_y + self.HUD_TITLE_HEIGHT,
+            hud_w, self.HUD_HEIGHT - self.HUD_TITLE_HEIGHT,
+        )
+        self._draw_hud_sections(content_rect, color, dimmer, label_dim)
+
+        # Border + corners + scanlines on top
+        pygame.draw.rect(self._screen, color, hud_rect, 2)
+        draw_corner_accents(self._screen, hud_rect, color)
+        self._draw_hud_scanlines(hud_rect)
+
+    def _draw_hud_title_bar(self, hud_rect, color, dim):
+        title_bar = pygame.Rect(hud_rect.x, hud_rect.y, hud_rect.w, self.HUD_TITLE_HEIGHT)
+        self._screen.blit(self._hud_title_tint_surf, title_bar.topleft)
+        pygame.draw.line(
+            self._screen, dim,
+            (title_bar.left, title_bar.bottom - 1),
+            (title_bar.right, title_bar.bottom - 1), 1,
+        )
+
+        self._screen.blit(self._hud_chip_surf, (hud_rect.x + 18, hud_rect.y + 8))
+
+        prompt_surf = self._hud_prompt_surf
+        self._screen.blit(
+            prompt_surf,
+            (hud_rect.centerx - prompt_surf.get_width() // 2, hud_rect.y + 8),
+        )
+
+        blink = (pygame.time.get_ticks() // 500) % 2 == 0
+        status_surf = self._hud_sys_bright_surf if blink else self._hud_sys_dim_surf
+        sx = hud_rect.right - 18 - status_surf.get_width()
+        self._screen.blit(status_surf, (sx, hud_rect.y + 8))
+        if blink:
+            pygame.draw.circle(self._screen, color, (sx - 10, hud_rect.y + 16), 4)
+
+    def _draw_hud_sections(self, content, color, dimmer, label_dim):
+        sections = ("OPERATOR", "SCORE", "PORTALS", "CONTROLS")
+        weights = (0.22, 0.16, 0.22, 0.40)
+        widths = [int(content.w * w) for w in weights]
+        widths[-1] = content.w - sum(widths[:-1])
+
+        x_cursor = content.x
+        for i, (label, sw) in enumerate(zip(sections, widths)):
+            sect = pygame.Rect(x_cursor, content.y, sw, content.h)
+            self._screen.blit(self._hud_section_label_surfs[i], (sect.x + 18, sect.y + 8))
+
+            if label == "OPERATOR":
+                self._draw_hud_operator(sect, color)
+            elif label == "SCORE":
+                self._draw_hud_score(sect)
+            elif label == "PORTALS":
+                self._draw_hud_portals(sect, color)
+            elif label == "CONTROLS":
+                self._draw_hud_controls(sect, color, label_dim)
+
+            x_cursor += sw
+            if i < len(sections) - 1:
+                pygame.draw.line(
+                    self._screen, dimmer,
+                    (x_cursor, content.y + 8),
+                    (x_cursor, content.bottom - 8), 1,
+                )
+
+    def _draw_hud_operator(self, sect, color):
+        name = self._player.get_name()
+        name_surf = self._font_code_bold.render(name, True, WHITE)
+        self._screen.blit(name_surf, (sect.x + 18, sect.y + 30))
+        meta = f"lvl.{self._player.get_level_reached():02d}  /  tasks.{self._player.get_tasks_completed():02d}"
+        meta_surf = self._font_code_small.render(meta, True, self._hud_dim(color, 0.55))
+        self._screen.blit(meta_surf, (sect.x + 18, sect.y + 56))
+
+    def _draw_hud_score(self, sect):
+        pulse = self._hud_pulse(self._hud_score_pulse_ms)
+        base = NEON_YELLOW
+        if pulse > 0:
+            target = NEON_GREEN if self._hud_score_delta >= 0 else NEON_RED
+            score_color = tuple(int(base[i] * (1 - pulse) + target[i] * pulse) for i in range(3))
+        else:
+            score_color = base
+
+        cur = self._player.get_score()
+        text = f"{cur:0>5}"
+        surf = self._font_code_bold.render(text, True, score_color)
+
+        if pulse > 0:
+            self._score_halo_surf.fill((score_color[0], score_color[1], score_color[2], int(70 * pulse)))
+            self._screen.blit(self._score_halo_surf, (sect.x + 18 - 14, sect.y + 30 - 7))
+
+        self._screen.blit(surf, (sect.x + 18, sect.y + 30))
+
+        if pulse > 0:
+            sign = "+" if self._hud_score_delta >= 0 else ""
+            delta_surf = self._font_code_small.render(
+                f"{sign}{self._hud_score_delta} pts", True, score_color
+            )
+            self._screen.blit(delta_surf, (sect.x + 18, sect.y + 56))
+
+    def _draw_hud_portals(self, sect, color):
+        completed = len(self._completed_portals)
+        portal_colors = (NEON_RED, NEON_YELLOW, NEON_GREEN)
+        seg_w, seg_h, seg_gap = 38, 14, 8
+        seg_y = sect.y + 36
+        pulse = self._hud_pulse(self._hud_portal_pulse_ms, duration=700)
+
+        for i in range(3):
+            seg_rect = pygame.Rect(sect.x + 18 + i * (seg_w + seg_gap), seg_y, seg_w, seg_h)
+            if i < completed:
+                pygame.draw.rect(self._screen, portal_colors[i], seg_rect)
+                pygame.draw.line(
+                    self._screen, WHITE,
+                    (seg_rect.x + 2, seg_rect.y + 2),
+                    (seg_rect.right - 3, seg_rect.y + 2), 1,
+                )
+                # glow halo on the most recent fill
+                if pulse > 0 and i == completed - 1:
+                    self._portal_halo_surf.fill((
+                        portal_colors[i][0], portal_colors[i][1], portal_colors[i][2],
+                        int(80 * pulse),
+                    ))
+                    self._screen.blit(self._portal_halo_surf, (seg_rect.x - 7, seg_rect.y - 7))
+            else:
+                pygame.draw.rect(self._screen, self._hud_dim(portal_colors[i], 0.3), seg_rect, 1)
+
+        count_surf = self._font_code.render(f"{completed} / 3", True, color)
+        seg_total_w = 3 * seg_w + 2 * seg_gap
+        self._screen.blit(count_surf, (sect.x + 18 + seg_total_w + 14, seg_y - 4))
+
+    def _draw_hud_controls(self, sect, color, label_dim):
+        x = sect.x + 18
+        for surf in self._ctrl_surfs_row1:
+            self._screen.blit(surf, (x, sect.y + 32))
+            x += surf.get_width()
+        x = sect.x + 18
+        for surf in self._ctrl_surfs_row2:
+            self._screen.blit(surf, (x, sect.y + 56))
+            x += surf.get_width()
+
+    def _draw_hud_scanlines(self, rect):
+        self._screen.blit(self._hud_scanline_surf, rect.topleft)
 
     def _draw_feedback(self):
         text = self._font_big.render(self._feedback_message, True, self._feedback_color)
