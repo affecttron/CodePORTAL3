@@ -153,6 +153,7 @@ class Game:
         _row2_data = [
             ("[R]",   NEON_CYAN), (" respawn  ", _label_dim),
             ("[F1]",  NEON_CYAN), (" FX  ",      _label_dim),
+            ("[F9]",  NEON_CYAN), (" skip  ",    _label_dim),
             ("[ESC]", NEON_CYAN), (" iziet",      _label_dim),
         ]
         self._ctrl_surfs_row1 = [self._font_code_small.render(t, True, c) for t, c in _row1_data]
@@ -216,6 +217,8 @@ class Game:
                     elif event.key == pygame.K_r:
                         spawn_x, spawn_y = self._world.get_spawn_position()
                         self._player_sprite.respawn(spawn_x, spawn_y)
+                    elif event.key == pygame.K_F9:
+                        self._debug_skip_world()
 
                 elif self._state == STATE_TASK:
                     if event.key == pygame.K_RETURN:
@@ -341,10 +344,14 @@ class Game:
             self._state = STATE_PLAYING
 
     def _open_task(self, portal):
-        level_id = portal.get_level_id()
+        portal_slot = portal.get_level_id() - 1
+        level_ids = self._current_world_config.get("level_ids", [1, 2, 3])
+        level_id = level_ids[portal_slot] if portal_slot < len(level_ids) else portal.get_level_id()
         overclock_ms = self._current_world_config["overclock_ms"]
         self._current_level = create_level(level_id, overclock_ms=overclock_ms)
         self._current_level.load_tasks()
+        task_count = self._current_world_config.get("task_count", 3)
+        self._current_level.set_task_limit(task_count)
         self._current_level.reset_typewriter()
         self._current_portal = portal
         self._state = STATE_TASK
@@ -352,7 +359,7 @@ class Game:
         self._player.reset_attempts()
         pygame.key.start_text_input()
         self._sound.play_sound("portal_open")
-        print(f"🌀 Portāls atvērts: Līmenis {level_id}")
+        print(f"Portal opened: Level {level_id} ({task_count} tasks)")
 
     def _submit_answer(self):
         if not self._input_text.strip():
@@ -436,6 +443,17 @@ class Game:
 
         # Push the player away from the portal so they don't re-trigger it.
         self._player_sprite.nudge(-100)
+
+    def _debug_skip_world(self):
+        for portal in self._world.get_portals():
+            portal.deactivate()
+            self._completed_portals.add(id(portal))
+        self._door_unlocked = True
+        self._world.unlock_door()
+        self._next_world_index = self._world_index + 1
+        self._transition_timer = 0
+        self._state = STATE_TRANSITION
+        self._pipeline.pulse_glitch(1.0)
 
     def _show_feedback(self, msg, color):
         self._feedback_message = msg

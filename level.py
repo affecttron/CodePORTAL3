@@ -8,7 +8,7 @@ from ui_utils import dim_color, draw_corner_accents
 from settings import (
     TASKS_FILE, TIME_LIMIT_PER_TASK,
     SCREEN_WIDTH, SCREEN_HEIGHT,
-    NEON_RED, NEON_YELLOW, NEON_GREEN, NEON_CYAN,
+    NEON_RED, NEON_YELLOW, NEON_GREEN, NEON_CYAN, NEON_PINK,
     OVERCLOCK_DURATION_MS, OVERCLOCK_BONUS_POINTS,
 )
 
@@ -67,7 +67,7 @@ class Level:
 
     def load_tasks(self, tasks_file=TASKS_FILE):
         if not os.path.exists(tasks_file):
-            print(f"❌ Tasks fails neatrasts: {tasks_file}")
+            print(f"Tasks fails neatrasts: {tasks_file}")
             return False
 
         with open(tasks_file, "r", encoding="utf-8") as f:
@@ -85,10 +85,10 @@ class Level:
                     self._tasks.append(task)
 
                 self._rng.shuffle(self._tasks)
-                print(f"✅ Ielādēti {len(self._tasks)} uzdevumi līmenim {self._level_id}")
+                print(f"Ieladeti {len(self._tasks)} uzdevumi limenim {self._level_id}")
                 return True
 
-        print(f"❌ Līmenis {self._level_id} nav atrasts")
+        print(f"Limenis {self._level_id} nav atrasts")
         return False
 
     def set_task_limit(self, n):
@@ -646,16 +646,43 @@ class FunctionLevel(Level):
 
     def __init__(self, level_id=3, title="Galvenā servera istaba - funkcijas", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
-        self._func_name = ""
         self._theme_color = NEON_GREEN
 
 
+class AdvancedLevel(Level):
+
+    _code_label = "DECODE: python.advanced"
+
+    def __init__(self, level_id=7, title="Kvantu matrica", overclock_ms=OVERCLOCK_DURATION_MS):
+        super().__init__(level_id, title, overclock_ms=overclock_ms)
+        self._theme_color = NEON_PINK
+
+
+class ExpertLevel(Level):
+
+    _code_label = "DECODE: python.expert"
+
+    def __init__(self, level_id=9, title="Singularitāte", overclock_ms=OVERCLOCK_DURATION_MS):
+        super().__init__(level_id, title, overclock_ms=overclock_ms)
+        self._theme_color = (255, 255, 255)
+
+
+_LEVEL_CATALOGUE = {
+    1: (ConditionLevel, "Drošības vārti - if/else nosacījumi"),
+    2: (LoopLevel,      "Datu tunelis - for/while cikli"),
+    3: (FunctionLevel,  "Galvenā servera istaba - funkcijas"),
+    4: (ConditionLevel, "Šifrēšanas mezgls - sarežģīti nosacījumi"),
+    5: (LoopLevel,      "Dziļais kodols - ciklu kombinācijas"),
+    6: (FunctionLevel,  "AI kontroles centrs - funkciju loģika"),
+    7: (AdvancedLevel,  "Kvantu matrica - algoritmu izaicinājumi"),
+    8: (AdvancedLevel,  "Neironu tīkls - datu manipulācija"),
+    9: (ExpertLevel,    "Singularitāte - elite programmēšanas tests"),
+}
+
+
 def create_level(level_id, overclock_ms=OVERCLOCK_DURATION_MS):
-    if level_id == 1:
-        return ConditionLevel(overclock_ms=overclock_ms)
-    elif level_id == 2:
-        return LoopLevel(overclock_ms=overclock_ms)
-    elif level_id == 3:
-        return FunctionLevel(overclock_ms=overclock_ms)
-    else:
-        return Level(level_id, f"Līmenis {level_id}", overclock_ms=overclock_ms)
+    entry = _LEVEL_CATALOGUE.get(level_id)
+    if entry is None:
+        return Level(level_id, f"Limenis {level_id}", overclock_ms=overclock_ms)
+    cls, title = entry
+    return cls(level_id=level_id, title=title, overclock_ms=overclock_ms)

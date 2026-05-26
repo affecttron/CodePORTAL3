@@ -34,7 +34,7 @@ class ShaderPipeline:
 
     @classmethod
     def create_passthrough(cls, size, fullscreen=False, display_size=None):
-        # Explicit passthrough — useful for tools (e.g. level editor) that want
+        # Explicit passthrough - useful for tools (e.g. level editor) that want
         # the auto-scale behavior without any shader distortion.
         return _PassthroughPipeline(size, fullscreen, display_size=display_size)
 

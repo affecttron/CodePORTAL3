@@ -156,12 +156,12 @@ TILE_DOOR_EXIT = "door_exit"
 WORLD_LABELS = ["INITIATION", "INFILTRATION", "CORE BREACH"]
 
 WORLD_CONFIGS = [
-    # world_index 0
-    {"task_count": 1, "overclock_ms": 15000, "max_attempts": 3},
-    # world_index 1
-    {"task_count": 2, "overclock_ms": 12000, "max_attempts": 3},
-    # world_index 2
-    {"task_count": 3, "overclock_ms":  9000, "max_attempts": 2},
+    # world_index 0 — World 1
+    {"task_count": 1, "overclock_ms": 15000, "max_attempts": 3, "level_ids": [1, 2, 3]},
+    # world_index 1 — World 2
+    {"task_count": 2, "overclock_ms": 12000, "max_attempts": 3, "level_ids": [4, 5, 6]},
+    # world_index 2 — World 3
+    {"task_count": 3, "overclock_ms":  9000, "max_attempts": 2, "level_ids": [7, 8, 9]},
 ]
 
 
@@ -173,4 +173,5 @@ def get_world_config(world_index):
         "task_count":   WORLD_CONFIGS[-1]["task_count"]   + extra + 1,
         "overclock_ms": max(3000, WORLD_CONFIGS[-1]["overclock_ms"] - (extra + 1) * 1000),
         "max_attempts": 2,
+        "level_ids":    [7, 8, 9],
     }
