@@ -55,9 +55,7 @@ class ParallaxBackground:
             return None
 
         try:
-            image = pygame.image.load(filepath)
-            if pygame.display.get_surface() is not None:
-                image = image.convert_alpha()
+            image = pygame.image.load(filepath).convert_alpha()
             if image.get_height() != SCREEN_HEIGHT:
                 ratio = SCREEN_HEIGHT / image.get_height()
                 new_width = int(image.get_width() * ratio)

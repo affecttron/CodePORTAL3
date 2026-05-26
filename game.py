@@ -106,6 +106,17 @@ class Game:
         self._death_flash_timer = 0
         self._death_flash_points = 10
 
+        # Pre-allocated overlay surfaces — filled each frame, never reallocated
+        _flash_w = 1100 - 2 * 26   # PANEL_WIDTH - 2*PANEL_PADDING_X
+        _flash_h = 360 + 12 + 32   # CODE_BLOCK_HEIGHT + gap + OVERCLOCK_AREA_HEIGHT
+        self._correct_flash_surf = pygame.Surface((_flash_w, _flash_h), pygame.SRCALPHA)
+
+        self._death_overlay_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self._death_stripe_surf  = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+
+        self._fullscreen_dark_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self._fullscreen_dark_surf.fill((0, 0, 0, 220))
+
         # Backspace hold-to-delete
         self._backspace_held_frames = 0
         self._BACKSPACE_INITIAL_DELAY = 25
@@ -516,9 +527,8 @@ class Game:
         oc_rect = layout["overclock"]
         flash_rect = pygame.Rect(code_rect.x, code_rect.y, code_rect.w, oc_rect.bottom - code_rect.y)
 
-        overlay = pygame.Surface((flash_rect.w, flash_rect.h), pygame.SRCALPHA)
-        overlay.fill((0, int(30 * frac), 0, int(210 * frac)))
-        self._screen.blit(overlay, flash_rect.topleft)
+        self._correct_flash_surf.fill((0, int(30 * frac), 0, int(210 * frac)))
+        self._screen.blit(self._correct_flash_surf, flash_rect.topleft)
 
         color = NEON_GREEN
         c = tuple(int(ch * frac) for ch in color)
@@ -862,16 +872,13 @@ class Game:
 
         frac = max(0.0, min(1.0, frac))
 
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((180, 0, 0, int(180 * frac)))
-        self._screen.blit(overlay, (0, 0))
+        self._death_overlay_surf.fill((180, 0, 0, int(180 * frac)))
+        self._screen.blit(self._death_overlay_surf, (0, 0))
 
-        # Scanline stripes across the whole screen
-        stripe_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        stripe_alpha = int(60 * frac)
+        self._death_stripe_surf.fill((0, 0, 0, 0))
         for sy in range(0, SCREEN_HEIGHT, 6):
-            pygame.draw.line(stripe_surf, (0, 0, 0, stripe_alpha), (0, sy), (SCREEN_WIDTH, sy))
-        self._screen.blit(stripe_surf, (0, 0))
+            pygame.draw.line(self._death_stripe_surf, (0, 0, 0, int(60 * frac)), (0, sy), (SCREEN_WIDTH, sy))
+        self._screen.blit(self._death_stripe_surf, (0, 0))
 
         c = tuple(int(ch * frac) for ch in NEON_RED)
 
@@ -899,9 +906,7 @@ class Game:
         pygame.draw.rect(self._screen, c, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), 4)
 
     def _draw_win_screen(self):
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 220))
-        self._screen.blit(overlay, (0, 0))
+        self._screen.blit(self._fullscreen_dark_surf, (0, 0))
 
         win_text = self._font_huge.render("UZVARA!", True, NEON_GREEN)
         win_rect = win_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 120))
@@ -924,9 +929,7 @@ class Game:
         self._screen.blit(hint, hint_rect)
 
     def _draw_transition_screen(self):
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 220))
-        self._screen.blit(overlay, (0, 0))
+        self._screen.blit(self._fullscreen_dark_surf, (0, 0))
 
         nwi = self._next_world_index
         if nwi < len(WORLD_LABELS):
@@ -951,9 +954,7 @@ class Game:
         self._screen.blit(score_surf, score_rect)
 
     def _draw_game_over_screen(self):
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 220))
-        self._screen.blit(overlay, (0, 0))
+        self._screen.blit(self._fullscreen_dark_surf, (0, 0))
 
         gg_text = self._font_huge.render("SPĒLE BEIGUSIES", True, NEON_RED)
         gg_rect = gg_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))

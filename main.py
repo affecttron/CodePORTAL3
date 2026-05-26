@@ -99,6 +99,9 @@ class MainMenu:
 
         self._dot_surf = pygame.Surface((14, 14), pygame.SRCALPHA)
 
+        self._scores_veil_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self._scores_veil_surf.fill((0, 0, 0, 225))
+
     @staticmethod
     def _build_glow(rect, specs):
         return [
@@ -410,9 +413,7 @@ class MainMenu:
 
     # Rezultātu logs
     def _draw_scores(self):
-        veil = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        veil.fill((0, 0, 0, 225))
-        self._screen.blit(veil, (0, 0))
+        self._screen.blit(self._scores_veil_surf, (0, 0))
 
         cx = SCREEN_WIDTH // 2
         title = self._font_title.render("REZULTĀTI", True, PALE)

@@ -130,14 +130,17 @@ class TileRegistry:
             return None
 
         try:
-            image = pygame.image.load(full_path).convert_alpha()
-            # mergojam
+            image = pygame.image.load(full_path)
+            try:
+                image = image.convert_alpha()
+            except pygame.error:
+                pass
             if image.get_width() != TILE_SIZE or image.get_height() != TILE_SIZE:
                 image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
             self._loaded_images_count += 1
             return image
         except pygame.error as e:
-            print(f"⚠️ Nevarēja ielādēt {filename}: {e}")
+            print(f"Nevarēja ielādēt {filename}: {e}")
             self._missing_images_count += 1
             return None
 
