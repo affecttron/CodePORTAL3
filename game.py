@@ -103,6 +103,9 @@ class Game:
         self._hint_revealed = False
         self._hint_text = ""
 
+        self._death_flash_timer = 0
+        self._death_flash_points = 10
+
         # Backspace hold-to-delete
         self._backspace_held_frames = 0
         self._BACKSPACE_INITIAL_DELAY = 25
@@ -314,6 +317,9 @@ class Game:
         if self._feedback_timer > 0:
             self._feedback_timer -= 1
 
+        if self._death_flash_timer > 0:
+            self._death_flash_timer -= 1
+
         if self._portal_cooldown > 0:
             self._portal_cooldown -= 1
 
@@ -327,11 +333,12 @@ class Game:
         self._camera.update()
 
         hazard = self._world.check_hazard_collision(self._player_sprite.get_rect())
-        if hazard:
+        if hazard and self._death_flash_timer == 0:
             self._sound.play_sound("death")
             spawn_x, spawn_y = self._world.get_spawn_position()
             self._player_sprite.respawn(spawn_x, spawn_y)
-            self._show_feedback("NĀVE! Mēģini vēlreiz!", NEON_RED)
+            self._player.deduct_score(self._death_flash_points)
+            self._death_flash_timer = 90
             self._pipeline.pulse_glitch(1.0)
 
         if self._portal_cooldown == 0:
@@ -549,6 +556,8 @@ class Game:
 
         if self._feedback_timer > 0:
             self._draw_feedback()
+        if self._death_flash_timer > 0:
+            self._draw_death_flash()
 
     # === HUD (bottom-anchored cyberpunk terminal) ===
 
@@ -840,6 +849,54 @@ class Game:
             surf = self._font_code_small.render(text, True, c)
             self._screen.blit(surf, (x, y))
             x += surf.get_width()
+
+    def _draw_death_flash(self):
+        t = self._death_flash_timer
+        # 0-90: fade in over first 15 frames, hold, fade out over last 30
+        if t > 75:
+            frac = (90 - t) / 15.0        # 0 → 1 as t goes 90 → 75
+        elif t > 30:
+            frac = 1.0
+        else:
+            frac = t / 30.0               # 1 → 0 as t goes 30 → 0
+
+        frac = max(0.0, min(1.0, frac))
+
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((180, 0, 0, int(180 * frac)))
+        self._screen.blit(overlay, (0, 0))
+
+        # Scanline stripes across the whole screen
+        stripe_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        stripe_alpha = int(60 * frac)
+        for sy in range(0, SCREEN_HEIGHT, 6):
+            pygame.draw.line(stripe_surf, (0, 0, 0, stripe_alpha), (0, sy), (SCREEN_WIDTH, sy))
+        self._screen.blit(stripe_surf, (0, 0))
+
+        c = tuple(int(ch * frac) for ch in NEON_RED)
+
+        killed_surf = self._font_huge.render("NĀVE", True, c)
+        killed_rect = killed_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 44))
+        self._screen.blit(killed_surf, killed_rect)
+
+        # Points deducted
+        pts_surf = self._font_big.render(f"-{self._death_flash_points} pts", True, c)
+        pts_rect = pts_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 32))
+        self._screen.blit(pts_surf, pts_rect)
+
+        # Corner accent lines
+        al = 32
+        for cx, cy, dx, dy in [
+            (0, 0, 1, 1),
+            (SCREEN_WIDTH - 1, 0, -1, 1),
+            (0, SCREEN_HEIGHT - 1, 1, -1),
+            (SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, -1, -1),
+        ]:
+            pygame.draw.line(self._screen, c, (cx, cy), (cx + dx * al, cy), 3)
+            pygame.draw.line(self._screen, c, (cx, cy), (cx, cy + dy * al), 3)
+
+        # Thin red border
+        pygame.draw.rect(self._screen, c, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), 4)
 
     def _draw_win_screen(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
