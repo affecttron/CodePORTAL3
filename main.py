@@ -232,7 +232,7 @@ class MainMenu:
 
     def _launch(self, fn):
         self._sound.stop_ambience()
-        self._fade(out=True)
+        self._fade(out=True, frames=22, hold=14)
         self._pipeline.shutdown()
         try:
             fn()
@@ -249,9 +249,9 @@ class MainMenu:
         self._sound.play_music()
         self._sound.start_ambience()
         self._draw()
-        self._fade(out=False)
+        self._fade(out=False, frames=18)
 
-    def _fade(self, out, frames=10):
+    def _fade(self, out, frames=18, hold=0):
         snap = self._screen.copy()
         veil = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         veil.fill(BLACK)
@@ -262,6 +262,12 @@ class MainMenu:
             self._screen.blit(veil, (0, 0))
             self._pipeline.present()
             self._clock.tick(FPS)
+        if hold > 0:
+            veil.set_alpha(255)
+            for _ in range(hold):
+                self._screen.blit(veil, (0, 0))
+                self._pipeline.present()
+                self._clock.tick(FPS)
 
     def _item_rect(self, i):
         w, h, gap = 680, 82, 24
