@@ -19,6 +19,7 @@ class World:
         self._hazards = []
         self._climbables = []
         self._doors = []
+        # Per-frame collision lists — rebuilt lazily, invalidated on edits.
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
         self._spawn_x = PLAYER_SPAWN_X
@@ -27,7 +28,9 @@ class World:
         self._world_height = WORLD_HEIGHT
         self._registry = registry
 
+    # === TILE PĀRVALDĪBA ===
     def add_tile(self, tile_type, grid_x, grid_y):
+        # Spawn = tikai pozīcija
         if tile_type == TILE_SPAWN:
             self._spawn_x = grid_x * TILE_SIZE
             self._spawn_y = grid_y * TILE_SIZE
@@ -37,12 +40,15 @@ class World:
             print(f"Nav registry - nevar pievienot '{tile_type}'")
             return
 
+        # Noņemam veco šajā vietā
         self.remove_tile(grid_x, grid_y)
 
+        # Izveidojam jaunu
         new_tile = create_tile(tile_type, grid_x, grid_y, self._registry)
         self._tiles.append(new_tile)
         self._tile_at[(grid_x, grid_y)] = new_tile
 
+        # Sadalām pa sarakstiem
         if isinstance(new_tile, SolidTile):
             self._platforms.append(new_tile)
             self._solid_rects_cache = None
@@ -52,6 +58,7 @@ class World:
             self._hazards.append(new_tile)
         elif isinstance(new_tile, DoorExitTile):
             self._doors.append(new_tile)
+            # Register all 4 grid cells so any cell can be right-clicked to remove
             self._tile_at[(grid_x + 1, grid_y    )] = new_tile
             self._tile_at[(grid_x,     grid_y + 1)] = new_tile
             self._tile_at[(grid_x + 1, grid_y + 1)] = new_tile
@@ -99,6 +106,7 @@ class World:
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
 
+    # === ZĪMĒŠANA ===
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
         sw, sh = screen.get_size()
         gx_min = camera_offset_x // TILE_SIZE
@@ -113,6 +121,7 @@ class World:
                     seen.add(id(t))
                     t.draw(screen, camera_offset_x, camera_offset_y)
 
+    # === SADURSMES ===
     def get_solid_rects(self):
         if self._solid_rects_cache is None:
             self._solid_rects_cache = [p.get_rect() for p in self._platforms]
@@ -155,6 +164,7 @@ class World:
     def get_doors(self):
         return self._doors
 
+    # === JSON SAGLABĀŠANA ===
     def save_to_file(self, filename):
         os.makedirs(LEVELS_FOLDER, exist_ok=True)
         filepath = os.path.join(LEVELS_FOLDER, filename)
@@ -170,13 +180,13 @@ class World:
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
 
-        print(f"Saglabats: {filepath}")
+        print(f"✅ Saglabāts: {filepath}")
 
     def load_from_file(self, filename):
         filepath = os.path.join(LEVELS_FOLDER, filename)
 
         if not os.path.exists(filepath):
-            print(f"Fails neatrasts: {filepath}")
+            print(f"❌ Fails neatrasts: {filepath}")
             return False
 
         self.clear()
@@ -184,26 +194,31 @@ class World:
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
 
+        # Spawn
         if "spawn" in data:
             self._spawn_x = data["spawn"]["x"] * TILE_SIZE
             self._spawn_y = data["spawn"]["y"] * TILE_SIZE
 
+        # Tiles
         for tile_data in data.get("tiles", []):
             self.add_tile(tile_data["type"], tile_data["x"], tile_data["y"])
 
-        print(f"Ieladets: {filepath} ({len(self._tiles)} tiles)")
+        print(f"✅ Ielādēts: {filepath} ({len(self._tiles)} tiles)")
         return True
 
+    # === DEMO PASAULE ===
     def create_demo_world(self):
         self.clear()
 
         if self._registry is None:
-            print("Nav registry - demo netiks izveidots")
+            print("⚠️ Nav registry - demo netiks izveidots")
             return
 
+        # Grīda
         for x in range(60):
             self.add_tile("ground", x, 16)
 
+        # Platformas
         for x in range(4, 8):
             self.add_tile("platform", x, 12)
         for x in range(12, 16):
@@ -211,13 +226,16 @@ class World:
         for x in range(18, 22):
             self.add_tile("platform", x, 8)
 
+        # 3 portāli
         self.add_tile("portal_red", 8, 15)
         self.add_tile("portal_yellow", 25, 15)
         self.add_tile("portal_green", 40, 15)
 
+        # Spawn
         self._spawn_x = 2 * TILE_SIZE
         self._spawn_y = 14 * TILE_SIZE
 
+    # === GETTERS ===
     def get_tiles(self):
         return self._tiles
 

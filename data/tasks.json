@@ -331,64 +331,64 @@
           "points": 150
         },
         {
-          "question": "x = 12\ny = 8\nif x > 10 and y < 10:\n    print('A')\nelif x < 5:\n    print('B')\nelse:\n    print('C')\n\nKas tiks izvadīts?",
-          "correct_answer": "A",
-          "hint": "Abi nosacījumi pirmajā if ir patiesi. Padomā soli pa solim.",
+          "question": "x = 3\ny = 9\nif x ** 2 == y:\n    print('sakrīt')\nelse:\n    print('nesakrīt')\n\nKas tiks izvadīts?",
+          "correct_answer": "sakrīt",
+          "hint": "3 ** 2 = 9, kas vienāds ar y.",
           "points": 155
         },
         {
-          "question": "a = 7\nb = 14\nif a * 2 == b:\n    print('vienādi')\nelse:\n    print('dažādi')\n\nKas tiks izvadīts?",
-          "correct_answer": "vienādi",
-          "hint": "7 * 2 = 14. Padomā soli pa solim.",
+          "question": "a = True\nb = False\nif a and not b:\n    print('jā')\nelse:\n    print('nē')\n\nKas tiks izvadīts?",
+          "correct_answer": "jā",
+          "hint": "True and not False = True and True = True.",
+          "points": 155
+        },
+        {
+          "question": "x = 10\nif x > 5:\n    if x > 15:\n        print('liels')\n    elif x > 8:\n        print('vidējs')\n    else:\n        print('mazs')\n\nKas tiks izvadīts?",
+          "correct_answer": "vidējs",
+          "hint": "x > 5 ir True, x > 15 ir False, x > 8 ir True.",
+          "points": 155
+        },
+        {
+          "question": "n = 12\nif n % 2 == 0 and n % 3 == 0:\n    print('dalās ar 2 un 3')\nelif n % 2 == 0:\n    print('dalās tikai ar 2')\nelse:\n    print('nedalās')\n\nKas tiks izvadīts?",
+          "correct_answer": "dalās ar 2 un 3",
+          "hint": "12 dalās gan ar 2 (atl. 0), gan ar 3 (atl. 0).",
+          "points": 155
+        },
+        {
+          "question": "x = 0\ny = 5\nif x or y:\n    print('patiess')\nelse:\n    print('aplams')\n\nKas tiks izvadīts?",
+          "correct_answer": "patiess",
+          "hint": "0 ir aplams, bet 5 ir patiess. 0 or 5 → patiess.",
+          "points": 155
+        },
+        {
+          "question": "saraksts = [1, 2, 3]\nif len(saraksts) > 2 and saraksts[0] == 1:\n    print('ok')\nelse:\n    print('ne')\n\nKas tiks izvadīts?",
+          "correct_answer": "ok",
+          "hint": "len = 3 > 2 ir True, un saraksts[0] = 1 ir True.",
           "points": 160
         },
         {
-          "question": "x = 5\nif x > 0:\n    if x < 10:\n        print('iekšā')\n    else:\n        print('ārā')\n\nKas tiks izvadīts?",
-          "correct_answer": "iekšā",
-          "hint": "Abi nosacījumi ir patiesi. Padomā soli pa solim.",
-          "points": 165
+          "question": "x = 7\ny = 3\nz = x % y\nif z == 1:\n    print('atlikums viens')\nelif z == 0:\n    print('dalās')\nelse:\n    print('cits')\n\nKas tiks izvadīts?",
+          "correct_answer": "atlikums viens",
+          "hint": "7 % 3 = 1.",
+          "points": 160
         },
         {
-          "question": "n = 9\nif n % 3 == 0 and n % 2 == 0:\n    print('abi')\nelif n % 3 == 0:\n    print('trīs')\nelse:\n    print('nekas')\n\nKas tiks izvadīts?",
-          "correct_answer": "trīs",
-          "hint": "9 dalās ar 3, bet ne ar 2. Padomā soli pa solim.",
-          "points": 170
+          "question": "a = 5\nb = 10\nc = 15\nif a < b < c:\n    print('augošā secībā')\nelse:\n    print('nav')\n\nKas tiks izvadīts?",
+          "correct_answer": "augošā secībā",
+          "hint": "Python atļauj ķēdes salīdzinājumus: 5 < 10 < 15.",
+          "points": 160
         },
         {
-          "question": "x = 20\nif not x < 10:\n    print('liels')\nelse:\n    print('mazs')\n\nKas tiks izvadīts?",
-          "correct_answer": "liels",
-          "hint": "x < 10 ir False, not False = True. Padomā soli pa solim.",
-          "points": 175
+          "question": "x = -3\nif x < 0:\n    x = -x\nif x > 5:\n    print('liels')\nelse:\n    print('mazs')\n\nKas tiks izvadīts?",
+          "correct_answer": "mazs",
+          "hint": "-3 kļūst 3 pēc pirmā if. 3 nav lielāks par 5.",
+          "points": 160
         },
         {
-          "question": "x = 12\ny = 8\nif x > 10 and y < 10:\n    print('A')\nelif x < 5:\n    print('B')\nelse:\n    print('C')\n\nKas tiks izvadīts?",
-          "correct_answer": "A",
-          "hint": "Abi nosacījumi pirmajā if ir patiesi. Padomā soli pa solim.",
-          "points": 180
-        },
-        {
-          "question": "a = 7\nb = 14\nif a * 2 == b:\n    print('vienādi')\nelse:\n    print('dažādi')\n\nKas tiks izvadīts?",
-          "correct_answer": "vienādi",
-          "hint": "7 * 2 = 14. Padomā soli pa solim.",
-          "points": 185
-        },
-        {
-          "question": "x = 5\nif x > 0:\n    if x < 10:\n        print('iekšā')\n    else:\n        print('ārā')\n\nKas tiks izvadīts?",
-          "correct_answer": "iekšā",
-          "hint": "Abi nosacījumi ir patiesi. Padomā soli pa solim.",
-          "points": 190
-        },
-        {
-          "question": "n = 9\nif n % 3 == 0 and n % 2 == 0:\n    print('abi')\nelif n % 3 == 0:\n    print('trīs')\nelse:\n    print('nekas')\n\nKas tiks izvadīts?",
-          "correct_answer": "trīs",
-          "hint": "9 dalās ar 3, bet ne ar 2. Padomā soli pa solim.",
-          "points": 195
-        },
-        {
-          "question": "x = 20\nif not x < 10:\n    print('liels')\nelse:\n    print('mazs')\n\nKas tiks izvadīts?",
-          "correct_answer": "liels",
-          "hint": "x < 10 ir False, not False = True. Padomā soli pa solim.",
-          "points": 200
+          "question": "n = 25\nif n % 5 == 0:\n    if n % 10 == 0:\n        print('dalās ar 10')\n    else:\n        print('dalās tikai ar 5')\nelse:\n    print('nedalās ar 5')\n\nKas tiks izvadīts?",
+          "correct_answer": "dalās tikai ar 5",
+          "hint": "25 % 5 = 0, bet 25 % 10 = 5, kas nav 0.",
+          "points": 160
         }
       ]
     },
@@ -429,64 +429,64 @@
           "points": 175
         },
         {
-          "question": "summa = 0\nfor i in range(1, 5):\n    for j in range(2):\n        summa += i\nprint(summa)\n\nKas tiks izvadīts?",
-          "correct_answer": "20",
-          "hint": "Katrs i tiek pieskaitīts 2 reizes. Padomā soli pa solim.",
+          "question": "x = 0\nfor i in range(1, 6):\n    if i % 2 == 0:\n        x += i * 2\n    else:\n        x += i\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "21",
+          "hint": "Nepāra i→+i, pāra i→+i*2. 1+4+3+8+5=21.",
           "points": 180
         },
         {
-          "question": "x = 1\nwhile x < 50:\n    x = x * 3\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "81",
-          "hint": "1→3→9→27→81. Padomā soli pa solim.",
+          "question": "n = 1\nwhile n * n < 50:\n    n += 1\nprint(n)\n\nKas tiks izvadīts?",
+          "correct_answer": "8",
+          "hint": "n tiek palielināts kamēr n² < 50. n=8: 64 >= 50.",
+          "points": 180
+        },
+        {
+          "question": "rezultats = []\nfor i in range(5):\n    if i % 2 != 0:\n        rezultats.append(i)\nprint(len(rezultats))\n\nKas tiks izvadīts?",
+          "correct_answer": "2",
+          "hint": "Nepāra skaitļi no 0-4 ir 1 un 3.",
+          "points": 180
+        },
+        {
+          "question": "x = 1\nskaits = 0\nwhile x < 1000:\n    x *= 10\n    skaits += 1\nprint(skaits)\n\nKas tiks izvadīts?",
+          "correct_answer": "3",
+          "hint": "x: 1→10→100→1000. Pie 1000 cikls apstājas.",
+          "points": 180
+        },
+        {
+          "question": "summa = 0\nfor i in range(3):\n    for j in range(3):\n        if i == j:\n            summa += 1\nprint(summa)\n\nKas tiks izvadīts?",
+          "correct_answer": "3",
+          "hint": "Nosacījums i == j izpildās 3 reizes: (0,0),(1,1),(2,2).",
+          "points": 180
+        },
+        {
+          "question": "x = 10\nwhile x > 0:\n    x -= 3\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "-2",
+          "hint": "x: 10→7→4→1→-2. Pie -2 nosacījums x > 0 kļūst aplams.",
           "points": 185
         },
         {
-          "question": "rez = 0\nfor i in range(5):\n    if i % 2 == 1:\n        rez += i\nprint(rez)\n\nKas tiks izvadīts?",
+          "question": "x = 0\nfor i in range(1, 5):\n    x = x * 10 + i\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "1234",
+          "hint": "Katrs solis pievieno nākamo ciparu: 0→1→12→123→1234.",
+          "points": 185
+        },
+        {
+          "question": "n = 6\nf = 1\nfor i in range(1, n + 1):\n    f *= i\nprint(f)\n\nKas tiks izvadīts?",
+          "correct_answer": "720",
+          "hint": "1*2*3*4*5*6 = 720.",
+          "points": 185
+        },
+        {
+          "question": "saraksts = [1, 2, 3, 4, 5]\nfor i in range(len(saraksts) - 1, -1, -1):\n    if saraksts[i] % 2 == 0:\n        print(saraksts[i])\n        break\n\nKas tiks izvadīts?",
           "correct_answer": "4",
-          "hint": "Nepāra skaitļi: 1 un 3. Padomā soli pa solim.",
-          "points": 190
+          "hint": "Cikls iet no beigām. Pirmais pāra skaitlis no beigām ir 4.",
+          "points": 185
         },
         {
-          "question": "n = 100\nskaits = 0\nwhile n > 1:\n    n = n // 5\n    skaits += 1\nprint(skaits)\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "100→20→4→0. Padomā soli pa solim.",
-          "points": 195
-        },
-        {
-          "question": "x = 0\nfor i in range(3):\n    for j in range(i):\n        x += 1\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "i=0 dod 0, i=1 dod 1, i=2 dod 2. Padomā soli pa solim.",
-          "points": 200
-        },
-        {
-          "question": "summa = 0\nfor i in range(1, 5):\n    for j in range(2):\n        summa += i\nprint(summa)\n\nKas tiks izvadīts?",
-          "correct_answer": "20",
-          "hint": "Katrs i tiek pieskaitīts 2 reizes. Padomā soli pa solim.",
-          "points": 205
-        },
-        {
-          "question": "x = 1\nwhile x < 50:\n    x = x * 3\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "81",
-          "hint": "1→3→9→27→81. Padomā soli pa solim.",
-          "points": 210
-        },
-        {
-          "question": "rez = 0\nfor i in range(5):\n    if i % 2 == 1:\n        rez += i\nprint(rez)\n\nKas tiks izvadīts?",
-          "correct_answer": "4",
-          "hint": "Nepāra skaitļi: 1 un 3. Padomā soli pa solim.",
-          "points": 215
-        },
-        {
-          "question": "n = 100\nskaits = 0\nwhile n > 1:\n    n = n // 5\n    skaits += 1\nprint(skaits)\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "100→20→4→0. Padomā soli pa solim.",
-          "points": 220
-        },
-        {
-          "question": "x = 0\nfor i in range(3):\n    for j in range(i):\n        x += 1\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "i=0 dod 0, i=1 dod 1, i=2 dod 2. Padomā soli pa solim.",
-          "points": 225
+          "question": "skaits = 0\nfor i in range(100):\n    if i % 7 == 0 and i % 3 == 0:\n        skaits += 1\nprint(skaits)\n\nKas tiks izvadīts?",
+          "correct_answer": "5",
+          "hint": "LCM(7,3)=21. Skaitļi 0-99 dalāmi ar 21: 0,21,42,63,84.",
+          "points": 185
         }
       ]
     },
@@ -527,64 +527,64 @@
           "points": 200
         },
         {
-          "question": "def f(x):\n    return x + 2\n\ndef g(x):\n    return x * 3\n\nprint(g(f(4)))\n\nKas tiks izvadīts?",
-          "correct_answer": "18",
-          "hint": "f(4)=6, tad 6*3. Padomā soli pa solim.",
+          "question": "def saskait(a, b, c):\n    return a + b + c\n\ndef dubult(x):\n    return x * 2\n\nprint(dubult(saskait(1, 2, 3)))\n\nKas tiks izvadīts?",
+          "correct_answer": "12",
+          "hint": "saskait(1,2,3) = 6, tad dubult(6) = 12.",
           "points": 205
         },
         {
-          "question": "def summa(n):\n    s = 0\n    for i in range(n):\n        s += i\n    return s\n\nprint(summa(5))\n\nKas tiks izvadīts?",
-          "correct_answer": "10",
-          "hint": "0+1+2+3+4. Padomā soli pa solim.",
+          "question": "def rekursija(n):\n    if n == 0:\n        return 0\n    return 1 + rekursija(n - 1)\n\nprint(rekursija(5))\n\nKas tiks izvadīts?",
+          "correct_answer": "5",
+          "hint": "rekursija(5) = 1 + rekursija(4) = ... = 5 + 0.",
+          "points": 205
+        },
+        {
+          "question": "def apgriezt(teksts):\n    return teksts[::-1]\n\nprint(apgriezt('kods'))\n\nKas tiks izvadīts?",
+          "correct_answer": "sdok",
+          "hint": "[::-1] apgriež tekstu otrādi.",
+          "points": 205
+        },
+        {
+          "question": "def skaita(teksts, burts):\n    skaits = 0\n    for b in teksts:\n        if b == burts:\n            skaits += 1\n    return skaits\n\nprint(skaita('banana', 'a'))\n\nKas tiks izvadīts?",
+          "correct_answer": "3",
+          "hint": "Vārdā 'banana' ir 3 'a' burti.",
+          "points": 205
+        },
+        {
+          "question": "def min2(a, b):\n    return a if a < b else b\n\ndef min3(a, b, c):\n    return min2(min2(a, b), c)\n\nprint(min3(5, 3, 7))\n\nKas tiks izvadīts?",
+          "correct_answer": "3",
+          "hint": "min2(5,3)=3, tad min2(3,7)=3.",
+          "points": 205
+        },
+        {
+          "question": "def sakne(x):\n    return x ** 0.5\n\nprint(sakne(144))\n\nKas tiks izvadīts?",
+          "correct_answer": "12.0",
+          "hint": "144 ** 0.5 = kvadrātsakne no 144 = 12.0.",
           "points": 210
         },
         {
-          "question": "def parbaude(x):\n    if x > 10:\n        return 'A'\n    return 'B'\n\nprint(parbaude(7))\n\nKas tiks izvadīts?",
-          "correct_answer": "B",
-          "hint": "7 nav lielāks par 10. Padomā soli pa solim.",
-          "points": 215
+          "question": "def pirmskaitlis(n):\n    if n < 2:\n        return False\n    for i in range(2, n):\n        if n % i == 0:\n            return False\n    return True\n\nprint(pirmskaitlis(17))\n\nKas tiks izvadīts?",
+          "correct_answer": "True",
+          "hint": "17 dalās tikai ar 1 un sevi — tas ir pirmskaitlis.",
+          "points": 210
         },
         {
-          "question": "def kubs(x):\n    return x ** 3\n\nrez = kubs(2) + kubs(1)\nprint(rez)\n\nKas tiks izvadīts?",
-          "correct_answer": "9",
-          "hint": "2³ + 1³ = 8 + 1. Padomā soli pa solim.",
-          "points": 220
+          "question": "def ciparu_summa(n):\n    if n == 0:\n        return 0\n    return n % 10 + ciparu_summa(n // 10)\n\nprint(ciparu_summa(123))\n\nKas tiks izvadīts?",
+          "correct_answer": "6",
+          "hint": "3 + 2 + 1 = 6.",
+          "points": 210
         },
         {
-          "question": "def mainit(teksts):\n    return teksts.upper()\n\nprint(mainit('python'))\n\nKas tiks izvadīts?",
-          "correct_answer": "PYTHON",
-          "hint": "upper() pārvērš tekstu lielajos burtos. Padomā soli pa solim.",
-          "points": 225
+          "question": "def pielietot(f, x):\n    return f(x)\n\ndef kvadrats(n):\n    return n * n\n\nprint(pielietot(kvadrats, 7))\n\nKas tiks izvadīts?",
+          "correct_answer": "49",
+          "hint": "pielietot(kvadrats, 7) izsauc kvadrats(7) = 49.",
+          "points": 210
         },
         {
-          "question": "def f(x):\n    return x + 2\n\ndef g(x):\n    return x * 3\n\nprint(g(f(4)))\n\nKas tiks izvadīts?",
-          "correct_answer": "18",
-          "hint": "f(4)=6, tad 6*3. Padomā soli pa solim.",
-          "points": 230
-        },
-        {
-          "question": "def summa(n):\n    s = 0\n    for i in range(n):\n        s += i\n    return s\n\nprint(summa(5))\n\nKas tiks izvadīts?",
-          "correct_answer": "10",
-          "hint": "0+1+2+3+4. Padomā soli pa solim.",
-          "points": 235
-        },
-        {
-          "question": "def parbaude(x):\n    if x > 10:\n        return 'A'\n    return 'B'\n\nprint(parbaude(7))\n\nKas tiks izvadīts?",
-          "correct_answer": "B",
-          "hint": "7 nav lielāks par 10. Padomā soli pa solim.",
-          "points": 240
-        },
-        {
-          "question": "def kubs(x):\n    return x ** 3\n\nrez = kubs(2) + kubs(1)\nprint(rez)\n\nKas tiks izvadīts?",
-          "correct_answer": "9",
-          "hint": "2³ + 1³ = 8 + 1. Padomā soli pa solim.",
-          "points": 245
-        },
-        {
-          "question": "def mainit(teksts):\n    return teksts.upper()\n\nprint(mainit('python'))\n\nKas tiks izvadīts?",
-          "correct_answer": "PYTHON",
-          "hint": "upper() pārvērš tekstu lielajos burtos. Padomā soli pa solim.",
-          "points": 250
+          "question": "def mainit_reg(teksts):\n    rez = ''\n    for b in teksts:\n        if b.isupper():\n            rez += b.lower()\n        else:\n            rez += b.upper()\n    return rez\n\nprint(mainit_reg('PyThOn'))\n\nKas tiks izvadīts?",
+          "correct_answer": "pYtHoN",
+          "hint": "Katrs burts tiek mainīts: lielie→mazie, mazie→lielie.",
+          "points": 210
         }
       ]
     },
@@ -625,64 +625,64 @@
           "points": 250
         },
         {
-          "question": "x = [1, 2, 3]\nprint(x[-1])\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "-1 nozīmē pēdējo elementu sarakstā. Padomā soli pa solim.",
+          "question": "x = [1, 2, 3, 4, 5]\nprint(x[1:3])\n\nKas tiks izvadīts?",
+          "correct_answer": "[2, 3]",
+          "hint": "Slice [1:3] ietver elementus ar indeksiem 1 un 2.",
           "points": 255
         },
         {
-          "question": "vardi = ['AI', 'BOT']\nrez = ''\nfor v in vardi:\n    rez += v\nprint(rez)\n\nKas tiks izvadīts?",
-          "correct_answer": "AIBOT",
-          "hint": "Teksti tiek savienoti kopā. Padomā soli pa solim.",
+          "question": "x = [10, 20, 30]\nx[1] = 99\nprint(x)\n\nKas tiks izvadīts?",
+          "correct_answer": "[10, 99, 30]",
+          "hint": "Elements ar indeksu 1 tiek nomainīts uz 99.",
+          "points": 255
+        },
+        {
+          "question": "d = {'a': 1, 'b': 2, 'c': 3}\nprint(list(d.keys()))\n\nKas tiks izvadīts?",
+          "correct_answer": "['a', 'b', 'c']",
+          "hint": "d.keys() atgriež visas atslēgas.",
+          "points": 255
+        },
+        {
+          "question": "x = [3, 1, 4, 1, 5, 9]\nx.sort()\nprint(x[0])\n\nKas tiks izvadīts?",
+          "correct_answer": "1",
+          "hint": "Pēc sort() saraksts ir [1,1,3,4,5,9]. Pirmais elements ir 1.",
+          "points": 255
+        },
+        {
+          "question": "x = [1, 2, 3]\ny = x.copy()\ny.append(4)\nprint(len(x))\n\nKas tiks izvadīts?",
+          "correct_answer": "3",
+          "hint": "copy() izveido neatkarīgu kopiju. x nav mainīts.",
+          "points": 255
+        },
+        {
+          "question": "d = {}\nfor i in range(3):\n    d[i] = i * i\nprint(d[2])\n\nKas tiks izvadīts?",
+          "correct_answer": "4",
+          "hint": "d = {0:0, 1:1, 2:4}. d[2] = 4.",
           "points": 260
         },
         {
-          "question": "x = [5, 10, 15]\nprint(len(x))\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "len() atgriež elementu skaitu. Padomā soli pa solim.",
-          "points": 265
+          "question": "x = [5, 3, 8, 1, 9]\nprint(max(x) - min(x))\n\nKas tiks izvadīts?",
+          "correct_answer": "8",
+          "hint": "max = 9, min = 1. 9 - 1 = 8.",
+          "points": 260
         },
         {
-          "question": "d = {'a': 1, 'b': 2}\nprint(d['b'])\n\nKas tiks izvadīts?",
+          "question": "teksts = 'hello world'\nprint(len(teksts.split()))\n\nKas tiks izvadīts?",
           "correct_answer": "2",
-          "hint": "Atslēgai 'b' ir vērtība 2. Padomā soli pa solim.",
-          "points": 270
+          "hint": "split() sadala pa atstarpēm: ['hello','world']. len = 2.",
+          "points": 260
         },
         {
-          "question": "x = [1, 2, 3]\nx.append(4)\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "[1, 2, 3, 4]",
-          "hint": "append() pievieno jaunu elementu saraksta beigās. Padomā soli pa solim.",
-          "points": 275
+          "question": "x = [1, 2, 3, 4, 5]\nprint(sum(x[::2]))\n\nKas tiks izvadīts?",
+          "correct_answer": "9",
+          "hint": "x[::2] = [1, 3, 5]. Summa = 9.",
+          "points": 260
         },
         {
-          "question": "x = [1, 2, 3]\nprint(x[-1])\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "-1 nozīmē pēdējo elementu sarakstā. Padomā soli pa solim.",
-          "points": 280
-        },
-        {
-          "question": "vardi = ['AI', 'BOT']\nrez = ''\nfor v in vardi:\n    rez += v\nprint(rez)\n\nKas tiks izvadīts?",
-          "correct_answer": "AIBOT",
-          "hint": "Teksti tiek savienoti kopā. Padomā soli pa solim.",
-          "points": 285
-        },
-        {
-          "question": "x = [5, 10, 15]\nprint(len(x))\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "len() atgriež elementu skaitu. Padomā soli pa solim.",
-          "points": 290
-        },
-        {
-          "question": "d = {'a': 1, 'b': 2}\nprint(d['b'])\n\nKas tiks izvadīts?",
-          "correct_answer": "2",
-          "hint": "Atslēgai 'b' ir vērtība 2. Padomā soli pa solim.",
-          "points": 295
-        },
-        {
-          "question": "x = [1, 2, 3]\nx.append(4)\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "[1, 2, 3, 4]",
-          "hint": "append() pievieno jaunu elementu saraksta beigās. Padomā soli pa solim.",
-          "points": 300
+          "question": "d = {'x': [1, 2, 3]}\nd['x'].append(4)\nprint(d['x'][-1])\n\nKas tiks izvadīts?",
+          "correct_answer": "4",
+          "hint": "Saraksts tiek papildināts ar 4. Pēdējais elements ir 4.",
+          "points": 260
         }
       ]
     },
@@ -723,64 +723,64 @@
           "points": 300
         },
         {
-          "question": "x = [2, 4, 6]\nprint(sum(x))\n\nKas tiks izvadīts?",
-          "correct_answer": "12",
-          "hint": "sum() saskaita visus elementus. Padomā soli pa solim.",
+          "question": "x = [1, 2, 3, 4, 5]\nprint(list(map(lambda n: n ** 2, x)))\n\nKas tiks izvadīts?",
+          "correct_answer": "[1, 4, 9, 16, 25]",
+          "hint": "map() pielieto funkciju katram elementam. n**2 ir n kvadrāts.",
           "points": 305
         },
         {
-          "question": "teksts = 'Cyber'\nprint(teksts[::-1])\n\nKas tiks izvadīts?",
-          "correct_answer": "rebyC",
-          "hint": "[::-1] apgriež tekstu otrādi. Padomā soli pa solim.",
+          "question": "teksts = '   python   '\nprint(len(teksts.strip()))\n\nKas tiks izvadīts?",
+          "correct_answer": "6",
+          "hint": "strip() noņem atstarpes. 'python' ir 6 burti.",
+          "points": 305
+        },
+        {
+          "question": "x = {'a': 1, 'b': 2}\ny = {'b': 3, 'c': 4}\nz = {**x, **y}\nprint(z['b'])\n\nKas tiks izvadīts?",
+          "correct_answer": "3",
+          "hint": "Ja atslēgas sakrīt, otrais vārdnīcas ieraksts pārraksta pirmo.",
+          "points": 305
+        },
+        {
+          "question": "x = [1, 2, 3, 4, 5]\nprint(x[-3:])\n\nKas tiks izvadīts?",
+          "correct_answer": "[3, 4, 5]",
+          "hint": "Negatīvais slice no -3 līdz beigām.",
+          "points": 305
+        },
+        {
+          "question": "vardi = ['bob', 'alice', 'charlie']\nvardi.sort()\nprint(vardi[0])\n\nKas tiks izvadīts?",
+          "correct_answer": "alice",
+          "hint": "Alfabētiskā secībā: alice, bob, charlie.",
+          "points": 305
+        },
+        {
+          "question": "x = [1, 2, 3]\nprint(x * 2)\n\nKas tiks izvadīts?",
+          "correct_answer": "[1, 2, 3, 1, 2, 3]",
+          "hint": "Sarakstu reizināšana atkārto to.",
           "points": 310
         },
         {
-          "question": "x = [1, 2, 3]\nfor i in range(len(x)):\n    x[i] *= 2\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "[2, 4, 6]",
-          "hint": "Katrs elements tiek reizināts ar 2. Padomā soli pa solim.",
-          "points": 315
+          "question": "d = {'a': [1, 2], 'b': [3, 4]}\nprint(sum(d['a']) + sum(d['b']))\n\nKas tiks izvadīts?",
+          "correct_answer": "10",
+          "hint": "sum([1,2]) = 3, sum([3,4]) = 7. 3 + 7 = 10.",
+          "points": 310
         },
         {
-          "question": "d = {'x': 5}\nd['y'] = 10\nprint(len(d))\n\nKas tiks izvadīts?",
-          "correct_answer": "2",
-          "hint": "Vārdnīcā tagad ir divas atslēgas. Padomā soli pa solim.",
-          "points": 320
+          "question": "x = 'hello'\nprint(''.join(sorted(x)))\n\nKas tiks izvadīts?",
+          "correct_answer": "ehllo",
+          "hint": "sorted('hello') → ['e','h','l','l','o']. join → 'ehllo'.",
+          "points": 310
         },
         {
-          "question": "x = set([1,1,2,3])\nprint(len(x))\n\nKas tiks izvadīts?",
+          "question": "x = [True, False, True, True]\nprint(sum(x))\n\nKas tiks izvadīts?",
           "correct_answer": "3",
-          "hint": "set neglabā dublikātus. Padomā soli pa solim.",
-          "points": 325
+          "hint": "True = 1, False = 0. Summa = 3.",
+          "points": 310
         },
         {
-          "question": "x = [2, 4, 6]\nprint(sum(x))\n\nKas tiks izvadīts?",
-          "correct_answer": "12",
-          "hint": "sum() saskaita visus elementus. Padomā soli pa solim.",
-          "points": 330
-        },
-        {
-          "question": "teksts = 'Cyber'\nprint(teksts[::-1])\n\nKas tiks izvadīts?",
-          "correct_answer": "rebyC",
-          "hint": "[::-1] apgriež tekstu otrādi. Padomā soli pa solim.",
-          "points": 335
-        },
-        {
-          "question": "x = [1, 2, 3]\nfor i in range(len(x)):\n    x[i] *= 2\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "[2, 4, 6]",
-          "hint": "Katrs elements tiek reizināts ar 2. Padomā soli pa solim.",
-          "points": 340
-        },
-        {
-          "question": "d = {'x': 5}\nd['y'] = 10\nprint(len(d))\n\nKas tiks izvadīts?",
-          "correct_answer": "2",
-          "hint": "Vārdnīcā tagad ir divas atslēgas. Padomā soli pa solim.",
-          "points": 345
-        },
-        {
-          "question": "x = set([1,1,2,3])\nprint(len(x))\n\nKas tiks izvadīts?",
-          "correct_answer": "3",
-          "hint": "set neglabā dublikātus. Padomā soli pa solim.",
-          "points": 350
+          "question": "d = {'a': 10, 'b': 20, 'c': 30}\nprint(max(d.values()))\n\nKas tiks izvadīts?",
+          "correct_answer": "30",
+          "hint": "d.values() = [10, 20, 30]. max = 30.",
+          "points": 310
         }
       ]
     },
@@ -821,64 +821,64 @@
           "points": 400
         },
         {
-          "question": "def rek(n):\n    if n == 1:\n        return 1\n    return n + rek(n-1)\n\nprint(rek(4))\n\nKas tiks izvadīts?",
-          "correct_answer": "10",
-          "hint": "4+3+2+1. Padomā soli pa solim.",
+          "question": "x = [1, 2, 3, 4, 5]\nrez = [i for i in x if i ** 2 > 10]\nprint(rez)\n\nKas tiks izvadīts?",
+          "correct_answer": "[4, 5]",
+          "hint": "i**2 > 10 ir patiess kad i=4 (16) un i=5 (25).",
           "points": 405
         },
         {
-          "question": "x = [i*i for i in range(4)]\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "[0, 1, 4, 9]",
-          "hint": "Katrs skaitlis tiek kāpināts kvadrātā. Padomā soli pa solim.",
+          "question": "def dekors(f):\n    def ieksa(*args):\n        return f(*args) + 1\n    return ieksa\n\n@dekors\ndef skaitlis(x):\n    return x * 2\n\nprint(skaitlis(5))\n\nKas tiks izvadīts?",
+          "correct_answer": "11",
+          "hint": "Dekorators pieskaita 1. skaitlis(5) = 5*2 = 10, tad +1 = 11.",
+          "points": 405
+        },
+        {
+          "question": "x = [1, [2, 3], [4, [5]]]\nprint(x[2][1][0])\n\nKas tiks izvadīts?",
+          "correct_answer": "5",
+          "hint": "x[2]=[4,[5]], x[2][1]=[5], x[2][1][0]=5.",
+          "points": 405
+        },
+        {
+          "question": "a = [1, 2, 3]\nb = a\nb.append(4)\nprint(len(a))\n\nKas tiks izvadīts?",
+          "correct_answer": "4",
+          "hint": "b = a nav kopija — abi norāda uz vienu sarakstu.",
+          "points": 405
+        },
+        {
+          "question": "x = {i: i**2 for i in range(5)}\nprint(x[3])\n\nKas tiks izvadīts?",
+          "correct_answer": "9",
+          "hint": "Vārdnīcas izpratne: {0:0,1:1,2:4,3:9,4:16}. x[3] = 9.",
+          "points": 405
+        },
+        {
+          "question": "kopa = set()\nfor i in range(5):\n    kopa.add(i % 3)\nprint(len(kopa))\n\nKas tiks izvadīts?",
+          "correct_answer": "3",
+          "hint": "i%3 var būt 0, 1 vai 2. Kopā ir 3 unikālas vērtības.",
           "points": 410
         },
         {
-          "question": "def f(a=[]):\n    a.append(1)\n    return len(a)\n\nprint(f())\nprint(f())\n\nKas tiks izvadīts otrajā print?",
-          "correct_answer": "2",
-          "hint": "Saraksts tiek saglabāts starp funkcijas izsaukumiem. Padomā soli pa solim.",
-          "points": 415
-        },
-        {
-          "question": "x = {'a':1,'b':2}\nfor k,v in x.items():\n    print(v, end='')\n\nKas tiks izvadīts?",
+          "question": "x = lambda a, b: a if a > b else b\nprint(x(7, 12))\n\nKas tiks izvadīts?",
           "correct_answer": "12",
-          "hint": "Tiek izdrukātas visas vērtības bez atstarpēm. Padomā soli pa solim.",
-          "points": 420
+          "hint": "Lambda atgriež lielāko. 7 > 12 ir False, tāpēc atgriež b=12.",
+          "points": 410
         },
         {
-          "question": "nums = [1,2,3,4]\nprint(list(filter(lambda x: x % 2 == 0, nums)))\n\nKas tiks izvadīts?",
-          "correct_answer": "[2, 4]",
-          "hint": "filter atstāj tikai pāra skaitļus. Padomā soli pa solim.",
-          "points": 425
+          "question": "def fib(n, atm={}):\n    if n in atm:\n        return atm[n]\n    if n <= 1:\n        return n\n    atm[n] = fib(n-1) + fib(n-2)\n    return atm[n]\n\nprint(fib(6))\n\nKas tiks izvadīts?",
+          "correct_answer": "8",
+          "hint": "Fibonacci skaitļi: 0,1,1,2,3,5,8. fib(6) = 8.",
+          "points": 410
         },
         {
-          "question": "def rek(n):\n    if n == 1:\n        return 1\n    return n + rek(n-1)\n\nprint(rek(4))\n\nKas tiks izvadīts?",
-          "correct_answer": "10",
-          "hint": "4+3+2+1. Padomā soli pa solim.",
-          "points": 430
+          "question": "x = [1, 2, 3, 4, 5]\nprint(list(zip(x, x[1:]))[0])\n\nKas tiks izvadīts?",
+          "correct_answer": "(1, 2)",
+          "hint": "zip apvieno divus sarakstus pāros. Pirmais pāris ir (1, 2).",
+          "points": 410
         },
         {
-          "question": "x = [i*i for i in range(4)]\nprint(x)\n\nKas tiks izvadīts?",
-          "correct_answer": "[0, 1, 4, 9]",
-          "hint": "Katrs skaitlis tiek kāpināts kvadrātā. Padomā soli pa solim.",
-          "points": 435
-        },
-        {
-          "question": "def f(a=[]):\n    a.append(1)\n    return len(a)\n\nprint(f())\nprint(f())\n\nKas tiks izvadīts otrajā print?",
-          "correct_answer": "2",
-          "hint": "Saraksts tiek saglabāts starp funkcijas izsaukumiem. Padomā soli pa solim.",
-          "points": 440
-        },
-        {
-          "question": "x = {'a':1,'b':2}\nfor k,v in x.items():\n    print(v, end='')\n\nKas tiks izvadīts?",
-          "correct_answer": "12",
-          "hint": "Tiek izdrukātas visas vērtības bez atstarpēm. Padomā soli pa solim.",
-          "points": 445
-        },
-        {
-          "question": "nums = [1,2,3,4]\nprint(list(filter(lambda x: x % 2 == 0, nums)))\n\nKas tiks izvadīts?",
-          "correct_answer": "[2, 4]",
-          "hint": "filter atstāj tikai pāra skaitļus. Padomā soli pa solim.",
-          "points": 450
+          "question": "saraksts = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(sorted(set(saraksts))[-1])\n\nKas tiks izvadīts?",
+          "correct_answer": "9",
+          "hint": "set noņem dublikātus, sorted kārto, [-1] ir lielākais.",
+          "points": 410
         }
       ]
     }

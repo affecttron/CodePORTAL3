@@ -1,5 +1,4 @@
 import pygame
-import sys
 import os
 from player import Player
 from player_sprite import PlayerSprite
@@ -17,7 +16,7 @@ from settings import (
     WHITE, BLACK, NEON_CYAN, NEON_GREEN, NEON_RED, NEON_YELLOW,
     GRAY,
     LEVELS_FOLDER,
-    TILE_DOOR_EXIT, WORLD_CONFIGS, WORLD_LABELS, get_world_config,
+    WORLD_LABELS, get_world_config,
 )
 from ui_utils import dim_color, draw_corner_accents
 
@@ -350,8 +349,6 @@ class Game:
         overclock_ms = self._current_world_config["overclock_ms"]
         self._current_level = create_level(level_id, overclock_ms=overclock_ms)
         self._current_level.load_tasks()
-        task_count = self._current_world_config.get("task_count", 3)
-        self._current_level.set_task_limit(task_count)
         self._current_level.reset_typewriter()
         self._current_portal = portal
         self._state = STATE_TASK
@@ -359,7 +356,7 @@ class Game:
         self._player.reset_attempts()
         pygame.key.start_text_input()
         self._sound.play_sound("portal_open")
-        print(f"Portal opened: Level {level_id} ({task_count} tasks)")
+        print(f"Portal opened: Level {level_id}")
 
     def _submit_answer(self):
         if not self._input_text.strip():
