@@ -96,6 +96,13 @@ class Game:
 
         self._portal_cooldown = 0
 
+        self._correct_flash_timer = 0
+        self._correct_flash_points = 0
+        self._correct_flash_oc = 0
+        self._pending_next_task = False
+        self._hint_revealed = False
+        self._hint_text = ""
+
         # Backspace hold-to-delete
         self._backspace_held_frames = 0
         self._BACKSPACE_INITIAL_DELAY = 25
@@ -220,7 +227,9 @@ class Game:
                         self._debug_skip_world()
 
                 elif self._state == STATE_TASK:
-                    if event.key == pygame.K_RETURN:
+                    if self._correct_flash_timer > 0:
+                        pass
+                    elif event.key == pygame.K_RETURN:
                         if self._current_level and not self._current_level.is_typewriter_complete():
                             self._current_level.skip_typewriter()
                         else:
@@ -246,7 +255,7 @@ class Game:
 
             # TEXTINPUT — dead-key composition (Latvian ' + a → ā)
             if event.type == pygame.TEXTINPUT:
-                if self._state == STATE_TASK and len(self._input_text) < 50:
+                if self._state == STATE_TASK and self._correct_flash_timer == 0 and len(self._input_text) < 50:
                     self._input_text += event.text
 
     def _handle_continuous_input(self):
@@ -288,6 +297,17 @@ class Game:
             self._update_playing()
         elif self._state == STATE_TASK:
             self._handle_task_hold_input()
+            if self._correct_flash_timer > 0:
+                self._correct_flash_timer -= 1
+                if self._correct_flash_timer == 0 and self._pending_next_task:
+                    self._pending_next_task = False
+                    self._hint_revealed = False
+                    self._hint_text = ""
+                    self._current_level.next_task()
+                    if self._current_level.is_complete():
+                        self._close_task_success()
+                    else:
+                        self._current_level.reset_typewriter()
         elif self._state == STATE_TRANSITION:
             self._update_transition()
 
@@ -353,6 +373,10 @@ class Game:
         self._current_portal = portal
         self._state = STATE_TASK
         self._input_text = ""
+        self._correct_flash_timer = 0
+        self._pending_next_task = False
+        self._hint_revealed = False
+        self._hint_text = ""
         self._player.reset_attempts()
         pygame.key.start_text_input()
         self._sound.play_sound("portal_open")
@@ -368,43 +392,36 @@ class Game:
             return
 
         if task.verify(self._input_text):
-            # PAREIZI
             self._player.increment_attempts()
             attempts = self._player.get_attempts()
             points = task.calculate_points(attempts)
             oc_bonus = self._current_level.consume_overclock_bonus()
             self._player.add_score(points + oc_bonus)
-
             self._sound.play_sound("correct")
-            if oc_bonus:
-                msg = f"PAREIZI! +{points} punkti! [+{oc_bonus} OVERCLOCK]"
-            else:
-                msg = f"PAREIZI! +{points} punkti!"
-            self._show_feedback(msg, NEON_GREEN)
+
+            self._correct_flash_points = points
+            self._correct_flash_oc = oc_bonus
+            self._correct_flash_timer = 70
+            self._pending_next_task = True
             self._input_text = ""
             self._player.reset_attempts()
-
-            self._current_level.next_task()
-            if self._current_level.is_complete():
-                self._close_task_success()
         else:
-            # NEPAREIZI
             self._player.increment_attempts()
             self._player.deduct_score(5)
             attempts = self._player.get_attempts()
             self._current_level.void_overclock()
-
             self._sound.play_sound("wrong")
 
+            self._hint_revealed = True
+            self._hint_text = task.get_hint()
+
             if not self._player.has_attempts_left():
-                self._show_feedback("Pārāk daudz kļūdu! -5 punkti!", NEON_RED)
+                self._show_feedback("Parāk daudz kļūdu!", NEON_RED)
                 self._pipeline.pulse_glitch(1.0)
                 self._close_task_fail()
             else:
                 remaining = 3 - attempts
-                hint = task.get_hint() if attempts >= 2 else ""
-                msg = f"Nepareizi! -5 punkti! Vēl {remaining} mēģ. {hint}"
-                self._show_feedback(msg, NEON_YELLOW)
+                self._show_feedback(f"Nepareizi! Vel {remaining} meginjums. -5 pts", NEON_YELLOW)
                 self._pipeline.pulse_glitch(0.45)
                 self._input_text = ""
 
@@ -435,6 +452,10 @@ class Game:
         self._current_level = None
         self._current_portal = None
         self._input_text = ""
+        self._correct_flash_timer = 0
+        self._pending_next_task = False
+        self._hint_revealed = False
+        self._hint_text = ""
         self._portal_cooldown = 60
         pygame.key.stop_text_input()
 
@@ -479,6 +500,44 @@ class Game:
                 self._draw_transition_screen()
 
         self._pipeline.present()
+
+    def _draw_correct_flash(self, layout):
+        t = self._correct_flash_timer
+        frac = min(1.0, t / 22.0)
+
+        code_rect = layout["code"]
+        oc_rect = layout["overclock"]
+        flash_rect = pygame.Rect(code_rect.x, code_rect.y, code_rect.w, oc_rect.bottom - code_rect.y)
+
+        overlay = pygame.Surface((flash_rect.w, flash_rect.h), pygame.SRCALPHA)
+        overlay.fill((0, int(30 * frac), 0, int(210 * frac)))
+        self._screen.blit(overlay, flash_rect.topleft)
+
+        color = NEON_GREEN
+        c = tuple(int(ch * frac) for ch in color)
+
+        pygame.draw.rect(self._screen, c, flash_rect, 3)
+        al = 12
+        for cx2, cy2, dx, dy in [
+            (flash_rect.x, flash_rect.y, 1, 1),
+            (flash_rect.right - 1, flash_rect.y, -1, 1),
+            (flash_rect.x, flash_rect.bottom - 1, 1, -1),
+            (flash_rect.right - 1, flash_rect.bottom - 1, -1, -1),
+        ]:
+            pygame.draw.line(self._screen, c, (cx2, cy2), (cx2 + dx * al, cy2), 2)
+            pygame.draw.line(self._screen, c, (cx2, cy2), (cx2, cy2 + dy * al), 2)
+
+        ok_surf = self._font_huge.render("PAREIZI!", True, c)
+        ok_rect = ok_surf.get_rect(center=(flash_rect.centerx, flash_rect.centery - 28))
+        self._screen.blit(ok_surf, ok_rect)
+
+        if self._correct_flash_oc:
+            pts_text = f"+{self._correct_flash_points} pts   [ +{self._correct_flash_oc} OVERCLOCK ]"
+        else:
+            pts_text = f"+{self._correct_flash_points} pts"
+        pts_surf = self._font_big.render(pts_text, True, c)
+        pts_rect = pts_surf.get_rect(center=(flash_rect.centerx, flash_rect.centery + 36))
+        self._screen.blit(pts_surf, pts_rect)
 
     def _draw_playing(self):
         cam_x, cam_y = self._camera.get_offset()
@@ -706,6 +765,8 @@ class Game:
 
         self._draw_terminal_input(layout)
         self._draw_terminal_hints(layout)
+        if self._correct_flash_timer > 0:
+            self._draw_correct_flash(layout)
 
     def _draw_terminal_input(self, layout):
         rect = layout["input"]
@@ -736,6 +797,36 @@ class Game:
         rect = layout["hint"]
         color = self._current_level.get_theme_color()
         dim_text = (140, 142, 148)
+        dim_color_hint = tuple(int(c * 0.45) for c in color)
+
+        task = self._current_level.get_current_task()
+        hint_text = task.get_hint() if task else ""
+
+        if hint_text:
+            if self._hint_revealed:
+                label_col = color
+                text_col = WHITE
+                prefix = "HINT: "
+                bg_alpha = 60
+            else:
+                label_col = dim_color_hint
+                text_col = (90, 92, 96)
+                prefix = "HINT: "
+                bg_alpha = 0
+
+            label_surf = self._font_code_small.render(prefix, True, label_col)
+            hint_surf = self._font_code_small.render(hint_text, True, text_col)
+            total_hw = label_surf.get_width() + hint_surf.get_width()
+            hx = rect.centerx - total_hw // 2
+            hy = rect.y
+
+            if self._hint_revealed and bg_alpha > 0:
+                bg = pygame.Surface((total_hw + 24, label_surf.get_height() + 6), pygame.SRCALPHA)
+                bg.fill((color[0], color[1], color[2], bg_alpha))
+                self._screen.blit(bg, (hx - 12, hy - 2))
+
+            self._screen.blit(label_surf, (hx, hy))
+            self._screen.blit(hint_surf, (hx + label_surf.get_width(), hy))
 
         parts = [
             ("[ENTER]", color), (" execute    ", dim_text),
@@ -744,7 +835,7 @@ class Game:
         ]
         total_w = sum(self._font_code_small.size(t)[0] for t, _ in parts)
         x = rect.centerx - total_w // 2
-        y = rect.y
+        y = rect.y + 26
         for text, c in parts:
             surf = self._font_code_small.render(text, True, c)
             self._screen.blit(surf, (x, y))
