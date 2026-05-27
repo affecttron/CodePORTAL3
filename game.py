@@ -26,6 +26,8 @@ STATE_TASK = "task"
 STATE_GAME_OVER = "game_over"
 STATE_WIN = "win"
 STATE_TRANSITION = "transition"
+STATE_PAUSED = "paused"
+STATE_LEADERBOARD = "leaderboard"
 
 
 class Game:
@@ -179,6 +181,37 @@ class Game:
         self._ctrl_surfs_row1 = [self._font_code_small.render(t, True, c) for t, c in _row1_data]
         self._ctrl_surfs_row2 = [self._font_code_small.render(t, True, c) for t, c in _row2_data]
 
+        # === Pause menu state + pre-allocated surfaces ===
+        self._pause_menu_index = 0
+        self._pause_menu_items = ["RESUME", "LEADERBOARD", "EXIT"]
+        self._leaderboard_data = []
+
+        _pm_w, _pm_title_h = 560, 50
+        self._pause_title_tint_surf = pygame.Surface((_pm_w, _pm_title_h), pygame.SRCALPHA)
+        self._pause_title_tint_surf.fill((NEON_CYAN[0], NEON_CYAN[1], NEON_CYAN[2], 26))
+        self._pause_sel_surf = pygame.Surface((_pm_w - 40, 40), pygame.SRCALPHA)
+        self._pause_sel_surf.fill((NEON_CYAN[0], NEON_CYAN[1], NEON_CYAN[2], 20))
+        self._pause_cursor_surf = self._font_code_bold.render(">", True, NEON_CYAN)
+        # Pre-render each item in both selected (cyan) and unselected (dimmed) colours
+        self._pause_item_surfs = [
+            (self._font_big.render(item, True, NEON_CYAN),
+             self._font_big.render(item, True, _label_dim))
+            for item in self._pause_menu_items
+        ]
+        _pm_hint_data = [
+            ("[↑/↓]",   NEON_CYAN), (" navigate    ", _label_dim),
+            ("[ENTER]", NEON_CYAN), (" select    ",   _label_dim),
+            ("[ESC]",   NEON_CYAN), (" resume",       _label_dim),
+        ]
+        self._pause_hint_surfs = [self._font_code_small.render(t, True, c) for t, c in _pm_hint_data]
+
+        # === Leaderboard pre-allocated surfaces ===
+        _lb_w, _lb_title_h = 1000, 50
+        self._lb_title_tint_surf = pygame.Surface((_lb_w, _lb_title_h), pygame.SRCALPHA)
+        self._lb_title_tint_surf.fill((NEON_CYAN[0], NEON_CYAN[1], NEON_CYAN[2], 26))
+        self._lb_row_hl_surf = pygame.Surface((_lb_w - 36, 38), pygame.SRCALPHA)
+        self._lb_row_hl_surf.fill((NEON_YELLOW[0], NEON_YELLOW[1], NEON_YELLOW[2], 18))
+
     def _load_world(self, world_index=0):
         self._world_index = world_index
         self._current_world_config = get_world_config(world_index)
@@ -219,6 +252,12 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     if self._state == STATE_TASK:
                         self._close_task_cancel()
+                    elif self._state == STATE_PLAYING:
+                        self._open_pause_menu()
+                    elif self._state == STATE_PAUSED:
+                        self._close_pause_menu()
+                    elif self._state == STATE_LEADERBOARD:
+                        self._state = STATE_PAUSED
                     else:
                         self._running = False
                     continue
@@ -264,6 +303,13 @@ class Game:
                 elif self._state == STATE_GAME_OVER:
                     if event.key == pygame.K_RETURN:
                         self._running = False
+                elif self._state == STATE_PAUSED:
+                    if event.key in (pygame.K_UP, pygame.K_w):
+                        self._pause_menu_index = (self._pause_menu_index - 1) % len(self._pause_menu_items)
+                    elif event.key in (pygame.K_DOWN, pygame.K_s):
+                        self._pause_menu_index = (self._pause_menu_index + 1) % len(self._pause_menu_items)
+                    elif event.key == pygame.K_RETURN:
+                        self._pause_menu_select()
 
             # TEXTINPUT — dead-key composition (Latvian ' + a → ā)
             if event.type == pygame.TEXTINPUT:
@@ -304,6 +350,11 @@ class Game:
             self._backspace_held_frames = 0
 
     def _update(self):
+        # Freeze all game logic while the pause/leaderboard overlay is open.
+        if self._state in (STATE_PAUSED, STATE_LEADERBOARD):
+            self._sound.update_ambience()
+            return
+
         if self._state == STATE_PLAYING:
             self._handle_continuous_input()
             self._update_playing()
@@ -495,6 +546,28 @@ class Game:
         self._feedback_color = color
         self._feedback_timer = 180
 
+    # === Pause / Leaderboard state helpers ===
+
+    def _open_pause_menu(self):
+        self._pause_menu_index = 0
+        self._state = STATE_PAUSED
+
+    def _close_pause_menu(self):
+        self._state = STATE_PLAYING
+
+    def _pause_menu_select(self):
+        item = self._pause_menu_items[self._pause_menu_index]
+        if item == "RESUME":
+            self._close_pause_menu()
+        elif item == "LEADERBOARD":
+            self._open_leaderboard()
+        elif item == "EXIT":
+            self._running = False
+
+    def _open_leaderboard(self):
+        self._leaderboard_data = self._score_log.get_top_scores(10)
+        self._state = STATE_LEADERBOARD
+
     def _draw(self):
         if self._state == STATE_PLAYING:
             self._draw_playing()
@@ -515,6 +588,12 @@ class Game:
             self._draw_playing()
             if self._transition_timer >= 31:
                 self._draw_transition_screen()
+        elif self._state == STATE_PAUSED:
+            self._draw_playing()
+            self._draw_pause_menu()
+        elif self._state == STATE_LEADERBOARD:
+            self._draw_playing()
+            self._draw_leaderboard()
 
         self._pipeline.present()
 
@@ -960,6 +1039,136 @@ class Game:
         gg_text = self._font_huge.render("SPĒLE BEIGUSIES", True, NEON_RED)
         gg_rect = gg_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         self._screen.blit(gg_text, gg_rect)
+
+    def _draw_pause_menu(self):
+        color = NEON_CYAN
+        dim = dim_color(color, 0.45)
+
+        self._screen.blit(self._fullscreen_dark_surf, (0, 0))
+
+        pm_w, pm_h, title_h = 560, 340, 50
+        pm_x = (SCREEN_WIDTH - pm_w) // 2
+        pm_y = (SCREEN_HEIGHT - pm_h) // 2
+        panel = pygame.Rect(pm_x, pm_y, pm_w, pm_h)
+
+        pygame.draw.rect(self._screen, (10, 12, 16), panel)
+        self._screen.blit(self._pause_title_tint_surf, (pm_x, pm_y))
+        pygame.draw.line(self._screen, dim,
+                         (pm_x, pm_y + title_h - 1), (pm_x + pm_w, pm_y + title_h - 1), 1)
+
+        chip_surf = self._font_code_bold.render("[ SYSTEM_HALT // PAUSED ]", True, color)
+        self._screen.blit(chip_surf, (pm_x + 18, pm_y + 15))
+
+        blink = (pygame.time.get_ticks() // 500) % 2 == 0
+        if blink:
+            pygame.draw.circle(self._screen, color, (pm_x + pm_w - 34, pm_y + 25), 4)
+
+        item_h = 52
+        items_top = pm_y + title_h + 28
+        for i, (sel_surf, unsel_surf) in enumerate(self._pause_item_surfs):
+            iy = items_top + i * item_h
+            if i == self._pause_menu_index:
+                self._screen.blit(self._pause_sel_surf, (pm_x + 20, iy - 6))
+                pygame.draw.rect(self._screen, dim,
+                                 pygame.Rect(pm_x + 20, iy - 6, pm_w - 40, 40), 1)
+                self._screen.blit(self._pause_cursor_surf, (pm_x + 30, iy))
+                self._screen.blit(sel_surf, (pm_x + 60, iy))
+            else:
+                self._screen.blit(unsel_surf, (pm_x + 60, iy))
+
+        hint_y = pm_y + pm_h - 34
+        total_w = sum(s.get_width() for s in self._pause_hint_surfs)
+        hx = pm_x + (pm_w - total_w) // 2
+        for surf in self._pause_hint_surfs:
+            self._screen.blit(surf, (hx, hint_y))
+            hx += surf.get_width()
+
+        pygame.draw.rect(self._screen, color, panel, 2)
+        draw_corner_accents(self._screen, panel, color)
+
+    def _draw_leaderboard(self):
+        color = NEON_CYAN
+        dim = dim_color(color, 0.45)
+        dimmer = dim_color(color, 0.22)
+        label_dim = (140, 142, 148)
+
+        self._screen.blit(self._fullscreen_dark_surf, (0, 0))
+
+        lb_w, lb_h, title_h = 1000, 640, 50
+        lb_x = (SCREEN_WIDTH - lb_w) // 2
+        lb_y = (SCREEN_HEIGHT - lb_h) // 2
+        panel = pygame.Rect(lb_x, lb_y, lb_w, lb_h)
+
+        pygame.draw.rect(self._screen, (10, 12, 16), panel)
+        self._screen.blit(self._lb_title_tint_surf, (lb_x, lb_y))
+        pygame.draw.line(self._screen, dim,
+                         (lb_x, lb_y + title_h - 1), (lb_x + lb_w, lb_y + title_h - 1), 1)
+
+        chip_surf = self._font_code_bold.render("[ OPERATOR_SCORES // TOP 10 ]", True, color)
+        self._screen.blit(chip_surf, (lb_x + 18, lb_y + 15))
+
+        esc_surf = self._font_code_small.render("[ESC] back", True, dim)
+        self._screen.blit(esc_surf, (lb_x + lb_w - esc_surf.get_width() - 18, lb_y + 18))
+
+        # Column x-positions
+        cx_rank  = lb_x + 24
+        cx_name  = lb_x + 110
+        cx_score = lb_x + 440
+        cx_level = lb_x + 590
+        cx_tasks = lb_x + 700
+        cx_date  = lb_x + 810
+
+        col_y = lb_y + title_h + 14
+        for text, cx in [
+            ("RANK", cx_rank), ("OPERATOR", cx_name), ("SCORE", cx_score),
+            ("LVL",  cx_level), ("TASKS",   cx_tasks), ("DATE", cx_date),
+        ]:
+            self._screen.blit(self._font_code_small.render(text, True, label_dim), (cx, col_y))
+
+        div_y = col_y + 22
+        pygame.draw.line(self._screen, dimmer,
+                         (lb_x + 18, div_y), (lb_x + lb_w - 18, div_y), 1)
+
+        current_player = self._player.get_name()
+        row_h = 46
+        row_y = div_y + 10
+
+        if not self._leaderboard_data:
+            no_data = self._font_code.render("-- NO RECORDS FOUND --", True, label_dim)
+            self._screen.blit(no_data, (lb_x + (lb_w - no_data.get_width()) // 2, row_y + 80))
+        else:
+            for rank, entry in enumerate(self._leaderboard_data, 1):
+                is_current = entry["name"] == current_player
+                if is_current:
+                    self._screen.blit(self._lb_row_hl_surf, (lb_x + 18, row_y - 4))
+
+                rank_color  = NEON_CYAN if rank <= 3 else label_dim
+                row_color   = NEON_YELLOW if is_current else WHITE
+                score_color = NEON_YELLOW if is_current else NEON_GREEN
+
+                self._screen.blit(
+                    self._font_code_bold.render(f"#{rank:02d}", True, rank_color),
+                    (cx_rank, row_y))
+                self._screen.blit(
+                    self._font_code_bold.render(entry["name"][:24], True, row_color),
+                    (cx_name, row_y))
+                self._screen.blit(
+                    self._font_code_bold.render(f"{entry['score']:05d}", True, score_color),
+                    (cx_score, row_y))
+                self._screen.blit(
+                    self._font_code.render(f"{entry['level_reached']:02d}", True, row_color),
+                    (cx_level, row_y))
+                self._screen.blit(
+                    self._font_code.render(f"{entry['tasks_completed']:02d}", True, row_color),
+                    (cx_tasks, row_y))
+                self._screen.blit(
+                    self._font_code_small.render(entry["date"][:10], True, label_dim),
+                    (cx_date, row_y + 5))
+
+                row_y += row_h
+
+        pygame.draw.rect(self._screen, color, panel, 2)
+        draw_corner_accents(self._screen, panel, color)
 
 
 if __name__ == "__main__":
