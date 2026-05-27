@@ -99,6 +99,9 @@ class Game:
         # Leaderboard (loaded fresh each time we enter the state)
         self._leaderboard_cache = None
 
+        # Score at the start of the current world (for per-world delta in transition)
+        self._world_score_start = 0
+
         self._current_level = None
         self._current_portal = None
         self._input_text = ""
@@ -186,7 +189,7 @@ class Game:
             ("[R]",   NEON_CYAN), (" respawn  ", _label_dim),
             ("[F1]",  NEON_CYAN), (" FX  ",      _label_dim),
             ("[F9]",  NEON_CYAN), (" skip  ",    _label_dim),
-            ("[ESC]", NEON_CYAN), (" iziet",      _label_dim),
+            ("[ESC]", NEON_CYAN), (" pauze",      _label_dim),
         ]
         self._ctrl_surfs_row1 = [self._font_code_small.render(t, True, c) for t, c in _row1_data]
         self._ctrl_surfs_row2 = [self._font_code_small.render(t, True, c) for t, c in _row2_data]
@@ -209,6 +212,7 @@ class Game:
         self._door_unlocked = False
         self._world.lock_doors()
         self._player.set_max_attempts(self._current_world_config["max_attempts"])
+        self._world_score_start = self._player.get_score()
 
     def run(self):
         while self._running:
@@ -278,8 +282,10 @@ class Game:
                     n = len(self._pause_items)
                     if event.key in (pygame.K_UP, pygame.K_w):
                         self._pause_selection = (self._pause_selection - 1) % n
+                        self._sound.play_sound("menu_click")
                     elif event.key in (pygame.K_DOWN, pygame.K_s):
                         self._pause_selection = (self._pause_selection + 1) % n
+                        self._sound.play_sound("menu_click")
                     elif event.key == pygame.K_RETURN:
                         self._activate_pause_selection()
 
@@ -310,7 +316,9 @@ class Game:
                     hit = False
                     for i, rect in enumerate(self._pause_item_rects):
                         if rect.collidepoint(mx, my):
-                            self._pause_selection = i
+                            if i != self._pause_selection:
+                                self._pause_selection = i
+                                self._sound.play_sound("menu_click")
                             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
                             hit = True
                             break
@@ -555,6 +563,7 @@ class Game:
         self._pipeline.pulse_glitch(1.0)
 
     def _activate_pause_selection(self):
+        self._sound.play_sound("menu_click")
         sel = self._pause_selection
         if sel == 0:                          # Resume
             self._state = STATE_PLAYING
@@ -686,7 +695,6 @@ class Game:
         color = NEON_CYAN
         dim = self._hud_dim(color, 0.45)
         dimmer = self._hud_dim(color, 0.22)
-        label_dim = (140, 142, 148)
 
         hud_w = SCREEN_WIDTH - self.HUD_MARGIN_X * 2
         hud_x = self.HUD_MARGIN_X
@@ -1031,9 +1039,19 @@ class Game:
         label_rect = label_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         self._screen.blit(label_surf, label_rect)
 
-        score_surf = self._font.render(f"Punkti: {self._player.get_score()}", True, NEON_YELLOW)
+        total_score = self._player.get_score()
+        world_delta = total_score - self._world_score_start
+        score_surf = self._font.render(f"Kopā: {total_score}", True, NEON_YELLOW)
         score_rect = score_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 80))
         self._screen.blit(score_surf, score_rect)
+
+        if world_delta > 0:
+            delta_surf = self._font_code_small.render(
+                f"+{world_delta} šajā pasaulē", True, NEON_GREEN
+            )
+            self._screen.blit(delta_surf,
+                               delta_surf.get_rect(center=(SCREEN_WIDTH // 2,
+                                                            SCREEN_HEIGHT // 2 + 126)))
 
     def _draw_game_over_screen(self):
         self._screen.blit(self._fullscreen_dark_surf, (0, 0))
@@ -1047,7 +1065,7 @@ class Game:
     # =========================================================================
 
     _PAUSE_W = 820
-    _PAUSE_H = 460
+    _PAUSE_H = 520
     _PAUSE_TITLE_H = 50
 
     def _draw_pause_menu(self):
@@ -1089,10 +1107,31 @@ class Game:
         rec_surf = self._font_code_small.render("REC", True, rec_col)
         self._screen.blit(rec_surf, (panel.right - 76, py + 17))
 
+        # Status strip — world, score, portals
+        STATUS_H = 44
+        status_y = py + self._PAUSE_TITLE_H
+        status_bar = pygame.Rect(px, status_y, pw, STATUS_H)
+        status_tint = pygame.Surface((pw, STATUS_H), pygame.SRCALPHA)
+        status_tint.fill((color[0], color[1], color[2], 10))
+        self._screen.blit(status_tint, status_bar.topleft)
+
+        world_label  = f"WORLD {self._world_index + 1}"
+        score_label  = f"SCORE  {self._player.get_score():05d}"
+        total_p      = self._world.get_portal_count()
+        portals_label = f"PORTALS  {len(self._completed_portals)}/{total_p}"
+        status_parts = [world_label, "  //  ", score_label, "  //  ", portals_label]
+        status_text  = "".join(status_parts)
+        status_surf  = self._font_code_small.render(status_text, True, dim)
+        self._screen.blit(status_surf,
+                          status_surf.get_rect(midleft=(px + 20, status_bar.centery)))
+
+        pygame.draw.line(self._screen, dimmer,
+                         (px, status_bar.bottom - 1), (px + pw, status_bar.bottom - 1), 1)
+
         # Menu items — build rects first so the event handler can hit-test them
         items = self._pause_items
         item_h = 72
-        items_y = py + self._PAUSE_TITLE_H + 40
+        items_y = py + self._PAUSE_TITLE_H + STATUS_H + 20
         self._pause_item_rects = [
             pygame.Rect(px + 20, items_y + i * item_h, pw - 40, item_h - 8)
             for i in range(len(items))
