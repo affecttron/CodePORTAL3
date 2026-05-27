@@ -60,6 +60,11 @@ class Tile:
             return False
         return self._definition.is_decoration()
 
+    def is_background(self):
+        if self._definition is None:
+            return False
+        return self._definition.is_background()
+
     def is_climbable(self):
         if self._definition is None:
             return False
@@ -228,12 +233,59 @@ class DoorExitTile(Tile):
             pygame.draw.line(screen, border_color, (cx2, cy2), (cx2, cy2 + dy * al))
 
 
+class BackgroundTile(Tile):
+
+    _pattern_cache = {}
+
+    def __init__(self, grid_x, grid_y, tile_id, registry):
+        super().__init__(grid_x, grid_y, tile_id, registry)
+        self._draw_surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+
+    def _get_pattern_surf(self):
+        if self._definition is None:
+            return None
+        color = self._definition.get_fallback_color()
+        if color in BackgroundTile._pattern_cache:
+            return BackgroundTile._pattern_cache[color]
+
+        surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+        surf.fill(color)
+        r, g, b = color
+        line_color = (min(r + 14, 255), min(g + 14, 255), min(b + 14, 255))
+        for i in range(0, TILE_SIZE * 2, 8):
+            pygame.draw.line(surf, line_color, (i, 0), (0, i))
+            pygame.draw.line(surf, line_color, (i, TILE_SIZE - 1), (TILE_SIZE - 1, i - TILE_SIZE))
+        BackgroundTile._pattern_cache[color] = surf
+        return surf
+
+    def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
+        x = self.get_pixel_x() - camera_offset_x
+        y = self.get_pixel_y() - camera_offset_y
+
+        sw, sh = screen.get_size()
+        if x + TILE_SIZE < 0 or x > sw or y + TILE_SIZE < 0 or y > sh:
+            return
+
+        if self._definition and self._definition.has_image():
+            self._draw_surf.blit(self._definition.get_image(), (0, 0))
+        else:
+            pat = self._get_pattern_surf()
+            if pat:
+                self._draw_surf.blit(pat, (0, 0))
+
+        self._draw_surf.set_alpha(200)
+        screen.blit(self._draw_surf, (x, y))
+        self._animation_frame += 1
+
+
 def create_tile(tile_id, grid_x, grid_y, registry):
     definition = registry.get_tile(tile_id)
     if definition is None:
         return Tile(grid_x, grid_y, tile_id, registry)
 
-    if definition.is_door_exit():
+    if definition.is_background():
+        return BackgroundTile(grid_x, grid_y, tile_id, registry)
+    elif definition.is_door_exit():
         return DoorExitTile(grid_x, grid_y, tile_id, registry)
     elif definition.is_portal():
         return PortalTile(grid_x, grid_y, tile_id, registry)

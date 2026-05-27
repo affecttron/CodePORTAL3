@@ -336,6 +336,12 @@ class LevelEditor:
             elif mouse_buttons[2]:
                 self._paint_at_mouse(add=False)
 
+    def _is_current_tile_bg(self):
+        if self._current_tile_id is None:
+            return False
+        tile_def = self._registry.get_tile(self._current_tile_id)
+        return tile_def is not None and tile_def.is_background()
+
     def _paint_at_mouse(self, add=True):
         screen_x, screen_y = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())
         world_x, world_y = self._camera.screen_to_world(screen_x, screen_y)
@@ -345,7 +351,11 @@ class LevelEditor:
         if add:
             if self._current_tile_id is None:
                 return
-            existing = self._world.get_tile_at(grid_x, grid_y)
+            is_bg = self._is_current_tile_bg()
+            if is_bg:
+                existing = self._world.get_bg_tile_at(grid_x, grid_y)
+            else:
+                existing = self._world.get_tile_at(grid_x, grid_y)
             if existing is None or existing.get_type() != self._current_tile_id:
                 if self._current_tile_id == TILE_DOOR_EXIT:
                     for dx, dy in [(0, 0), (1, 0), (0, 1), (1, 1)]:
@@ -353,9 +363,14 @@ class LevelEditor:
                 self._world.add_tile(self._current_tile_id, grid_x, grid_y)
                 self._unsaved_changes = True
         else:
-            if self._world.get_tile_at(grid_x, grid_y) is not None:
-                self._world.remove_tile(grid_x, grid_y)
-                self._unsaved_changes = True
+            if self._is_current_tile_bg():
+                if self._world.get_bg_tile_at(grid_x, grid_y) is not None:
+                    self._world.remove_bg_tile(grid_x, grid_y)
+                    self._unsaved_changes = True
+            else:
+                if self._world.get_tile_at(grid_x, grid_y) is not None:
+                    self._world.remove_tile(grid_x, grid_y)
+                    self._unsaved_changes = True
 
     def _clamp_scroll(self):
         if not self._categories:

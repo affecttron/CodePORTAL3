@@ -21,6 +21,7 @@ class TileDefinition:
         self._decoration = data.get("decoration", False)
         self._special = data.get("special", "")
         self._door_exit = data.get("door_exit", False)
+        self._background = data.get("background", False)
 
         # fallback
         fc = data.get("fallback_color", [128, 128, 128])
@@ -68,6 +69,9 @@ class TileDefinition:
 
     def is_door_exit(self):
         return self._door_exit
+
+    def is_background(self):
+        return self._background
 
 
 class TileRegistry:

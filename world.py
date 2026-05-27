@@ -1,7 +1,7 @@
 import json
 import os
 import pygame
-from tile import create_tile, SolidTile, PortalTile, HazardTile, DoorExitTile
+from tile import create_tile, SolidTile, PortalTile, HazardTile, DoorExitTile, BackgroundTile
 from settings import (
     WORLD_WIDTH, WORLD_HEIGHT, TILE_SIZE,
     TILE_SPAWN, PLAYER_SPAWN_X, PLAYER_SPAWN_Y,
@@ -19,6 +19,8 @@ class World:
         self._hazards = []
         self._climbables = []
         self._doors = []
+        self._bg_tiles = []
+        self._bg_tile_at = {}
         # Per-frame collision lists — rebuilt lazily, invalidated on edits.
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
@@ -40,11 +42,17 @@ class World:
             print(f"Nav registry - nevar pievienot '{tile_type}'")
             return
 
+        new_tile = create_tile(tile_type, grid_x, grid_y, self._registry)
+
+        if isinstance(new_tile, BackgroundTile):
+            self.remove_bg_tile(grid_x, grid_y)
+            self._bg_tiles.append(new_tile)
+            self._bg_tile_at[(grid_x, grid_y)] = new_tile
+            return
+
         # Noņemam veco šajā vietā
         self.remove_tile(grid_x, grid_y)
 
-        # Izveidojam jaunu
-        new_tile = create_tile(tile_type, grid_x, grid_y, self._registry)
         self._tiles.append(new_tile)
         self._tile_at[(grid_x, grid_y)] = new_tile
 
@@ -92,8 +100,16 @@ class World:
             self._climbables.remove(tile_to_remove)
             self._climbable_rects_cache = None
 
+    def remove_bg_tile(self, grid_x, grid_y):
+        tile = self._bg_tile_at.pop((grid_x, grid_y), None)
+        if tile is not None and tile in self._bg_tiles:
+            self._bg_tiles.remove(tile)
+
     def get_tile_at(self, grid_x, grid_y):
         return self._tile_at.get((grid_x, grid_y))
+
+    def get_bg_tile_at(self, grid_x, grid_y):
+        return self._bg_tile_at.get((grid_x, grid_y))
 
     def clear(self):
         self._tiles.clear()
@@ -103,6 +119,8 @@ class World:
         self._hazards.clear()
         self._climbables.clear()
         self._doors.clear()
+        self._bg_tiles.clear()
+        self._bg_tile_at.clear()
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
 
@@ -113,6 +131,13 @@ class World:
         gy_min = camera_offset_y // TILE_SIZE
         gx_max = (camera_offset_x + sw) // TILE_SIZE
         gy_max = (camera_offset_y + sh) // TILE_SIZE
+
+        for gy in range(gy_min, gy_max + 1):
+            for gx in range(gx_min, gx_max + 1):
+                t = self._bg_tile_at.get((gx, gy))
+                if t is not None:
+                    t.draw(screen, camera_offset_x, camera_offset_y)
+
         seen = set()
         for gy in range(gy_min, gy_max + 1):
             for gx in range(gx_min, gx_max + 1):
@@ -174,7 +199,8 @@ class World:
                 "x": self._spawn_x // TILE_SIZE,
                 "y": self._spawn_y // TILE_SIZE
             },
-            "tiles": [t.to_dict() for t in self._tiles]
+            "tiles": [t.to_dict() for t in self._tiles],
+            "bg_tiles": [t.to_dict() for t in self._bg_tiles],
         }
 
         with open(filepath, "w", encoding="utf-8") as f:
@@ -199,11 +225,13 @@ class World:
             self._spawn_x = data["spawn"]["x"] * TILE_SIZE
             self._spawn_y = data["spawn"]["y"] * TILE_SIZE
 
-        # Tiles
         for tile_data in data.get("tiles", []):
             self.add_tile(tile_data["type"], tile_data["x"], tile_data["y"])
 
-        print(f"✅ Ielādēts: {filepath} ({len(self._tiles)} tiles)")
+        for tile_data in data.get("bg_tiles", []):
+            self.add_tile(tile_data["type"], tile_data["x"], tile_data["y"])
+
+        print(f"✅ Ielādēts: {filepath} ({len(self._tiles)} tiles, {len(self._bg_tiles)} bg tiles)")
         return True
 
     # === DEMO PASAULE ===
@@ -255,4 +283,4 @@ class World:
         return (self._world_width, self._world_height)
 
     def get_tile_count(self):
-        return len(self._tiles)
+        return len(self._tiles) + len(self._bg_tiles)

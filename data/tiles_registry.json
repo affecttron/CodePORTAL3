@@ -220,6 +220,66 @@
       ]
     },
     {
+      "name": "Fons",
+      "icon": "▒",
+      "tiles": [
+        {
+          "id": "bg_dark_panel",
+          "name": "Tumšs panelis",
+          "image": "bg_dark_panel.png",
+          "solid": false,
+          "kills": false,
+          "background": true,
+          "fallback_color": [18, 20, 35]
+        },
+        {
+          "id": "bg_metal",
+          "name": "Metāls",
+          "image": "bg_metal.png",
+          "solid": false,
+          "kills": false,
+          "background": true,
+          "fallback_color": [28, 35, 45]
+        },
+        {
+          "id": "bg_brick",
+          "name": "Ķieģeļi",
+          "image": "bg_brick.png",
+          "solid": false,
+          "kills": false,
+          "background": true,
+          "fallback_color": [50, 22, 18]
+        },
+        {
+          "id": "bg_circuit",
+          "name": "Mikroshēma",
+          "image": "bg_circuit.png",
+          "solid": false,
+          "kills": false,
+          "background": true,
+          "fallback_color": [12, 32, 22]
+        },
+        {
+          "id": "bg_concrete",
+          "name": "Betons",
+          "image": "bg_concrete.png",
+          "solid": false,
+          "kills": false,
+          "background": true,
+          "fallback_color": [30, 30, 32]
+        },
+        {
+          "id": "bg_stars",
+          "name": "Kosmoss",
+          "image": "bg_stars.png",
+          "solid": false,
+          "kills": false,
+          "background": true,
+          "fallback_color": [5, 5, 18]
+        }
+      ]
+    },
+    {
       "name": "Speciāli",
       "icon": "⭐",
       "tiles": [
@@ -235,6 +295,7 @@
         {
           "id": "door_exit",
           "name": "Izejas durvis",
+          "image": "door_exit.png",
           "solid": false,
           "kills": false,
           "door_exit": true,

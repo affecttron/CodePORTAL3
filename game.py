@@ -304,12 +304,12 @@ class Game:
                     if event.key == pygame.K_RETURN:
                         self._running = False
 
-            # TEXTINPUT — dead-key composition (Latvian ' + a → ā)
+            # TEXTINPUT lai varetu latviesu burtus ievadit.
             if event.type == pygame.TEXTINPUT:
                 if self._state == STATE_TASK and self._correct_flash_timer == 0 and len(self._input_text) < 50:
                     self._input_text += event.text
 
-            # MOUSE — pause menu hover + click; leaderboard click-to-back
+            # Mouse Hover
             if event.type == pygame.MOUSEMOTION:
                 mx, my = self._pipeline.scale_mouse_pos(event.pos)
                 if self._state == STATE_PAUSED and self._pause_item_rects:
