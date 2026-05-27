@@ -261,8 +261,6 @@ class Game:
                         spawn_x, spawn_y = self._world.get_spawn_position()
                         self._player_sprite.respawn(spawn_x, spawn_y)
                         self._state = STATE_PLAYING
-                    elif event.key == pygame.K_ESCAPE:
-                        self._running = False
                 elif self._state == STATE_GAME_OVER:
                     if event.key == pygame.K_RETURN:
                         self._running = False
@@ -438,7 +436,7 @@ class Game:
                 self._pipeline.pulse_glitch(1.0)
                 self._close_task_fail()
             else:
-                remaining = 3 - attempts
+                remaining = self._current_world_config["max_attempts"] - attempts
                 self._show_feedback(f"Nepareizi! Vel {remaining} meginjums. -5 pts", NEON_YELLOW)
                 self._pipeline.pulse_glitch(0.45)
                 self._input_text = ""
@@ -461,6 +459,7 @@ class Game:
 
     def _close_task_fail(self):
         self._return_to_playing()
+        self._state = STATE_GAME_OVER
 
     def _close_task_cancel(self):
         self._return_to_playing()
@@ -724,11 +723,13 @@ class Game:
         self._screen.blit(world_label, (sect.x + 18, sect.y + 20))
         seg_y = sect.y + 50
         pulse = self._hud_pulse(self._hud_portal_pulse_ms, duration=700)
+        total_portals = self._world.get_portal_count()
 
-        for i in range(3):
+        for i in range(total_portals):
+            seg_color = portal_colors[i % len(portal_colors)]
             seg_rect = pygame.Rect(sect.x + 18 + i * (seg_w + seg_gap), seg_y, seg_w, seg_h)
             if i < completed:
-                pygame.draw.rect(self._screen, portal_colors[i], seg_rect)
+                pygame.draw.rect(self._screen, seg_color, seg_rect)
                 pygame.draw.line(
                     self._screen, WHITE,
                     (seg_rect.x + 2, seg_rect.y + 2),
@@ -737,15 +738,15 @@ class Game:
                 # glow halo on the most recent fill
                 if pulse > 0 and i == completed - 1:
                     self._portal_halo_surf.fill((
-                        portal_colors[i][0], portal_colors[i][1], portal_colors[i][2],
+                        seg_color[0], seg_color[1], seg_color[2],
                         int(80 * pulse),
                     ))
                     self._screen.blit(self._portal_halo_surf, (seg_rect.x - 7, seg_rect.y - 7))
             else:
-                pygame.draw.rect(self._screen, self._hud_dim(portal_colors[i], 0.3), seg_rect, 1)
+                pygame.draw.rect(self._screen, self._hud_dim(seg_color, 0.3), seg_rect, 1)
 
-        count_surf = self._font_code.render(f"{completed} / {self._world.get_portal_count()}", True, color)
-        seg_total_w = 3 * seg_w + 2 * seg_gap
+        count_surf = self._font_code.render(f"{completed} / {total_portals}", True, color)
+        seg_total_w = total_portals * seg_w + (total_portals - 1) * seg_gap
         self._screen.blit(count_surf, (sect.x + 18 + seg_total_w + 14, seg_y - 4))
 
     def _draw_hud_controls(self, sect, color, label_dim):
