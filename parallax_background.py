@@ -19,12 +19,15 @@ class ParallaxLayer:
 
     def draw(self, screen, camera_x, camera_y):
         offset_x = -(camera_x * self._scroll_speed) % self._width
-        offset_y = -(camera_y * self._scroll_speed) + self._y_offset
+
+        raw_offset_y = -(camera_y * self._scroll_speed) + self._y_offset
+        min_offset_y = SCREEN_HEIGHT - self._height   # 0 when image == screen height
+        offset_y = max(min_offset_y, min(0, raw_offset_y))
 
         x = offset_x - self._width
         while x < SCREEN_WIDTH:
-            screen.blit(self._image, (x, offset_y))
-            x += self._width
+           screen.blit(self._image, (x, offset_y))
+           x += self._width
 
 
 class ParallaxBackground:
