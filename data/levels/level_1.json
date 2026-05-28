@@ -1569,5 +1569,172 @@
       "x": 41,
       "y": 8
     }
+  ],
+  "bg_tiles": [
+    {
+      "type": "bg_dark_panel",
+      "x": 18,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 18,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 18,
+      "y": 10
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 18,
+      "y": 11
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 19,
+      "y": 10
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 19,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 19,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 20,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 20,
+      "y": 10
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 20,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 21,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 22,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 22,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 21,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 21,
+      "y": 10
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 23,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 23,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 24,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 24,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 23,
+      "y": 10
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 22,
+      "y": 10
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 25,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 26,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 27,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 28,
+      "y": 9
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 28,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 28,
+      "y": 7
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 27,
+      "y": 7
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 26,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 25,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 27,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 29,
+      "y": 8
+    },
+    {
+      "type": "bg_dark_panel",
+      "x": 29,
+      "y": 9
+    }
   ]
 }

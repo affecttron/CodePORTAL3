@@ -121,6 +121,8 @@ class Game:
         self._death_flash_timer = 0
         self._death_flash_points = 10
 
+        self._access_denied_timer = 0
+
         # Pre-allocated overlay surfaces — filled each frame, never reallocated
         _flash_w = 1100 - 2 * 26   # PANEL_WIDTH - 2*PANEL_PADDING_X
         _flash_h = 360 + 12 + 32   # CODE_BLOCK_HEIGHT + gap + OVERCLOCK_AREA_HEIGHT
@@ -128,6 +130,9 @@ class Game:
 
         self._death_overlay_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         self._death_stripe_surf  = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+
+        self._access_denied_overlay_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self._access_denied_stripe_surf  = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
 
         self._fullscreen_dark_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         self._fullscreen_dark_surf.fill((0, 0, 0, 220))
@@ -401,6 +406,9 @@ class Game:
         if self._death_flash_timer > 0:
             self._death_flash_timer -= 1
 
+        if self._access_denied_timer > 0:
+            self._access_denied_timer -= 1
+
         if self._portal_cooldown > 0:
             self._portal_cooldown -= 1
 
@@ -499,6 +507,8 @@ class Game:
             attempts = self._player.get_attempts()
             self._current_level.void_overclock()
             self._sound.play_sound("wrong")
+            self._access_denied_timer = 45
+            self._pipeline.pulse_glitch(0.6)
 
             self._hint_revealed = True
             self._hint_text = task.get_hint()
@@ -585,6 +595,8 @@ class Game:
         elif self._state == STATE_TASK:
             self._draw_playing()
             self._draw_task_ui()
+            if self._access_denied_timer > 0:
+                self._draw_access_denied_flash()
         elif self._state == STATE_PAUSED:
             self._draw_playing()
             self._draw_pause_menu()
@@ -993,6 +1005,46 @@ class Game:
             pygame.draw.line(self._screen, c, (cx, cy), (cx, cy + dy * al), 3)
 
         # Thin red border
+        pygame.draw.rect(self._screen, c, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), 4)
+
+    def _draw_access_denied_flash(self):
+        t = self._access_denied_timer
+        if t > 35:
+            frac = (45 - t) / 10.0
+        elif t > 15:
+            frac = 1.0
+        else:
+            frac = t / 15.0
+        frac = max(0.0, min(1.0, frac))
+
+        self._access_denied_overlay_surf.fill((200, 0, 0, int(170 * frac)))
+        self._screen.blit(self._access_denied_overlay_surf, (0, 0))
+
+        self._access_denied_stripe_surf.fill((0, 0, 0, 0))
+        for sy in range(0, SCREEN_HEIGHT, 8):
+            pygame.draw.line(self._access_denied_stripe_surf, (0, 0, 0, int(70 * frac)), (0, sy), (SCREEN_WIDTH, sy))
+        self._screen.blit(self._access_denied_stripe_surf, (0, 0))
+
+        c = tuple(int(ch * frac) for ch in NEON_RED)
+
+        denied_surf = self._font_huge.render("ACCESS DENIED", True, c)
+        denied_rect = denied_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 44))
+        self._screen.blit(denied_surf, denied_rect)
+
+        pts_surf = self._font_big.render("-5 pts", True, c)
+        pts_rect = pts_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 36))
+        self._screen.blit(pts_surf, pts_rect)
+
+        al = 32
+        for cx, cy, dx, dy in [
+            (0, 0, 1, 1),
+            (SCREEN_WIDTH - 1, 0, -1, 1),
+            (0, SCREEN_HEIGHT - 1, 1, -1),
+            (SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, -1, -1),
+        ]:
+            pygame.draw.line(self._screen, c, (cx, cy), (cx + dx * al, cy), 3)
+            pygame.draw.line(self._screen, c, (cx, cy), (cx, cy + dy * al), 3)
+
         pygame.draw.rect(self._screen, c, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), 4)
 
     def _draw_win_screen(self):
