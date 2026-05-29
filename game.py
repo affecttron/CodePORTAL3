@@ -1,5 +1,6 @@
 import pygame
 import os
+import random
 from player import Player
 from player_sprite import PlayerSprite
 from world import World
@@ -204,6 +205,11 @@ class Game:
     def _load_world(self, world_index=0):
         self._world_index = world_index
         self._current_world_config = get_world_config(world_index)
+
+        # Endless režīmā izvēlas nejaušus uzdevumu ID
+        if self._endless_mode:
+            self._current_world_config = dict(self._current_world_config)
+            self._current_world_config["level_ids"] = random.sample(range(1, 10), 3)
 
         level_file = f"level_{world_index + 1}.json"
         if not os.path.exists(os.path.join(LEVELS_FOLDER, level_file)):

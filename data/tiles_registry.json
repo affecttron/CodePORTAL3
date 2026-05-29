@@ -29,6 +29,14 @@
           "fallback_color": [50, 50, 70]
         },
         {
+          "id": "wall2",
+          "name": "Siena 2",
+          "image": "wall2.png",
+          "solid": true,
+          "kills": false,
+          "fallback_color": [45, 55, 75]
+        },
+        {
           "id": "ceiling",
           "name": "Griesti",
           "image": "ceiling.png",
