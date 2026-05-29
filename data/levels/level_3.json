@@ -190,21 +190,6 @@
       "y": 12
     },
     {
-      "type": "portal_red",
-      "x": 10,
-      "y": 11
-    },
-    {
-      "type": "portal_yellow",
-      "x": 14,
-      "y": 11
-    },
-    {
-      "type": "portal_green",
-      "x": 18,
-      "y": 11
-    },
-    {
       "type": "ground",
       "x": 13,
       "y": 12
@@ -328,6 +313,22 @@
       "type": "door_exit",
       "x": 22,
       "y": 11
+    },
+    {
+      "type": "portal_pink",
+      "x": 11,
+      "y": 11
+    },
+    {
+      "type": "portal_black",
+      "x": 15,
+      "y": 11
+    },
+    {
+      "type": "portal_white",
+      "x": 19,
+      "y": 11
     }
-  ]
+  ],
+  "bg_tiles": []
 }

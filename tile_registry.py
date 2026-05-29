@@ -24,6 +24,10 @@ class TileDefinition:
         self._door_exit = data.get("door_exit", False)
         self._background = data.get("background", False)
 
+        # animācija
+        self._frames = []
+        self._frame_speed = data.get("frame_speed", 6)
+
         # fallback
         fc = data.get("fallback_color", [128, 128, 128])
         self._fallback_color = tuple(fc)
@@ -47,6 +51,19 @@ class TileDefinition:
     # Atgriež rezerves krāsu bez attēla
     def get_fallback_color(self):
         return self._fallback_color
+
+    # Animācija
+    def set_frames(self, frames):
+        self._frames = frames
+
+    def get_frames(self):
+        return self._frames
+
+    def get_frame_speed(self):
+        return self._frame_speed
+
+    def is_animated(self):
+        return bool(self._frames)
 
     # Vai flīze bloķē kustību
     def is_solid(self):
@@ -126,6 +143,13 @@ class TileRegistry:
                 image = self._try_load_image(tile_data.get("image", ""))
                 tile_def = TileDefinition(tile_data, image)
 
+                if tile_data.get("animated", False):
+                    frames = self._try_load_sprite_sheet(
+                        tile_data.get("sprite_sheet", ""),
+                        tile_data.get("frame_count", 1),
+                    )
+                    tile_def.set_frames(frames)
+
                 self._tiles_by_id[tile_def.get_id()] = tile_def
                 self._tiles_by_category[cat_name].append(tile_def)
 
@@ -137,12 +161,38 @@ class TileRegistry:
 
         return True
 
+    # Ielādē animācijas kadrus no sprite faila
+    def _try_load_sprite_sheet(self, filename, frame_count):
+        if not filename or frame_count < 1:
+            return []
+        full_path = os.path.join(IMAGES_FOLDER, "animated tiles", filename)
+        if not os.path.exists(full_path):
+            print(f"Sprite sheet nav atrasts: {full_path}")
+            return []
+        try:
+            sheet = pygame.image.load(full_path).convert_alpha()
+            sw, sh = sheet.get_width(), sheet.get_height()
+            frame_w = sw // frame_count
+            frames = []
+            for i in range(frame_count):
+                frame = pygame.Surface((frame_w, sh), pygame.SRCALPHA)
+                frame.blit(sheet, (0, 0), (i * frame_w, 0, frame_w, sh))
+                if frame_w != TILE_SIZE or sh != TILE_SIZE:
+                    frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
+                frames.append(frame)
+            self._loaded_images_count += 1
+            return frames
+        except pygame.error as e:
+            print(f"Nevarēja ielādēt sprite sheet {filename}: {e}")
+            self._missing_images_count += 1
+            return []
+
     # Mēģina ielādēt attēlu un mērogot pareizi
     def _try_load_image(self, filename):
         if not filename:
             return None
 
-        # folder path
+        # Pilns ceļš uz attēlu failu
         full_path = os.path.join(IMAGES_FOLDER, "tiles", filename)
 
         # ja nav faila
@@ -196,7 +246,11 @@ class TileRegistry:
             pygame.draw.rect(screen, (255, 0, 255), (x, y, TILE_SIZE, TILE_SIZE))
             return
 
-        if tile_def.has_image():
+        frames = tile_def.get_frames()
+        if frames:
+            idx = (animation_frame // tile_def.get_frame_speed()) % len(frames)
+            screen.blit(frames[idx], (x, y))
+        elif tile_def.has_image():
             screen.blit(tile_def.get_image(), (x, y))
         else:
             color = tile_def.get_fallback_color()

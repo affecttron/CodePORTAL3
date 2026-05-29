@@ -27,8 +27,8 @@ HEADER_HEIGHT = TOP_BAR_HEIGHT + LEVEL_BAR_HEIGHT + CATEGORY_BAR_HEIGHT
 BUTTON_SIZE = 70
 BUTTON_SPACING = 8
 
-TOOLBAR_ARROW_W = 55        # Width of the left/right scroll arrow buttons
-TOOLBAR_SCROLL_STEP = 390   # Pixels scrolled per arrow click (~5 tiles)
+TOOLBAR_ARROW_W = 55        # Bultiņu pogu platums pikseļos
+TOOLBAR_SCROLL_STEP = 390   # Ritināšanas solis pikseļos uz klikšķi
 
 LEVEL_FILE_RE = re.compile(r"^level_(\d+)\.json$", re.IGNORECASE)
 
@@ -319,7 +319,7 @@ class LevelEditor:
 
     # Apstrādā klikšķi uz rīkjoslas tiles
     def _handle_toolbar_click(self, screen_x, screen_y):
-        # Arrow button clicks
+        # Pārbauda klikšķus uz bultiņu pogām
         if self._toolbar_arrow_left_rect and self._toolbar_arrow_left_rect.collidepoint(screen_x, screen_y):
             self._toolbar_scroll -= TOOLBAR_SCROLL_STEP
             self._clamp_scroll()
@@ -613,7 +613,7 @@ class LevelEditor:
         pygame.draw.rect(self._screen, DARK_GRAY, (0, toolbar_y, SCREEN_WIDTH, TOOLBAR_HEIGHT))
         pygame.draw.line(self._screen, GRAY, (0, toolbar_y), (SCREEN_WIDTH, toolbar_y), 2)
 
-        # Left / right arrow buttons
+        # Kreisā un labā bultiņas poga
         arrow_h = TOOLBAR_HEIGHT - 20
         left_rect = pygame.Rect(5, toolbar_y + 10, TOOLBAR_ARROW_W, arrow_h)
         right_rect = pygame.Rect(SCREEN_WIDTH - 405 - TOOLBAR_ARROW_W, toolbar_y + 10, TOOLBAR_ARROW_W, arrow_h)
@@ -643,7 +643,7 @@ class LevelEditor:
             tiles_area_x = TOOLBAR_ARROW_W + 10
             tiles_area_w = SCREEN_WIDTH - 400 - TOOLBAR_ARROW_W * 2 - 20
 
-            # Clip drawing to the tile area so buttons don't bleed under arrows
+            # Apgriež zīmēšanas laukumu, lai tiles neparādās zem bultiņām
             clip_rect = pygame.Rect(tiles_area_x, toolbar_y, tiles_area_w, TOOLBAR_HEIGHT)
             self._screen.set_clip(clip_rect)
 

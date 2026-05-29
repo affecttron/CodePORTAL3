@@ -18,6 +18,7 @@ from settings import (
     GRAY,
     LEVELS_FOLDER,
     WORLD_LABELS, get_world_config,
+    PORTAL_THEME_COLORS,
 )
 from ui_utils import dim_color, draw_corner_accents
 
@@ -852,7 +853,7 @@ class Game:
     # Zīmē portālu progresu HUD joslas segmentos
     def _draw_hud_portals(self, sect, color):
         completed = len(self._completed_portals)
-        portal_colors = (NEON_RED, NEON_YELLOW, NEON_GREEN)
+        portal_colors = PORTAL_THEME_COLORS
         seg_w, seg_h, seg_gap = 38, 14, 8
         world_label = self._font_code_small.render(
             f"WORLD {self._world_index + 1}", True, (0, 140, 140)
@@ -862,8 +863,10 @@ class Game:
         pulse = self._hud_pulse(self._hud_portal_pulse_ms, duration=700)
         total_portals = self._world.get_portal_count()
 
+        portals = self._world.get_portals()
         for i in range(total_portals):
-            seg_color = portal_colors[i % len(portal_colors)]
+            lvl_id = portals[i].get_level_id() if i < len(portals) else (i + 1)
+            seg_color = portal_colors.get(lvl_id, NEON_CYAN)
             seg_rect = pygame.Rect(sect.x + 18 + i * (seg_w + seg_gap), seg_y, seg_w, seg_h)
             if i < completed:
                 pygame.draw.rect(self._screen, seg_color, seg_rect)

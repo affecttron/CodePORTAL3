@@ -37,7 +37,7 @@ class Camera:
         self._vel_x = 0.0
         self._vel_y = 0.0
 
-        # Custom clamp overrides (editor sets min_y negative to expose top tiles)
+        # Minimālā y vērtība, redaktors iestata negatīvu
         self._min_y = 0.0
 
         # Motion blur
@@ -88,7 +88,7 @@ class Camera:
         self._x = max(0.0, min(self._x, max_x))
         self._y = max(self._min_y, min(self._y, max_y))
 
-    # Iestata minimālo y vērtību (negatīva — ļauj redzēt augšējo rindu)
+    # Iestata minimālo y vērtību kameras ritināšanai
     def set_min_y(self, value):
         self._min_y = float(value)
 

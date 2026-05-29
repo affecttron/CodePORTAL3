@@ -265,11 +265,15 @@ class DoorExitTile(Tile):
 class BackgroundTile(Tile):
 
     _pattern_cache = {}
+    _tint_surf = None   # Kopīga tumšā pārklājuma virsma
 
     # Izveido fona tile ar zīmēšanas virsmu
     def __init__(self, grid_x, grid_y, tile_id, registry):
         super().__init__(grid_x, grid_y, tile_id, registry)
         self._draw_surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+        if BackgroundTile._tint_surf is None:
+            BackgroundTile._tint_surf = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
+            BackgroundTile._tint_surf.fill((0, 0, 0, 90))
 
     # Iegūst vai izveido diagnostikas raksta virsmu
     def _get_pattern_surf(self):
@@ -289,7 +293,7 @@ class BackgroundTile(Tile):
         BackgroundTile._pattern_cache[color] = surf
         return surf
 
-    # Zīmē fona tile caurspīdīgi
+    # Zīmē fona tile ar tumšu pārklājumu
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
         x = self.get_pixel_x() - camera_offset_x
         y = self.get_pixel_y() - camera_offset_y
@@ -305,7 +309,7 @@ class BackgroundTile(Tile):
             if pat:
                 self._draw_surf.blit(pat, (0, 0))
 
-        self._draw_surf.set_alpha(200)
+        self._draw_surf.blit(BackgroundTile._tint_surf, (0, 0))
         screen.blit(self._draw_surf, (x, y))
         self._animation_frame += 1
 

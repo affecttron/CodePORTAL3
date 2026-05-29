@@ -90,6 +90,21 @@ NEON_YELLOW = (255, 215, 0)       # 2. līmenis
 NEON_GREEN = (0, 255, 65)         # 3. līmenis
 NEON_PINK = (255, 16, 240)
 NEON_CYAN = (0, 255, 255)
+NEON_PURPLE = (160, 32, 240)
+NEON_ORANGE = (255, 140, 0)
+
+# Katra līmeņa ID krāsa portālam un konsolei
+PORTAL_THEME_COLORS = {
+    1: (255,   0,  64),   # NEON_RED
+    2: (255, 215,   0),   # NEON_YELLOW
+    3: (  0, 255,  65),   # NEON_GREEN
+    4: (  0, 255, 255),   # NEON_CYAN
+    5: (160,  32, 240),   # NEON_PURPLE
+    6: (255, 140,   0),   # NEON_ORANGE
+    7: (255,  16, 240),   # NEON_PINK
+    8: ( 80,  80, 120),   # tumšs portāls
+    9: (255, 255, 255),   # WHITE
+}
 
 # Fons
 BACKGROUND_COLOR = (10, 10, 25)

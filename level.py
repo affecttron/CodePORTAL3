@@ -10,6 +10,7 @@ from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT,
     NEON_RED, NEON_YELLOW, NEON_GREEN, NEON_CYAN, NEON_PINK,
     OVERCLOCK_DURATION_MS, OVERCLOCK_BONUS_POINTS,
+    PORTAL_THEME_COLORS,
 )
 
 
@@ -41,7 +42,7 @@ class Level:
         self._time_limit = time_limit
         self._overclock_duration_ms = overclock_ms
         self._current_task_index = 0
-        self._theme_color = NEON_CYAN
+        self._theme_color = PORTAL_THEME_COLORS.get(level_id, NEON_CYAN)
         # rng lai sajauktu uzdevumu secību
         self._rng = random.Random()
 
@@ -666,7 +667,6 @@ class ConditionLevel(Level):
     def __init__(self, level_id=1, title="Drošības vārti - if/else", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._branch_type = "if/else"
-        self._theme_color = NEON_RED
 
 
 class LoopLevel(Level):
@@ -677,7 +677,6 @@ class LoopLevel(Level):
     def __init__(self, level_id=2, title="Datu tunelis - cikli", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._loop_type = "for/while"
-        self._theme_color = NEON_YELLOW
 
 
 class FunctionLevel(Level):
@@ -687,7 +686,6 @@ class FunctionLevel(Level):
     # Izveido funkciju tēmas līmeni
     def __init__(self, level_id=3, title="Galvenā servera istaba - funkcijas", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
-        self._theme_color = NEON_GREEN
 
 
 class AdvancedLevel(Level):
@@ -697,7 +695,6 @@ class AdvancedLevel(Level):
     # Izveido sarežģītu algoritmu līmeni
     def __init__(self, level_id=7, title="Kvantu matrica", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
-        self._theme_color = NEON_PINK
 
 
 class ExpertLevel(Level):
@@ -707,7 +704,6 @@ class ExpertLevel(Level):
     # Izveido ekspertu līmeni ar baltu tēmu
     def __init__(self, level_id=9, title="Singularitāte", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
-        self._theme_color = (255, 255, 255)
 
 
 _LEVEL_CATALOGUE = {

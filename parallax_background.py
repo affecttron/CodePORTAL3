@@ -34,8 +34,8 @@ class ParallaxLayer:
 
 class ParallaxBackground:
 
-    # scroll_speed: 0.0 = static (far), 1.0 = locked to world (near)
-    # scale: fraction of SCREEN_HEIGHT — smaller = appears further away
+    # scroll_speed 0.0 statisks, 1.0 seko pasaulei
+    # scale daļa no ekrana augstuma, mazāks izskatās tālāk
     CYBERPUNK_LAYERS = (
         ("layer1_sky.png",       0.05, 1.0),
         ("layer2_stars.png",     0.15, 1.0),
