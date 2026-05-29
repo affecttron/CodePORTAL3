@@ -35,12 +35,13 @@ class ParallaxLayer:
 class ParallaxBackground:
 
     # scroll_speed: 0.0 = static (far), 1.0 = locked to world (near)
+    # scale: fraction of SCREEN_HEIGHT — smaller = appears further away
     CYBERPUNK_LAYERS = (
-        ("layer1_sky.png",       0.05),
-        ("layer2_stars.png",     0.15),
-        ("layer3_city_far.png",  0.3),
-        ("layer4_city_mid.png",  0.5),
-        ("layer5_city_near.png", 0.75),
+        ("layer1_sky.png",       0.05, 1.0),
+        ("layer2_stars.png",     0.15, 1.0),
+        ("layer3_city_far.png",  0.3,  0.75),
+        ("layer4_city_mid.png",  0.5,  0.85),
+        ("layer5_city_near.png", 0.75, 0.93),
     )
 
     # Izveido tukšu paralaksa fonu
@@ -55,7 +56,7 @@ class ParallaxBackground:
         return layer
 
     # Ielādē slāni no faila un pievieno
-    def add_layer_from_file(self, filename, scroll_speed, y_offset=0):
+    def add_layer_from_file(self, filename, scroll_speed, y_offset=0, scale=1.0):
         filepath = os.path.join(IMAGES_FOLDER, "backgrounds", filename)
 
         if not os.path.exists(filepath):
@@ -64,12 +65,12 @@ class ParallaxBackground:
 
         try:
             image = pygame.image.load(filepath).convert_alpha()
-            if image.get_height() != SCREEN_HEIGHT:
-                ratio = SCREEN_HEIGHT / image.get_height()
-                new_width = int(image.get_width() * ratio)
-                image = pygame.transform.scale(image, (new_width, SCREEN_HEIGHT))
+            target_h = int(SCREEN_HEIGHT * scale)
+            ratio = target_h / image.get_height()
+            new_width = int(image.get_width() * ratio)
+            image = pygame.transform.scale(image, (new_width, target_h))
 
-            log.info("Slānis ielādēts: %s (ātrums %s)", filename, scroll_speed)
+            log.info("Slānis ielādēts: %s (ātrums %s, mērogs %.0f%%)", filename, scroll_speed, scale * 100)
             return self.add_layer(image, scroll_speed, y_offset)
         except pygame.error as e:
             log.error("Kļūda ielādējot %s: %s", filename, e)
@@ -99,8 +100,8 @@ class ParallaxBackground:
         self.set_sky_color((10, 5, 30))
 
         loaded_count = 0
-        for filename, speed in self.CYBERPUNK_LAYERS:
-            if self.add_layer_from_file(filename, speed) is not None:
+        for filename, speed, scale in self.CYBERPUNK_LAYERS:
+            if self.add_layer_from_file(filename, speed, scale=scale) is not None:
                 loaded_count += 1
 
         if loaded_count == 0:

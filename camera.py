@@ -37,6 +37,9 @@ class Camera:
         self._vel_x = 0.0
         self._vel_y = 0.0
 
+        # Custom clamp overrides (editor sets min_y negative to expose top tiles)
+        self._min_y = 0.0
+
         # Motion blur
         self._motion_blur_enabled = CAMERA_MOTION_BLUR
         self._prev_frame = None
@@ -80,23 +83,14 @@ class Camera:
 
     # Notur kameru pasaules robežās
     def _clamp_to_world(self):
-        # left
-        if self._x < 0:
-            self._x = 0
+        max_x = max(0.0, self._world_width - self._screen_width)
+        max_y = max(self._min_y, self._world_height - self._screen_height)
+        self._x = max(0.0, min(self._x, max_x))
+        self._y = max(self._min_y, min(self._y, max_y))
 
-        # right
-        max_x = self._world_width - self._screen_width
-        if self._x > max_x:
-            self._x = max_x
-
-        # up
-        if self._y < 0:
-            self._y = 0
-
-        # down
-        max_y = self._world_height - self._screen_height
-        if self._y > max_y:
-            self._y = max_y
+    # Iestata minimālo y vērtību (negatīva — ļauj redzēt augšējo rindu)
+    def set_min_y(self, value):
+        self._min_y = float(value)
 
     # Pārvieto kameru par delta vērtībām
     def move(self, dx, dy):

@@ -27,6 +27,9 @@ HEADER_HEIGHT = TOP_BAR_HEIGHT + LEVEL_BAR_HEIGHT + CATEGORY_BAR_HEIGHT
 BUTTON_SIZE = 70
 BUTTON_SPACING = 8
 
+TOOLBAR_ARROW_W = 55        # Width of the left/right scroll arrow buttons
+TOOLBAR_SCROLL_STEP = 390   # Pixels scrolled per arrow click (~5 tiles)
+
 LEVEL_FILE_RE = re.compile(r"^level_(\d+)\.json$", re.IGNORECASE)
 
 
@@ -55,6 +58,7 @@ class LevelEditor:
         # Pasaule un kamera
         self._world = World(registry=self._registry)
         self._camera = Camera()
+        self._camera.set_min_y(-HEADER_HEIGHT)
 
         # Kategorijas
         self._categories = self._registry.get_categories()
@@ -81,6 +85,10 @@ class LevelEditor:
         self._toolbar_scroll = 0  # Scroll, ja tile ir vairāk par ekrāna platumu
 
         self._mouse_pos = (0, 0)
+
+        # Toolbar scroll arrow rects (updated each frame in _draw_toolbar)
+        self._toolbar_arrow_left_rect = None
+        self._toolbar_arrow_right_rect = None
 
         # Cached preview tile surface
         self._preview_surf = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
@@ -213,7 +221,7 @@ class LevelEditor:
             elif event.type == pygame.MOUSEWHEEL:
                 mouse_y = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())[1]
                 if mouse_y >= SCREEN_HEIGHT - TOOLBAR_HEIGHT:
-                    self._toolbar_scroll -= event.y * 50
+                    self._toolbar_scroll -= event.y * (BUTTON_SIZE + BUTTON_SPACING)
                     self._clamp_scroll()
 
         self._handle_continuous_input()
@@ -311,12 +319,22 @@ class LevelEditor:
 
     # Apstrādā klikšķi uz rīkjoslas tiles
     def _handle_toolbar_click(self, screen_x, screen_y):
+        # Arrow button clicks
+        if self._toolbar_arrow_left_rect and self._toolbar_arrow_left_rect.collidepoint(screen_x, screen_y):
+            self._toolbar_scroll -= TOOLBAR_SCROLL_STEP
+            self._clamp_scroll()
+            return
+        if self._toolbar_arrow_right_rect and self._toolbar_arrow_right_rect.collidepoint(screen_x, screen_y):
+            self._toolbar_scroll += TOOLBAR_SCROLL_STEP
+            self._clamp_scroll()
+            return
+
         if not self._categories:
             return
         category = self._categories[self._current_category_index]
         tiles = self._registry.get_tiles_in_category(category)
 
-        x_offset = 20 - self._toolbar_scroll
+        x_offset = TOOLBAR_ARROW_W + 10 - self._toolbar_scroll
         toolbar_y = SCREEN_HEIGHT - TOOLBAR_HEIGHT + 15
 
         for tile_def in tiles:
@@ -389,16 +407,19 @@ class LevelEditor:
                     self._world.remove_tile(grid_x, grid_y)
                     self._unsaved_changes = True
 
-    # Notur rīkjoslas ritināšanu pieļaujamās robežās
-    def _clamp_scroll(self):
+    # Aprēķina maksimālo ritināšanas vērtību aktīvajai kategorijai
+    def _max_scroll(self):
         if not self._categories:
-            self._toolbar_scroll = 0
-            return
+            return 0
         category = self._categories[self._current_category_index]
         tiles = self._registry.get_tiles_in_category(category)
         total_width = len(tiles) * (BUTTON_SIZE + BUTTON_SPACING)
-        max_scroll = max(0, total_width - SCREEN_WIDTH + 40)
-        self._toolbar_scroll = max(0, min(self._toolbar_scroll, max_scroll))
+        visible_width = SCREEN_WIDTH - TOOLBAR_ARROW_W * 2 - 400 - 20
+        return max(0, total_width - visible_width)
+
+    # Notur rīkjoslas ritināšanu pieļaujamās robežās
+    def _clamp_scroll(self):
+        self._toolbar_scroll = max(0, min(self._toolbar_scroll, self._max_scroll()))
 
     # Atjaunina kameru un ziņojuma taimeri
     def _update(self):
@@ -592,17 +613,47 @@ class LevelEditor:
         pygame.draw.rect(self._screen, DARK_GRAY, (0, toolbar_y, SCREEN_WIDTH, TOOLBAR_HEIGHT))
         pygame.draw.line(self._screen, GRAY, (0, toolbar_y), (SCREEN_WIDTH, toolbar_y), 2)
 
+        # Left / right arrow buttons
+        arrow_h = TOOLBAR_HEIGHT - 20
+        left_rect = pygame.Rect(5, toolbar_y + 10, TOOLBAR_ARROW_W, arrow_h)
+        right_rect = pygame.Rect(SCREEN_WIDTH - 405 - TOOLBAR_ARROW_W, toolbar_y + 10, TOOLBAR_ARROW_W, arrow_h)
+        self._toolbar_arrow_left_rect = left_rect
+        self._toolbar_arrow_right_rect = right_rect
+
+        can_scroll_left = self._toolbar_scroll > 0
+        can_scroll_right = self._categories and self._toolbar_scroll < self._max_scroll()
+
+        left_color = NEON_CYAN if can_scroll_left else GRAY
+        right_color = NEON_CYAN if can_scroll_right else GRAY
+
+        pygame.draw.rect(self._screen, (30, 30, 50), left_rect)
+        pygame.draw.rect(self._screen, left_color, left_rect, 2)
+        left_label = self._font_big.render("<", True, left_color)
+        self._screen.blit(left_label, left_label.get_rect(center=left_rect.center))
+
+        pygame.draw.rect(self._screen, (30, 30, 50), right_rect)
+        pygame.draw.rect(self._screen, right_color, right_rect, 2)
+        right_label = self._font_big.render(">", True, right_color)
+        self._screen.blit(right_label, right_label.get_rect(center=right_rect.center))
+
         if self._categories:
             category = self._categories[self._current_category_index]
             tiles = self._registry.get_tiles_in_category(category)
 
-            x_offset = 20 - self._toolbar_scroll
+            tiles_area_x = TOOLBAR_ARROW_W + 10
+            tiles_area_w = SCREEN_WIDTH - 400 - TOOLBAR_ARROW_W * 2 - 20
+
+            # Clip drawing to the tile area so buttons don't bleed under arrows
+            clip_rect = pygame.Rect(tiles_area_x, toolbar_y, tiles_area_w, TOOLBAR_HEIGHT)
+            self._screen.set_clip(clip_rect)
+
+            x_offset = tiles_area_x - self._toolbar_scroll
             tick = pygame.time.get_ticks() // 16
             for tile_def in tiles:
                 btn_x = x_offset
                 btn_y = toolbar_y + 15
 
-                if btn_x + BUTTON_SIZE >= 0 and btn_x <= SCREEN_WIDTH:
+                if btn_x + BUTTON_SIZE >= tiles_area_x and btn_x <= tiles_area_x + tiles_area_w:
                     is_selected = (tile_def.get_id() == self._current_tile_id)
                     self._registry.draw_tile(self._screen, tile_def.get_id(), btn_x, btn_y, tick)
                     border_color = NEON_CYAN if is_selected else GRAY
@@ -615,6 +666,8 @@ class LevelEditor:
                         self._screen.blit(name_text, (btn_x, btn_y + BUTTON_SIZE + 4))
 
                 x_offset += BUTTON_SIZE + BUTTON_SPACING
+
+            self._screen.set_clip(None)
 
         controls_x = SCREEN_WIDTH - 400
         controls_y = toolbar_y + 10
