@@ -6,11 +6,12 @@ from settings import TILE_SIZE, IMAGES_FOLDER, TILES_REGISTRY_FILE
 
 class TileDefinition:
 
+    # Izveido flīzes definīciju no JSON datiem
     def __init__(self, data, image=None):
         self._id = data["id"]
         self._name = data.get("name", self._id)
         self._image_filename = data.get("image", "")
-        self._image = image 
+        self._image = image
 
         # ipasibas
         self._solid = data.get("solid", False)
@@ -27,55 +28,70 @@ class TileDefinition:
         fc = data.get("fallback_color", [128, 128, 128])
         self._fallback_color = tuple(fc)
 
-
+    # Atgriež flīzes unikālo identifikatoru
     def get_id(self):
         return self._id
 
+    # Atgriež flīzes lasāmo nosaukumu
     def get_name(self):
         return self._name
 
+    # Atgriež flīzes attēlu
     def get_image(self):
         return self._image
 
+    # Vai flīzei ir ielādēts attēls
     def has_image(self):
         return self._image is not None
 
+    # Atgriež rezerves krāsu bez attēla
     def get_fallback_color(self):
         return self._fallback_color
 
+    # Vai flīze bloķē kustību
     def is_solid(self):
         return self._solid
 
+    # Vai flīze nogalina spēlētāju
     def kills_player(self):
         return self._kills
 
+    # Vai flīze ir portāls
     def is_portal(self):
         return self._is_portal
 
+    # Atgriež saistītā līmeņa numuru
     def get_level_id(self):
         return self._level_id
 
+    # Vai pa šo flīzi var rāpties
     def is_climbable(self):
         return self._climbable
 
+    # Vai flīze ir dekoratīva
     def is_decoration(self):
         return self._decoration
 
+    # Atgriež īpašā tipa apzīmējumu
     def get_special(self):
         return self._special
 
+    # Vai šī ir spawn vieta
     def is_spawn(self):
         return self._special == "spawn"
 
+    # Vai flīze ir izejas durvis
     def is_door_exit(self):
         return self._door_exit
 
+    # Vai flīze pieder fonā
     def is_background(self):
         return self._background
 
 
 class TileRegistry:
 
+    # Izveido tukšu reģistru no konfigurācijas faila
     def __init__(self, registry_file=TILES_REGISTRY_FILE):
         self._registry_file = registry_file
         self._categories = []          # Saraksts ar kategorijām (nosaukumi)
@@ -84,10 +100,10 @@ class TileRegistry:
         self._loaded_images_count = 0
         self._missing_images_count = 0
 
-
+    # Ielādē visas flīzes no JSON reģistra
     def load(self):
         if not os.path.exists(self._registry_file):
-            print(f"❌ Registry fails neatrasts: {self._registry_file}")
+            print(f"Registry fails neatrasts: {self._registry_file}")
             return False
 
 
@@ -113,7 +129,7 @@ class TileRegistry:
                 self._tiles_by_id[tile_def.get_id()] = tile_def
                 self._tiles_by_category[cat_name].append(tile_def)
 
-        print(f"✅ Registry ielādēts:")
+        print(f"Registry ielādēts:")
         print(f"   Kategorijas: {len(self._categories)}")
         print(f"   Tile veidi: {len(self._tiles_by_id)}")
         print(f"   Attēli ielādēti: {self._loaded_images_count}")
@@ -121,6 +137,7 @@ class TileRegistry:
 
         return True
 
+    # Mēģina ielādēt attēlu un mērogot pareizi
     def _try_load_image(self, filename):
         if not filename:
             return None
@@ -148,26 +165,31 @@ class TileRegistry:
             self._missing_images_count += 1
             return None
 
-  
+    # Atgriež flīzes definīciju pēc ID
     def get_tile(self, tile_id):
         return self._tiles_by_id.get(tile_id)
 
+    # Pārbauda vai reģistrā ir šāda flīze
     def has_tile(self, tile_id):
         return tile_id in self._tiles_by_id
 
+    # Atgriež visu flīžu ID sarakstu
     def get_all_tile_ids(self):
         return list(self._tiles_by_id.keys())
 
+    # Atgriež kategoriju nosaukumu sarakstu
     def get_categories(self):
         return self._categories.copy()
 
+    # Atgriež flīzes konkrētā kategorijā
     def get_tiles_in_category(self, category_name):
         return self._tiles_by_category.get(category_name, [])
 
+    # Atgriež reģistrēto flīžu skaitu
     def get_tile_count(self):
         return len(self._tiles_by_id)
 
-
+    # Zīmē flīzi ekrānā ar animāciju
     def draw_tile(self, screen, tile_id, x, y, animation_frame=0):
         tile_def = self.get_tile(tile_id)
         if tile_def is None:

@@ -8,6 +8,7 @@ from settings import TILE_SIZE
 
 class Tile:
 
+    # Izveido tile tīkla pozīcijā ar reģistru
     def __init__(self, grid_x, grid_y, tile_id, registry):
         self._grid_x = grid_x
         self._grid_y = grid_y
@@ -19,66 +20,79 @@ class Tile:
             grid_x * TILE_SIZE, grid_y * TILE_SIZE, TILE_SIZE, TILE_SIZE
         )
 
+    # Atgriež x koordināti pikseļos
     def get_pixel_x(self):
         return self._grid_x * TILE_SIZE
 
+    # Atgriež y koordināti pikseļos
     def get_pixel_y(self):
         return self._grid_y * TILE_SIZE
 
+    # Atgriež sadursmes taisnstūri
     def get_rect(self):
         return self._rect
 
+    # Atgriež x pozīciju tīklā
     def get_grid_x(self):
         return self._grid_x
 
+    # Atgriež y pozīciju tīklā
     def get_grid_y(self):
         return self._grid_y
 
-
+    # Vai tile bloķē kustību
     def is_solid(self):
         if self._definition is None:
             return False
         return self._definition.is_solid()
 
+    # Vai spēlētājs mirst pieskaroties
     def kills_player(self):
         if self._definition is None:
             return False
         return self._definition.kills_player()
 
+    # Vai šis tile ir portāls
     def is_portal(self):
         if self._definition is None:
             return False
         return self._definition.is_portal()
 
+    # Atgriež saistītā līmeņa numuru
     def get_level_id(self):
         if self._definition is None:
             return 0
         return self._definition.get_level_id()
 
+    # Vai tile ir tikai dekorācija
     def is_decoration(self):
         if self._definition is None:
             return False
         return self._definition.is_decoration()
 
+    # Vai tile pieder fona slānim
     def is_background(self):
         if self._definition is None:
             return False
         return self._definition.is_background()
 
+    # Vai pa šo tile var rāpties
     def is_climbable(self):
         if self._definition is None:
             return False
         return self._definition.is_climbable()
 
+    # Atgriež tile tipa identifikatoru
     def get_type(self):
         return self._tile_id
 
+    # Atgriež tile nosaukumu
     def get_name(self):
         if self._definition is None:
             return self._tile_id
         return self._definition.get_name()
 
-
+    # Zīmē tile ekrānā ar animāciju
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
         x = self.get_pixel_x() - camera_offset_x
         y = self.get_pixel_y() - camera_offset_y
@@ -89,7 +103,7 @@ class Tile:
         # Atjauninām animāciju
         self._animation_frame += 1
 
-
+    # Pārveido tile vārdnīcā saglabāšanai
     def to_dict(self):
         return {
             "type": self._tile_id,
@@ -100,33 +114,41 @@ class Tile:
 
 class SolidTile(Tile):
 
+    # Inicializē cieto tile
     def __init__(self, grid_x, grid_y, tile_id, registry):
         super().__init__(grid_x, grid_y, tile_id, registry)
 
+    # Ciets tile vienmēr bloķē ceļu
     def is_solid(self):
         return True
 
 
 class PortalTile(Tile):
 
+    # Inicializē portāla tile aktīvā stāvoklī
     def __init__(self, grid_x, grid_y, tile_id, registry):
         super().__init__(grid_x, grid_y, tile_id, registry)
         self._is_active = True
         self._is_completed = False
 
+    # Deaktivē portālu pēc uzdevuma pabeigšanas
     def deactivate(self):
         self._is_active = False
         self._is_completed = True
 
+    # Aktivē portālu atkārtotai lietošanai
     def activate(self):
         self._is_active = True
 
+    # Vai portāls pašlaik aktīvs
     def is_active(self):
         return self._is_active
 
+    # Vai portāls jau pabeigts
     def is_completed(self):
         return self._is_completed
 
+    # Zīmē portālu, pelēku ja pabeigts
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
         x = self.get_pixel_x() - camera_offset_x
         y = self.get_pixel_y() - camera_offset_y
@@ -144,9 +166,11 @@ class PortalTile(Tile):
 
 class HazardTile(Tile):
 
+    # Inicializē bīstamo tile
     def __init__(self, grid_x, grid_y, tile_id, registry):
         super().__init__(grid_x, grid_y, tile_id, registry)
 
+    # Bīstams tile vienmēr nogalina spēlētāju
     def kills_player(self):
         # Garantējam, ka nogalina
         return True
@@ -154,6 +178,7 @@ class HazardTile(Tile):
 
 class DoorExitTile(Tile):
 
+    # Izveido izejas durvis ar diviem tiles
     def __init__(self, grid_x, grid_y, tile_id, registry):
         super().__init__(grid_x, grid_y, tile_id, registry)
         self._rect = pygame.Rect(
@@ -164,15 +189,19 @@ class DoorExitTile(Tile):
         self._font_label = pygame.font.SysFont("Consolas", 14, bold=True)
         self._font_exit  = pygame.font.SysFont("Consolas", 28, bold=True)
 
+    # Atslēdz durvis uz nākamo pasauli
     def unlock(self):
         self._locked = False
 
+    # Aizslēdz durvis
     def lock(self):
         self._locked = True
 
+    # Vai durvis pašlaik aizslēgtas
     def is_locked(self):
         return self._locked
 
+    # Zīmē durvis ar slēgtu vai atvērtu izskatu
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
         x = self.get_pixel_x() - camera_offset_x
         y = self.get_pixel_y() - camera_offset_y
@@ -237,10 +266,12 @@ class BackgroundTile(Tile):
 
     _pattern_cache = {}
 
+    # Izveido fona tile ar zīmēšanas virsmu
     def __init__(self, grid_x, grid_y, tile_id, registry):
         super().__init__(grid_x, grid_y, tile_id, registry)
         self._draw_surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
 
+    # Iegūst vai izveido diagnostikas raksta virsmu
     def _get_pattern_surf(self):
         if self._definition is None:
             return None
@@ -258,6 +289,7 @@ class BackgroundTile(Tile):
         BackgroundTile._pattern_cache[color] = surf
         return surf
 
+    # Zīmē fona tile caurspīdīgi
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
         x = self.get_pixel_x() - camera_offset_x
         y = self.get_pixel_y() - camera_offset_y
@@ -278,6 +310,7 @@ class BackgroundTile(Tile):
         self._animation_frame += 1
 
 
+# Izveido pareizā tipa tile no definīcijas
 def create_tile(tile_id, grid_x, grid_y, registry):
     definition = registry.get_tile(tile_id)
     if definition is None:

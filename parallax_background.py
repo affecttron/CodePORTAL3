@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 
 class ParallaxLayer:
 
+    # Izveido paralaksa slāni ar attēlu un ātrumu
     def __init__(self, image, scroll_speed, y_offset=0):
         self._image = image
         self._scroll_speed = scroll_speed
@@ -17,6 +18,7 @@ class ParallaxLayer:
         self._width = image.get_width()
         self._height = image.get_height()
 
+    # Zīmē slāni ar paralaksa nobīdi
     def draw(self, screen, camera_x, camera_y):
         offset_x = -(camera_x * self._scroll_speed) % self._width
 
@@ -41,15 +43,18 @@ class ParallaxBackground:
         ("layer5_city_near.png", 0.75),
     )
 
+    # Izveido tukšu paralaksa fonu
     def __init__(self):
         self._layers = []
         self._sky_color = (10, 10, 25)
 
+    # Pievieno slāni no esošā attēla
     def add_layer(self, image, scroll_speed, y_offset=0):
         layer = ParallaxLayer(image, scroll_speed, y_offset)
         self._layers.append(layer)
         return layer
 
+    # Ielādē slāni no faila un pievieno
     def add_layer_from_file(self, filename, scroll_speed, y_offset=0):
         filepath = os.path.join(IMAGES_FOLDER, "backgrounds", filename)
 
@@ -70,20 +75,25 @@ class ParallaxBackground:
             log.error("Kļūda ielādējot %s: %s", filename, e)
             return None
 
+    # Zīmē debesu krāsu un visus slāņus
     def draw(self, screen, camera_x, camera_y):
         screen.fill(self._sky_color)
         for layer in self._layers:
             layer.draw(screen, camera_x, camera_y)
 
+    # Iestata debesu fona krāsu
     def set_sky_color(self, color):
         self._sky_color = color
 
+    # Atgriež ielādēto slāņu skaitu
     def get_layer_count(self):
         return len(self._layers)
 
+    # Noņem visus slāņus
     def clear(self):
         self._layers.clear()
 
+    # Izveido kiberpunktu ainas fona slāņus
     def create_cyberpunk_scene(self):
         self.clear()
         self.set_sky_color((10, 5, 30))

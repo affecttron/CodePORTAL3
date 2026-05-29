@@ -32,6 +32,7 @@ LEVEL_FILE_RE = re.compile(r"^level_(\d+)\.json$", re.IGNORECASE)
 
 class LevelEditor:
 
+    # Izveido redaktoru ar visiem UI elementiem
     def __init__(self):
         self._pipeline = ShaderPipeline.create_passthrough(
             (SCREEN_WIDTH, SCREEN_HEIGHT),
@@ -108,6 +109,7 @@ class LevelEditor:
         self._top_bar_surf = None
         self._top_bar_cache_key = None
 
+    # Izvēlas pirmo tile aktīvajā kategorijā
     def _select_first_tile(self):
         if not self._categories:
             return
@@ -117,6 +119,7 @@ class LevelEditor:
             self._current_tile_id = tiles[0].get_id()
 
     # === LĪMEŅU PĀRVALDĪBA ===
+    # Atrod visus līmeņu JSON failus mapē
     def _discover_levels(self):
         if not os.path.isdir(LEVELS_FOLDER):
             return []
@@ -130,6 +133,7 @@ class LevelEditor:
         files = [f for f in os.listdir(LEVELS_FOLDER) if f.lower().endswith(".json")]
         return sorted(files, key=sort_key)
 
+    # Ģenerē nākamā brīvā numura faila nosaukumu
     def _next_level_filename(self):
         used = set()
         for name in self._levels:
@@ -141,6 +145,7 @@ class LevelEditor:
             n += 1
         return f"level_{n}.json"
 
+    # Izveido jaunu tukšu līmeni diskā
     def _create_new_level(self, force=False):
         if self._unsaved_changes and not force:
             self._show_message("Nesaglabātas izmaiņas! Ctrl+S vai Shift, lai radītu jaunu")
@@ -153,6 +158,7 @@ class LevelEditor:
         self._unsaved_changes = False
         self._show_message(f"Izveidots jauns līmenis: {filename}")
 
+    # Pārslēdzas uz citu līmeni
     def _switch_level(self, filename, force=False):
         if filename == self._current_filename:
             return
@@ -168,6 +174,7 @@ class LevelEditor:
             self._show_message(f"Jauns: {filename}")
         self._unsaved_changes = False
 
+    # Saglabā pašreizējo līmeni diskā
     def _save_current_level(self):
         self._world.save_to_file(self._current_filename)
         self._unsaved_changes = False
@@ -176,6 +183,7 @@ class LevelEditor:
         self._show_message(f"Saglabāts: {self._current_filename}")
 
     # === GALVENĀ CILPA ===
+    # Galvenā redaktora cilpa
     def run(self):
         if os.path.exists(os.path.join(LEVELS_FOLDER, self._current_filename)):
             self._world.load_from_file(self._current_filename)
@@ -193,6 +201,7 @@ class LevelEditor:
             self._pipeline.shutdown()
 
     # === NOTIKUMI ===
+    # Apstrādā visus ienākošos notikumus
     def _handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -209,6 +218,7 @@ class LevelEditor:
 
         self._handle_continuous_input()
 
+    # Apstrādā klaviatūras saīsnes redaktorā
     def _handle_keydown(self, event):
         if event.key == pygame.K_ESCAPE:
             self._running = False
@@ -249,6 +259,7 @@ class LevelEditor:
                 self._switch_level(self._levels[index], force=shift_pressed)
             return
 
+    # Apstrādā peles klikšķus dažādās zonās
     def _handle_mouse_click(self, event):
         screen_x, screen_y = self._pipeline.scale_mouse_pos(event.pos)
 
@@ -271,6 +282,7 @@ class LevelEditor:
         elif event.button == 3:
             self._paint_at_mouse(add=False)
 
+    # Apstrādā klikšķi uz līmeņa cilnes joslas
     def _handle_level_click(self, screen_x, screen_y, event):
         shift = bool(pygame.key.get_mods() & pygame.KMOD_SHIFT)
 
@@ -284,6 +296,7 @@ class LevelEditor:
             if event.button == 1:
                 self._create_new_level(force=shift)
 
+    # Apstrādā klikšķi uz kategorijas joslas
     def _handle_category_click(self, screen_x):
         x_offset = 20
         for i, cat_name in enumerate(self._categories):
@@ -296,6 +309,7 @@ class LevelEditor:
                 return
             x_offset += text_width + 10
 
+    # Apstrādā klikšķi uz rīkjoslas tiles
     def _handle_toolbar_click(self, screen_x, screen_y):
         if not self._categories:
             return
@@ -313,6 +327,7 @@ class LevelEditor:
                 return
             x_offset += BUTTON_SIZE + BUTTON_SPACING
 
+    # Apstrādā turētas taustiņu un peles ievades
     def _handle_continuous_input(self):
         keys = pygame.key.get_pressed()
         camera_speed = 15
@@ -336,12 +351,14 @@ class LevelEditor:
             elif mouse_buttons[2]:
                 self._paint_at_mouse(add=False)
 
+    # Pārbauda vai izvēlētais tile ir fona tips
     def _is_current_tile_bg(self):
         if self._current_tile_id is None:
             return False
         tile_def = self._registry.get_tile(self._current_tile_id)
         return tile_def is not None and tile_def.is_background()
 
+    # Liek vai dzēš tile peles pozīcijā
     def _paint_at_mouse(self, add=True):
         screen_x, screen_y = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())
         world_x, world_y = self._camera.screen_to_world(screen_x, screen_y)
@@ -372,6 +389,7 @@ class LevelEditor:
                     self._world.remove_tile(grid_x, grid_y)
                     self._unsaved_changes = True
 
+    # Notur rīkjoslas ritināšanu pieļaujamās robežās
     def _clamp_scroll(self):
         if not self._categories:
             self._toolbar_scroll = 0
@@ -382,6 +400,7 @@ class LevelEditor:
         max_scroll = max(0, total_width - SCREEN_WIDTH + 40)
         self._toolbar_scroll = max(0, min(self._toolbar_scroll, max_scroll))
 
+    # Atjaunina kameru un ziņojuma taimeri
     def _update(self):
         self._mouse_pos = self._pipeline.scale_mouse_pos(pygame.mouse.get_pos())
         self._camera.update()
@@ -389,6 +408,7 @@ class LevelEditor:
             self._message_timer -= 1
 
     # === ZĪMĒŠANA ===
+    # Zīmē visu redaktora skatu
     def _draw(self):
         self._screen.fill(BACKGROUND_COLOR)
 
@@ -411,6 +431,7 @@ class LevelEditor:
 
         self._pipeline.present()
 
+    # Zīmē tīkla režģi pasaules apgabalā
     def _draw_grid(self, cam_x, cam_y):
         grid_bottom = SCREEN_HEIGHT - TOOLBAR_HEIGHT
         grid_top = HEADER_HEIGHT
@@ -427,6 +448,7 @@ class LevelEditor:
             pygame.draw.line(self._screen, EDITOR_GRID_COLOR,
                              (0, y), (SCREEN_WIDTH, y), 1)
 
+    # Zīmē spawn punkta atzīmi
     def _draw_spawn_marker(self, cam_x, cam_y):
         spawn_x, spawn_y = self._world.get_spawn_position()
         screen_x = spawn_x - cam_x
@@ -446,6 +468,7 @@ class LevelEditor:
         label_y = screen_y - 20 if screen_y >= HEADER_HEIGHT + 20 else screen_y + TILE_SIZE + 4
         self._screen.blit(label, (screen_x, label_y))
 
+    # Zīmē tile priekšskatījumu peles vietā
     def _draw_mouse_preview(self, cam_x, cam_y):
         mouse_x, mouse_y = self._mouse_pos
 
@@ -473,6 +496,7 @@ class LevelEditor:
         pos_text = self._font_small.render(f"({grid_x}, {grid_y})", True, WHITE)
         self._screen.blit(pos_text, (preview_x, preview_y - 18))
 
+    # Zīmē augšējo statusu joslu
     def _draw_top_bar(self):
         pygame.draw.rect(self._screen, DARK_GRAY, (0, 0, SCREEN_WIDTH, TOP_BAR_HEIGHT))
         pygame.draw.line(self._screen, GRAY, (0, TOP_BAR_HEIGHT), (SCREEN_WIDTH, TOP_BAR_HEIGHT), 2)
@@ -492,6 +516,7 @@ class LevelEditor:
             self._top_bar_cache_key = cache_key
         self._screen.blit(self._top_bar_surf, (20, 10))
 
+    # Zīmē līmeņu cilnes joslu
     def _draw_level_bar(self):
         y = TOP_BAR_HEIGHT
         pygame.draw.rect(self._screen, (20, 20, 35), (0, y, SCREEN_WIDTH, LEVEL_BAR_HEIGHT))
@@ -536,6 +561,7 @@ class LevelEditor:
         self._screen.blit(text, (rect.x + 10, rect.y + 6))
         self._new_level_tab_rect = rect
 
+    # Zīmē kategoriju izvēles joslu
     def _draw_category_bar(self):
         y = TOP_BAR_HEIGHT + LEVEL_BAR_HEIGHT
         pygame.draw.rect(self._screen, (30, 30, 50), (0, y, SCREEN_WIDTH, CATEGORY_BAR_HEIGHT))
@@ -559,6 +585,7 @@ class LevelEditor:
 
             x_offset += text_width + 10
 
+    # Zīmē tile izvēles rīkjoslu apakšā
     def _draw_toolbar(self):
         toolbar_y = SCREEN_HEIGHT - TOOLBAR_HEIGHT
 
@@ -594,6 +621,7 @@ class LevelEditor:
         for i, surf in enumerate(self._toolbar_ctrl_surfs):
             self._screen.blit(surf, (controls_x, controls_y + i * 18))
 
+    # Zīmē īslaicīgu ziņojumu ekrānā
     def _draw_message(self):
         text = self._font_big.render(self._message, True, NEON_YELLOW)
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, HEADER_HEIGHT + 50))
@@ -605,6 +633,7 @@ class LevelEditor:
         self._screen.blit(text, text_rect)
 
     # === PALĪGI ===
+    # Parāda statusu ziņojumu uz laiku
     def _show_message(self, msg):
         self._message = msg
         self._message_timer = 120

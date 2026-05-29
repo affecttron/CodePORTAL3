@@ -35,6 +35,7 @@ class MainMenu:
     ITEM_GLOW_SPECS = ((34, 0.03, 22), (20, 0.07, 14), (10, 0.13, 10))
     NAME_GLOW_SPECS = ((20, 0.05, 16), (10, 0.12, 10))
 
+    # Izveido galveno izvēlni ar visiem UI elementiem
     def __init__(self):
         self._pipeline = ShaderPipeline.create(
             (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu",
@@ -102,6 +103,7 @@ class MainMenu:
         self._scores_veil_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         self._scores_veil_surf.fill((0, 0, 0, 225))
 
+    # Izveido virsmas masīvu spīduma efektam
     @staticmethod
     def _build_glow(rect, specs):
         return [
@@ -109,6 +111,7 @@ class MainMenu:
             for e, a, r in specs
         ]
 
+    # Galvenā izvēlnes cilpa
     def run(self):
         while self._running:
             self._events()
@@ -123,6 +126,7 @@ class MainMenu:
         pygame.quit()
         sys.exit()
 
+    # Atjaunina hover animācijas un kursoru
     def _update(self):
         self._sound.update_ambience()
         for i in range(len(self._items)):
@@ -143,6 +147,7 @@ class MainMenu:
             self._cursor_state = desired
 
     # Notikumu apstrāde
+    # Apstrādā visus pygame notikumus
     def _events(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -158,6 +163,7 @@ class MainMenu:
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 self._click(self._pipeline.scale_mouse_pos(e.pos))
 
+    # Apstrādā klaviatūras taustiņu nospiešanu
     def _key(self, e):
         if self._show_scores:
             if e.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_SPACE):
@@ -183,24 +189,28 @@ class MainMenu:
             self._pipeline.toggle()
 
     # Vārda rediģēšana
+    # Sāk vārda rediģēšanas režīmu
     def _start_edit(self):
         self._editing = True
         if self._player_name == "Spēlētājs":
             self._player_name = ""
         pygame.key.start_text_input()
 
+    # Pabeidz vārda rediģēšanu
     def _stop_edit(self):
         self._editing = False
         if not self._player_name.strip():
             self._player_name = "Spēlētājs"
         pygame.key.stop_text_input()
 
+    # Atjaunina izvēlēto punktu pēc hover
     def _hover(self, pos):
         for i in range(len(self._items)):
             if self._item_rect(i).collidepoint(pos):
                 self._selected = i
                 return
 
+    # Apstrādā peles klikšķi uz izvēlnes
     def _click(self, pos):
         if self._show_scores:
             self._show_scores = False
@@ -218,6 +228,7 @@ class MainMenu:
             self._start_edit()
 
     # Darbības izpilde
+    # Izpilda izvēlēto izvēlnes darbību
     def _activate(self):
         action = self._items[self._selected][0]
         self._sound.play_sound("menu_click")
@@ -230,6 +241,7 @@ class MainMenu:
         elif action == QUIT:
             self._running = False
 
+    # Palaiž apakšspēli ar fade pāreju
     def _launch(self, fn):
         self._sound.stop_ambience()
         self._fade(out=True, frames=22, hold=14)
@@ -251,6 +263,7 @@ class MainMenu:
         self._draw()
         self._fade(out=False, frames=18)
 
+    # Animē ekrāna ienākšanu vai iziešanu
     def _fade(self, out, frames=18, hold=0):
         snap = self._screen.copy()
         veil = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -269,18 +282,21 @@ class MainMenu:
                 self._pipeline.present()
                 self._clock.tick(FPS)
 
+    # Atgriež izvēlnes punkta taisnstūri
     def _item_rect(self, i):
         w, h, gap = 680, 82, 24
         x = (SCREEN_WIDTH - w) // 2
         y = SCREEN_HEIGHT // 2 - 80 + i * (h + gap)
         return pygame.Rect(x, y, w, h)
 
+    # Atgriež vārda ievades lauka taisnstūri
     def _name_rect(self):
         w, h = 520, 54
         x = (SCREEN_WIDTH - w) // 2
         y = self._item_rect(len(self._items) - 1).bottom + 80
         return pygame.Rect(x, y, w, h)
 
+    # Zīmē visu izvēlni
     def _draw(self):
         self._screen.fill(BG)
         self._draw_title()
@@ -291,6 +307,7 @@ class MainMenu:
             self._draw_scores()
         self._pipeline.present()
 
+    # Zīmē spēles virsrakstu ar logotipu
     def _draw_title(self):
         cx = SCREEN_WIDTH // 2
 
@@ -309,6 +326,7 @@ class MainMenu:
         self._draw_brackets(frame, ACCENT, DIM_SOFT, arm=40, thickness=4)
 
     # Stūru iekavas
+    # Zīmē stūru iekavu akcentus taisnstūrim
     def _draw_brackets(self, rect, c_top, c_bot, arm=24, thickness=3):
         corners = (
             (rect.left,  rect.top,    +1, +1, c_top),
@@ -320,12 +338,14 @@ class MainMenu:
             pygame.draw.line(self._screen, color, (cx, cy), (cx + dx * arm, cy), thickness)
             pygame.draw.line(self._screen, color, (cx, cy), (cx, cy + dy * arm), thickness)
 
+    # Aizpilda virsmu ar krāsu un zīmē ekrānā
     def _fill_rect(self, surf, color, pos, width=0, radius=0):
         surf.fill((0, 0, 0, 0))
         pygame.draw.rect(surf, color, surf.get_rect(), width=width, border_radius=radius)
         self._screen.blit(surf, pos)
 
     # Punktu saraksts
+    # Zīmē visus izvēlnes punktus ar animāciju
     def _draw_items(self):
         for i, (_, label, c) in enumerate(self._items):
             rect = self._item_rect(i)
@@ -367,6 +387,7 @@ class MainMenu:
                 self._screen.blit(chev, (cx, cy - 16))
 
     # Vārda kaste
+    # Zīmē spēlētāja vārda ievades lauku
     def _draw_name(self):
         rect = self._name_rect()
         h    = self._name_hover
@@ -399,6 +420,7 @@ class MainMenu:
             self._screen.blit(hint, hint.get_rect(midright=(rect.right - 18, rect.centery)))
 
     # Apakšējā josla
+    # Zīmē apakšas statusu un vadības padomus
     def _draw_footer(self):
         cx = SCREEN_WIDTH // 2
         y  = SCREEN_HEIGHT - 50
@@ -410,7 +432,7 @@ class MainMenu:
         status = self._font_small.render("ONLINE", True, AMBER)
         self._screen.blit(status, status.get_rect(midleft=(60, y)))
 
-        hint = "↑↓ / WS  pārvietoties     ENTER  izvēlēties     N  pārdēvēt     F1  ēnotāji     ESC  iziet"
+        hint = "↑↓ / WS  pārvietoties     ENTER  izvēlēties     N  pārdēvēt     F1  shaders     ESC  iziet"
         t    = self._font_small.render(hint, True, DIM)
         self._screen.blit(t, t.get_rect(center=(cx, y)))
 
@@ -418,6 +440,7 @@ class MainMenu:
         self._screen.blit(ver, ver.get_rect(midright=(SCREEN_WIDTH - 40, y)))
 
     # Rezultātu logs
+    # Zīmē rezultātu tabulas pārsegumu
     def _draw_scores(self):
         self._screen.blit(self._scores_veil_surf, (0, 0))
 
@@ -444,6 +467,7 @@ class MainMenu:
         hint = self._font_small.render("[ENTER / ESC / klikšķis] atpakaļ", True, DIM)
         self._screen.blit(hint, hint.get_rect(center=(cx, SCREEN_HEIGHT - 90)))
 
+    # Ielādē logotipu un mērogā pareizi
     @staticmethod
     def _load_logo(target_h=240):
         path = os.path.join(
@@ -464,6 +488,7 @@ class MainMenu:
             img = pygame.transform.smoothscale(img, (new_w, target_h))
         return img
 
+    # Interpolē starp divām krāsām
     @staticmethod
     def _lerp_color(a, b, t):
         t = max(0.0, min(1.0, t))
@@ -474,6 +499,7 @@ class MainMenu:
         )
 
 
+# Inicializē pygame un palaiž galveno izvēlni
 def main():
     pygame.init()
     MainMenu().run()

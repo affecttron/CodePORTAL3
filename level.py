@@ -33,7 +33,7 @@ class Level:
 
     _code_label = "DECODE: payload"
 
-
+    # Izveido līmeni ar nosaukumu un laika limitu
     def __init__(self, level_id, title, time_limit=TIME_LIMIT_PER_TASK, overclock_ms=OVERCLOCK_DURATION_MS):
         self._level_id = level_id
         self._title = title
@@ -42,7 +42,7 @@ class Level:
         self._overclock_duration_ms = overclock_ms
         self._current_task_index = 0
         self._theme_color = NEON_CYAN
-        # rng lai mainitu tasks
+        # rng lai sajauktu uzdevumu secību
         self._rng = random.Random()
 
         self._tw_wrapped = None
@@ -51,12 +51,12 @@ class Level:
         self._tw_last_ms = None
         self._tw_blip_counter = 0
 
-        # OVERCLOCK - per-task countdown for the +OVERCLOCK_BONUS_POINTS window.
+        # OVERCLOCK laika logs bonusa punktiem uz uzdevumu
         self._oc_started_ms = None
         self._oc_consumed = False
         self._oc_voided = False
 
-        # Cached surfaces - allocated once, built lazily after theme_color is set.
+        # Kešotas virsmas, izveido vienu reizi un pārlieto
         self._sound = SoundManager()
         self._overlay_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         self._overlay_surf.fill((0, 0, 0, 215))
@@ -65,6 +65,7 @@ class Level:
         self._code_label_surf = None
         self._oc_surf_cache = {}
 
+    # Ielādē uzdevumus no JSON faila
     def load_tasks(self, tasks_file=TASKS_FILE):
         if not os.path.exists(tasks_file):
             print(f"Tasks fails neatrasts: {tasks_file}")
@@ -91,23 +92,28 @@ class Level:
         print(f"Limenis {self._level_id} nav atrasts")
         return False
 
+    # Ierobežo uzdevumu skaitu
     def set_task_limit(self, n):
         if n < len(self._tasks):
             self._tasks = self._tasks[:n]
 
+    # Atgriež overclock laika logu milisekundēs
     def get_overclock_duration_ms(self):
         return self._overclock_duration_ms
 
+    # Atgriež pašreizējo uzdevumu
     def get_current_task(self):
         if self._current_task_index < len(self._tasks):
             return self._tasks[self._current_task_index]
         return None
 
+    # Pāriet uz nākamo uzdevumu
     def next_task(self):
         self._current_task_index += 1
         self.reset_typewriter()
         return self.get_current_task()
 
+    # Atiestata typewriter animāciju jaunam tekstam
     def reset_typewriter(self):
         self._tw_wrapped = None
         self._tw_total = 0
@@ -118,25 +124,30 @@ class Level:
         self._oc_consumed = False
         self._oc_voided = False
 
+    # Uzreiz parāda visu tekstu
     def skip_typewriter(self):
         if self._tw_wrapped is not None:
             self._tw_revealed = float(self._tw_total)
 
+    # Vai typewriter animācija pabeigta
     def is_typewriter_complete(self):
         return self._tw_wrapped is not None and self._tw_revealed >= self._tw_total
 
+    # Vai visi uzdevumi pabeigti
     def is_complete(self):
-        # An empty task list means load failed — don't auto-complete in that case.
+        # Tukšs saraksts nozīmē ielādes kļūdu, nepabeigt automātiski
         if not self._tasks:
             return False
         return self._current_task_index >= len(self._tasks)
 
+    # Pārbauda atbildi pret pašreizējo uzdevumu
     def check_answer(self, ans):
         task = self.get_current_task()
         if task is None:
             return False
         return task.verify(ans)
 
+    # Zīmē uzdevuma UI un atgriež izkārtojumu
     def display_task(self, screen, font_normal, attempts=0):
         layout = self.get_panel_layout()
         self._draw_base_ui(screen, layout, attempts)
@@ -145,6 +156,7 @@ class Level:
         self._draw_overclock_strip(screen, layout["overclock"])
         return layout
 
+    # Aprēķina un atgriež paneļa elementu pozīcijas
     def get_panel_layout(self):
         panel_x = (SCREEN_WIDTH - PANEL_WIDTH) // 2
         panel_y = (SCREEN_HEIGHT - PANEL_HEIGHT) // 2
@@ -181,9 +193,11 @@ class Level:
             "hint": hint,
         }
 
+    # Aptumšo krāsu par norādītu koeficientu
     def _dim_color(self, color, factor=0.4):
         return dim_color(color, factor)
 
+    # Atgriež kešotu monospacea fontu pēc izmēra
     def _mono_font(self, size, bold=False):
         if not hasattr(self, "_mono_cache"):
             self._mono_cache = {}
@@ -192,6 +206,7 @@ class Level:
             self._mono_cache[key] = pygame.font.SysFont("Consolas", size, bold=bold)
         return self._mono_cache[key]
 
+    # Ģenerē sesijas ID no uzdevuma teksta
     def _session_id(self):
         task = self.get_current_task()
         if task is None:
@@ -199,6 +214,7 @@ class Level:
         h = sum(ord(c) for c in task.get_question()) & 0xFFFF
         return f"0x{h:04X}"
 
+    # Zīmē pamata paneļa rāmi un virsrakstu
     def _draw_base_ui(self, screen, layout, attempts):
         panel = layout["panel"]
         color = self._theme_color
@@ -259,6 +275,7 @@ class Level:
         pygame.draw.rect(screen, color, panel, 2)
         draw_corner_accents(screen, panel, color)
 
+    # Zīmē mēģinājumu punktus virsrakstjoslā
     def _draw_attempt_dots(self, screen, panel, attempts):
         color = self._theme_color
         dim = self._dim_color(color, 0.35)
@@ -277,6 +294,7 @@ class Level:
             else:
                 pygame.draw.circle(screen, dim, (cx, dot_y), 5, 1)
 
+    # Zīmē CRT skenlīniju efektu apgabalam
     def _draw_scanlines(self, screen, rect, color):
         if self._scanline_surf is None:
             surf = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
@@ -286,6 +304,7 @@ class Level:
             self._scanline_surf = surf
         screen.blit(self._scanline_surf, rect.topleft)
 
+    # Zīmē koda bloku ar typewriter animāciju
     def _draw_code_block(self, screen, font_normal, code_rect):
         task = self.get_current_task()
         if task is None:
@@ -370,6 +389,7 @@ class Level:
 
         self._draw_scanlines(screen, code_rect, color)
 
+    # Sadala tekstu rindās pēc platuma
     def _wrap_question_lines(self, question, font, max_width):
         wrapped = []
         for raw_line in question.split("\n"):
@@ -390,6 +410,7 @@ class Level:
                 wrapped.append(current.rstrip())
         return wrapped
 
+    # Atjaunina typewriter animācijas progresu
     def _tick_typewriter(self):
         if self._tw_total == 0 or self._tw_revealed >= self._tw_total:
             return
@@ -423,16 +444,19 @@ class Level:
                     blipped = True
 
     # === OVERCLOCK ===
+    # Sāk overclock taimeri pēc typewriter
     def _ensure_overclock_started(self):
         if self._oc_started_ms is None and self.is_typewriter_complete():
             self._oc_started_ms = pygame.time.get_ticks()
 
+    # Atgriež atlikušo overclock laiku ms
     def get_overclock_remaining_ms(self):
         if self._oc_started_ms is None:
             return self._overclock_duration_ms
         elapsed = pygame.time.get_ticks() - self._oc_started_ms
         return max(0, self._overclock_duration_ms - elapsed)
 
+    # Vai overclock logs pašlaik aktīvs
     def is_overclock_active(self):
         return (
             self._oc_started_ms is not None
@@ -441,16 +465,19 @@ class Level:
             and self.get_overclock_remaining_ms() > 0
         )
 
+    # Patērē overclock bonusu un atgriež punktus
     def consume_overclock_bonus(self):
         if not self.is_overclock_active():
             return 0
         self._oc_consumed = True
         return OVERCLOCK_BONUS_POINTS
 
+    # Anulē overclock logu pēc nepareizas atbildes
     def void_overclock(self):
-        # Forfeit the overclock window — called when the player submits a wrong answer.
+        # Anulē overclock logu pēc nepareizas atbildes
         self._oc_voided = True
 
+    # Atgriež overclock stāvokļa tekstu
     def _oc_state(self):
         if not self.is_typewriter_complete() or self._oc_started_ms is None:
             return "standby"
@@ -465,6 +492,7 @@ class Level:
             return "warning"
         return "active"
 
+    # Atgriež krāsu paleti pēc overclock stāvokļa
     def _oc_palette(self, state):
         color = self._theme_color
         if state == "standby":
@@ -493,6 +521,7 @@ class Level:
         return (color, self._dim_color(color, 0.45),
                 color, self._dim_color(color, 0.20))
 
+    # Atgriež ciparu tekstu taimera displejam
     def _oc_digits_text(self, state):
         if state == "standby":
             return "--.---s"
@@ -503,6 +532,7 @@ class Level:
         secs = max(0, self.get_overclock_remaining_ms()) / 1000.0
         return f"{secs:06.3f}s"
 
+    # Atgriež statusa etiķetes tekstu
     def _oc_badge_text(self, state):
         if state == "standby":
             return "STANDBY"
@@ -512,6 +542,7 @@ class Level:
             return "VOIDED"
         return f"+{OVERCLOCK_BONUS_POINTS} PT"
 
+    # Zīmē overclock joslu ar taimeri un statusu
     def _draw_overclock_strip(self, screen, rect):
         state = self._oc_state()
         primary, accent, bar_color, bar_dim = self._oc_palette(state)
@@ -524,10 +555,10 @@ class Level:
             border_color = accent
         pygame.draw.rect(screen, border_color, rect, 1)
 
-        # Left vertical accent stripe
+        # Kreisā vertikālā akcenta svītra
         pygame.draw.line(screen, primary, (rect.x, rect.y), (rect.x, rect.bottom), 3)
 
-        # Build state-keyed cache for all static text surfaces on first visit.
+        # Izveido teksta virsmu kešu pirmajā reizē
         if state not in self._oc_surf_cache:
             label_font = self._mono_font(15, bold=True)
             badge_font = self._mono_font(14, bold=True)
@@ -561,7 +592,7 @@ class Level:
         badge_w = badge_surf.get_width()
         badge_pad = 18
 
-        # Bar starts after a fixed-width digit reservation so ticking doesn't shift it.
+        # Josla sākas pēc skaitļu platuma, lai taimeris to nepārvieto
         bar_x = digit_x + digit_font.size("00.000s")[0] + 22
         bar_right = rect.right - badge_pad - badge_w - 26
         bar_w = max(0, bar_right - bar_x)
@@ -589,7 +620,7 @@ class Level:
             else:
                 pygame.draw.rect(screen, bar_dim, seg_rect, 1)
 
-        # Bracketed badge on the right — "[ +10 PT ]" / "[ STANDBY ]" / "[ EXPIRED ]"
+        # Iekavota etiķete labajā pusē ar statusu
         open_b  = cached["open_b"]
         close_b = cached["close_b"]
         badge_x = rect.right - badge_pad - badge_w
@@ -598,24 +629,31 @@ class Level:
         screen.blit(badge_surf, (badge_x, badge_y))
         screen.blit(close_b, (badge_x + badge_w + 4, badge_y))
 
+    # Atgriež līmeņa ID numuru
     def get_level_id(self):
         return self._level_id
 
+    # Atgriež līmeņa nosaukumu
     def get_title(self):
         return self._title
 
+    # Atgriež uzdevumu sarakstu
     def get_tasks(self):
         return self._tasks
 
+    # Atgriež uzdevumu skaitu
     def get_task_count(self):
         return len(self._tasks)
 
+    # Atgriež pašreizējā uzdevuma indeksu
     def get_current_index(self):
         return self._current_task_index
 
+    # Atgriež laika limitu sekundēs
     def get_time_limit(self):
         return self._time_limit
 
+    # Atgriež līmeņa tēmas krāsu
     def get_theme_color(self):
         return self._theme_color
 
@@ -624,6 +662,7 @@ class ConditionLevel(Level):
 
     _code_label = "DECODE: python.if_else"
 
+    # Izveido if/else nosacījumu līmeni
     def __init__(self, level_id=1, title="Drošības vārti - if/else", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._branch_type = "if/else"
@@ -634,6 +673,7 @@ class LoopLevel(Level):
 
     _code_label = "DECODE: python.loop"
 
+    # Izveido ciklu tēmas līmeni
     def __init__(self, level_id=2, title="Datu tunelis - cikli", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._loop_type = "for/while"
@@ -644,6 +684,7 @@ class FunctionLevel(Level):
 
     _code_label = "DECODE: python.function"
 
+    # Izveido funkciju tēmas līmeni
     def __init__(self, level_id=3, title="Galvenā servera istaba - funkcijas", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._theme_color = NEON_GREEN
@@ -653,6 +694,7 @@ class AdvancedLevel(Level):
 
     _code_label = "DECODE: python.advanced"
 
+    # Izveido sarežģītu algoritmu līmeni
     def __init__(self, level_id=7, title="Kvantu matrica", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._theme_color = NEON_PINK
@@ -662,6 +704,7 @@ class ExpertLevel(Level):
 
     _code_label = "DECODE: python.expert"
 
+    # Izveido ekspertu līmeni ar baltu tēmu
     def __init__(self, level_id=9, title="Singularitāte", overclock_ms=OVERCLOCK_DURATION_MS):
         super().__init__(level_id, title, overclock_ms=overclock_ms)
         self._theme_color = (255, 255, 255)
@@ -680,6 +723,7 @@ _LEVEL_CATALOGUE = {
 }
 
 
+# Izveido pareizā tipa līmeni pēc ID
 def create_level(level_id, overclock_ms=OVERCLOCK_DURATION_MS):
     entry = _LEVEL_CATALOGUE.get(level_id)
     if entry is None:
