@@ -24,11 +24,11 @@ Tas ir kursa darbs, kas izskatās pēc spēles, bet faktiski māca programmēša
 
 Spēle satur trīs pasaules ar pieaugošu grūtību. Katrā pasaulē ir trīs portāli, katrs ar savu tēmu.
 
-| Pasaule | Nosaukums | Portāli | Mēģinājumi | Overclock |
-|:-:|:--|:--|:-:|:-:|
-| 1 | INITIATION | if/else, for/while, funkcijas | 3 | 15 sek |
-| 2 | INFILTRATION | Sarežģīti nosacījumi, ciklu kombinācijas, funkciju loģika | 3 | 12 sek |
-| 3 | CORE BREACH | Algoritmi, datu manipulācija, elite tests | 2 | 9 sek |
+| Pasaule | Nosaukums    | Portāli                                                   | Mēģinājumi | Overclock |
+| :-----: | :----------- | :-------------------------------------------------------- | :--------: | :-------: |
+|    1    | INITIATION   | if/else, for/while, funkcijas                             |     3      |  15 sek   |
+|    2    | INFILTRATION | Sarežģīti nosacījumi, ciklu kombinācijas, funkciju loģika |     3      |  12 sek   |
+|    3    | CORE BREACH  | Algoritmi, datu manipulācija, elite tests                 |     2      |   9 sek   |
 
 Pēc trešās pasaules var turpināt Endless režīmā bez limita.
 
@@ -74,7 +74,7 @@ Kopā 9 līmeņi, katrā 15 uzdevumi. Tas ir 135 jautājumi.
 ## Instalācija
 
 ```bash
-pip install pygame-ce
+pip install moderngl pygame-ce numpy
 python main.py
 ```
 
@@ -86,36 +86,36 @@ Nepieciešams Python 3.10 vai jaunāks.
 
 **Pasaulē**
 
-| Taustiņš | Darbība |
-|:-:|:--|
-| `A` `D` vai bultiņas | Kustība |
-| `SPACE` vai `W` | Lēkt |
-| `W` `S` | Rāpties pa kāpnēm |
-| `R` | Respawn |
-| `F1` | Ieslēgt/izslēgt vizuālos efektus |
-| `F9` | Izlaist pasauli (testēšanai) |
-| `ESC` | Iziet |
+|       Taustiņš       | Darbība                          |
+| :------------------: | :------------------------------- |
+| `A` `D` vai bultiņas | Kustība                          |
+|   `SPACE` vai `W`    | Lēkt                             |
+|       `W` `S`        | Rāpties pa kāpnēm                |
+|         `R`          | Respawn                          |
+|         `F1`         | Ieslēgt/izslēgt vizuālos efektus |
+|         `F9`         | Izlaist pasauli (testēšanai)     |
+|        `ESC`         | Iziet                            |
 
 **Uzdevumā**
 
-| Taustiņš | Darbība |
-|:-:|:--|
-| Tastatūra | Ievadīt atbildi |
-| `ENTER` | Iesniegt |
-| `TAB` | Izlaist typewriter animāciju |
+|  Taustiņš   | Darbība                          |
+| :---------: | :------------------------------- |
+|  Tastatūra  | Ievadīt atbildi                  |
+|   `ENTER`   | Iesniegt                         |
+|    `TAB`    | Izlaist typewriter animāciju     |
 | `BACKSPACE` | Dzēst (tur nospiestu: ātri dzēš) |
-| `ESC` | Atcelt un atgriezties pasaulē |
+|    `ESC`    | Atcelt un atgriezties pasaulē    |
 
 **Līmeņu redaktorā**
 
-| Taustiņš | Darbība |
-|:-:|:--|
-| `LMB` | Likt tile |
-| `RMB` | Dzēst tile |
-| `TAB` | Pārslēgt kategoriju |
-| `G` | Rādīt/slēpt režģi |
-| `Ctrl+S` | Saglabāt |
-| `N` | Jauns līmenis |
+| Taustiņš | Darbība             |
+| :------: | :------------------ |
+|  `LMB`   | Likt tile           |
+|  `RMB`   | Dzēst tile          |
+|  `TAB`   | Pārslēgt kategoriju |
+|   `G`    | Rādīt/slēpt režģi   |
+| `Ctrl+S` | Saglabāt            |
+|   `N`    | Jauns līmenis       |
 
 ---
 
@@ -123,12 +123,12 @@ Nepieciešams Python 3.10 vai jaunāks.
 
 Projekts izmanto četrus OOP principus.
 
-| Princips | Kur |
-|:--|:--|
-| Iekapsulēšana | Privāti atribūti ar `_`, piekļuve caur metodēm |
-| Mantošana | `Tile` un `Level` klašu hierarhijas |
-| Polimorfisms | `draw()`, `verify()`, `to_dict()` pārdefinētas apakšklasēs |
-| Kompozīcija | `Game` satur `World`, `Player`, `Camera`, `Level` u.c. |
+| Princips      | Kur                                                        |
+| :------------ | :--------------------------------------------------------- |
+| Iekapsulēšana | Privāti atribūti ar `_`, piekļuve caur metodēm             |
+| Mantošana     | `Tile` un `Level` klašu hierarhijas                        |
+| Polimorfisms  | `draw()`, `verify()`, `to_dict()` pārdefinētas apakšklasēs |
+| Kompozīcija   | `Game` satur `World`, `Player`, `Camera`, `Level` u.c.     |
 
 ```
 Tile                    Level
@@ -170,7 +170,7 @@ data/levels/         Līmeņu JSON faili
 
 Veidoja **Artūrs Skorikovs** · Komanda **PORTAL 3**
 
-*(jo Portal 2 jau bija paņemts)*
+_(jo Portal 2 jau bija paņemts)_
 
 Kursa darbs programmēšanas kursā
 
