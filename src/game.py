@@ -494,7 +494,7 @@ class Game:
     def _open_task(self, portal):
         portal_slot = portal.get_level_id() - 1
         level_ids = self._current_world_config.get("level_ids", [1, 2, 3])
-        level_id = level_ids[portal_slot] if portal_slot < len(level_ids) else portal.get_level_id()
+        level_id = level_ids[portal_slot] if 0 <= portal_slot < len(level_ids) else portal.get_level_id()
         overclock_ms = self._current_world_config["overclock_ms"]
         self._current_level = create_level(level_id, overclock_ms=overclock_ms)
         self._current_level.load_tasks()
