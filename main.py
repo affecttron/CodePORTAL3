@@ -250,8 +250,11 @@ class MainMenu:
         self._sound.stop_ambience()
         self._fade(out=True, frames=22, hold=14)
         self._pipeline.shutdown()
+        exc = None
         try:
             fn()
+        except Exception as e:
+            exc = e
         finally:
             self._pipeline = ShaderPipeline.create(
                 (SCREEN_WIDTH, SCREEN_HEIGHT), fullscreen=FULLSCREEN, shader="menu",
@@ -266,6 +269,8 @@ class MainMenu:
         self._sound.start_ambience()
         self._draw()
         self._fade(out=False, frames=18)
+        if exc is not None:
+            raise exc
 
     # Animē ekrāna ienākšanu vai iziešanu
     def _fade(self, out, frames=18, hold=0):
