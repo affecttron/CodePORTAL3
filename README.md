@@ -20,9 +20,11 @@ Tas ir kursa darbs, kas izskatās pēc spēles, bet faktiski māca programmēša
 
 ---
 
-## Pasaules
+## Pasaule
 
-Spēle satur trīs pasaules ar pieaugošu grūtību. Katrā pasaulē ir trīs portāli, katrs ar savu tēmu.
+<img src="assets/Showcase of the World.png" alt="Spēles pasaule" width="720"/>
+
+Industriāla kiberpunka vide ar platformer fiziku. Katrā pasaulē ir trīs portāli un durvis, kas atveras tikai pēc visu portālu pabeigšanas.
 
 | Pasaule | Nosaukums    | Portāli                                                   | Mēģinājumi | Overclock |
 | :-----: | :----------- | :-------------------------------------------------------- | :--------: | :-------: |
@@ -34,40 +36,48 @@ Pēc trešās pasaules var turpināt Endless režīmā bez limita.
 
 ---
 
-## Kā tas strādā
+## Hakošana
 
-Staigā pa platformer līmeni. Uzskriej portālam. Atveras terminālis ar Python koda fragmentu un jautājumu. Tu analizē kodu ar galvu un ievadi atbildi. Nav interneta, nav hints sākumā, nav laika tēriņiem. Pēc kļūdas hints parādās.
+<img src="assets/ShowcaseOfHacking.png" alt="Uzdevuma terminālis" width="720"/>
 
-Pareizi: portāls izslēdzas, saņem punktus un laika bonusu ja biji ātrs.  
-Nepareizi: zaudē 5 punktus, redzat padomu.  
-Kritieni hazardā: zaudē 10 punktus, nomirst dramatiskā raudzenē.  
-Visi trīs portāli pabeigti: durvis uz nākamo pasauli atveras.
+Uzskriej portālam un atveras terminālis ar Python koda fragmentu un jautājumu. Tu analizē kodu ar galvu un ievadi atbildi. Nav interneta, nav padomu sākumā. Pēc kļūdas padoms parādās.
 
----
+Pareizi: portāls izslēdzas, saņem punktus un laika bonusu ja biji ātrs.
+Nepareizi: zaudē 5 punktus, redzi padomu.
+Kritieni hazardā: zaudē 10 punktus, nomirst dramatiskā raudzenē.
 
-## Punkti
-
-Katram uzdevumam ir trīs mēģinājumi. Punktus skaita šādi:
-
-- 1. mēģinājums: 100 pts
-- 2. mēģinājums: 50 pts
-- 3. mēģinājums: 20 pts
-
-Ja atbildi pirms Overclock taimera beigām, saņem papildu 10 punktus. Overclock logs ir 15/12/9 sekundes atkarībā no pasaules. Pēc kļūdas Overclock bonuss pazūd uz šo uzdevumu.
+Katram uzdevumam ir trīs mēģinājumi. Punktus skaita šādi: 1. mēģinājums 100 pts, 2. mēģinājums 50 pts, 3. mēģinājums 20 pts. Ja atbildi pirms Overclock taimera beigām, saņem papildu 10 punktus.
 
 ---
 
-## Uzdevumi
+## Vizuālie efekti
 
-Katrā portālā ir 15 unikāli uzdevumi par dažādiem tematiem. Katrs uzdevums dod koda fragmentu un prasa precīzu atbildi ko Python izpildītu.
+<img src="assets/ShowcaseOfGLSL.png" alt="GLSL shaderi" width="720"/>
+
+Spēle izmanto moderngl ar divpakāpju GLSL renderēšanu. Pirmajā solī scēnas shaderis pielieto post-FX: radiālu hromatisko aberāciju, scanlines, neon glow uz spožiem pikseļiem, FBM atmosfēras driftu un vinjeti. Otrajā solī screen shaderis upscale attēlu ar unsharp mask asināšanu. F1 izslēdz visus efektus.
+
+---
+
+## Arhitektūra
+
+Projekts izmanto četrus OOP principus.
+
+**Iekapsulēšana.** Visi klašu atribūti ir privāti ar `_` prefiksu un pieejami tikai caur metodēm. `PlayerSprite` pārvalda savu fiziku pilnīgi iekšēji, `Game` nekad tieši nepieskaras koordinātēm.
+
+**Mantošana.** `Tile` un `Level` ir bāzes klases ar pilnām hierarhijām:
 
 ```
-Pasaule 1:  if/else nosacījumi  |  for/while cikli  |  funkcijas
-Pasaule 2:  sarežģīti nosacījumi  |  ciklu kombinācijas  |  funkciju loģika
-Pasaule 3:  algoritmi  |  datu manipulācija  |  elite tests
+Tile                    Level
+├── SolidTile           ├── ConditionLevel   (pasaules 1, 2)
+├── PortalTile          ├── LoopLevel        (pasaules 1, 2)
+├── HazardTile          ├── FunctionLevel    (pasaules 1, 2)
+├── ClimbableTile       ├── AdvancedLevel    (pasaule 3)
+└── DoorExitTile        └── ExpertLevel      (pasaule 3)
 ```
 
-Kopā 9 līmeņi, katrā 15 uzdevumi. Tas ir 135 jautājumi.
+**Polimorfisms.** `draw()`, `verify()` un `to_dict()` metodes ir pārdefinētas katrā apakšklasē. `Game` zina tikai, ka portālam ir `verify()`, bet kas notiek iekšā ir katra `Level` veida pašu lieta.
+
+**Kompozīcija.** `Game` satur `World`, `PlayerSprite`, `Camera`, `Level`, `SoundManager` un `ShaderPipeline` kā neatkarīgus komponentus. Neviens no tiem nezina par otru tieši.
 
 ---
 
@@ -106,64 +116,6 @@ Nepieciešams Python 3.10 vai jaunāks.
 | `BACKSPACE` | Dzēst (tur nospiestu: ātri dzēš) |
 |    `ESC`    | Atcelt un atgriezties pasaulē    |
 
-**Līmeņu redaktorā**
-
-| Taustiņš | Darbība             |
-| :------: | :------------------ |
-|  `LMB`   | Likt tile           |
-|  `RMB`   | Dzēst tile          |
-|  `TAB`   | Pārslēgt kategoriju |
-|   `G`    | Rādīt/slēpt režģi   |
-| `Ctrl+S` | Saglabāt            |
-|   `N`    | Jauns līmenis       |
-
----
-
-## Arhitektūra
-
-Projekts izmanto četrus OOP principus.
-
-| Princips      | Kur                                                        |
-| :------------ | :--------------------------------------------------------- |
-| Iekapsulēšana | Privāti atribūti ar `_`, piekļuve caur metodēm             |
-| Mantošana     | `Tile` un `Level` klašu hierarhijas                        |
-| Polimorfisms  | `draw()`, `verify()`, `to_dict()` pārdefinētas apakšklasēs |
-| Kompozīcija   | `Game` satur `World`, `Player`, `Camera`, `Level` u.c.     |
-
-```
-Tile                    Level
-├── SolidTile           ├── ConditionLevel   (pasaules 1, 2)
-├── PortalTile          ├── LoopLevel        (pasaules 1, 2)
-├── HazardTile          ├── FunctionLevel    (pasaules 1, 2)
-├── ClimbableTile       ├── AdvancedLevel    (pasaule 3)
-└── DoorExitTile        └── ExpertLevel      (pasaule 3)
-```
-
-Tehnoloģijas: Python 3, pygame-ce, JSON (līmeņi un uzdevumi), CSV (rezultāti), moderngl (shaderi).
-
----
-
-## Failu struktūra
-
-```
-main.py              Galvenā izvēlne
-game.py              Spēles stāvokļu mašīna
-level.py             Uzdevumu panelis un tipu hierarhija
-world.py             Tile pārvaldība un sadursmes
-player.py            Spēlētāja dati un punkti
-player_sprite.py     Kustība un fizika
-camera.py            Kamera ar smooth follow
-tile.py              Tile klases
-tile_registry.py     Tile attēlu kešs
-parallax_background  Fona slāņi
-shader_pipeline.py   Cyberpunk vizuālie efekti
-sound_manager.py     Skaņa un mūzika
-level_editor.py      Grafiskais līmeņu redaktors
-score_log.py         CSV rezultātu saglabāšana
-data/tasks.json      Visi 135 uzdevumi
-data/levels/         Līmeņu JSON faili
-```
-
 ---
 
 <div align="center">
@@ -171,7 +123,5 @@ data/levels/         Līmeņu JSON faili
 Veidoja **Artūrs Skorikovs** · Komanda **PORTAL 3**
 
 _(jo Portal 2 jau bija paņemts)_
-
-Kursa darbs programmēšanas kursā
 
 </div>
