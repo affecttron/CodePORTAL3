@@ -61,18 +61,21 @@ class ScoreLog:
             with open(self._filename, "r", newline="", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
-                    scores.append({
-                        "name": row["name"],
-                        "date": row["date"],
-                        "score": int(row["score"]),
-                        "level_reached": int(row["level_reached"]),
-                        "tasks_completed": int(row["tasks_completed"]),
-                    })
-            self._entries = scores
-            return scores
+                    try:
+                        scores.append({
+                            "name": row["name"],
+                            "date": row["date"],
+                            "score": int(row["score"]),
+                            "level_reached": int(row["level_reached"]),
+                            "tasks_completed": int(row["tasks_completed"]),
+                        })
+                    except (ValueError, KeyError):
+                        print(f"Skipping malformed score row: {row}")
         except Exception as e:
             print(f"Kļūda ielādējot: {e}")
             return []
+        self._entries = scores
+        return scores
 
     # Atgriež augstākos rezultātus sakārtotus
     def get_top_scores(self, limit=5):

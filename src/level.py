@@ -199,11 +199,15 @@ class Level:
         return dim_color(color, factor)
 
     # Atgriež kešotu monospacea fontu pēc izmēra
+    _MONO_CACHE_LIMIT = 16
+
     def _mono_font(self, size, bold=False):
         if not hasattr(self, "_mono_cache"):
             self._mono_cache = {}
         key = (size, bold)
         if key not in self._mono_cache:
+            if len(self._mono_cache) >= self._MONO_CACHE_LIMIT:
+                self._mono_cache.pop(next(iter(self._mono_cache)))
             self._mono_cache[key] = pygame.font.SysFont("bahnschrift", size, bold=bold)
         return self._mono_cache[key]
 
