@@ -36,8 +36,9 @@ class ScoreLog:
         try:
             with open(self._filename, "a", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
+                safe_name = player.get_name().lstrip("=+-@|")
                 writer.writerow([
-                    player.get_name(),
+                    safe_name,
                     self._timestamp,
                     player.get_score(),
                     player.get_level_reached(),
