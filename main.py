@@ -502,6 +502,14 @@ class MainMenu:
 # Inicializē pygame un palaiž galveno izvēlni
 def main():
     pygame.init()
+    _icon_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "assets", "images", "AppIcon", "Code3AppIcon.png",
+    )
+    try:
+        pygame.display.set_icon(pygame.image.load(_icon_path))
+    except Exception:
+        pass
     MainMenu().run()
 
 
