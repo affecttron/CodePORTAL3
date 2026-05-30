@@ -22,7 +22,7 @@ Tas ir kursa darbs, kas izskatās pēc spēles, bet faktiski māca programmēša
 
 ## Pasaule
 
-<img src="assets/Showcase of the World.png" alt="Spēles pasaule" width="720"/>
+<div align="center"><img src="assets/Showcase of the World.png" alt="Spēles pasaule" width="720"/></div>
 
 Industriāla kiberpunka vide ar platformer fiziku. Katrā pasaulē ir trīs portāli un durvis, kas atveras tikai pēc visu portālu pabeigšanas.
 
@@ -38,9 +38,9 @@ Pēc trešās pasaules var turpināt Endless režīmā bez limita.
 
 ## Hakošana
 
-<img src="assets/ShowcaseOfHacking.png" alt="Uzdevuma terminālis" width="720"/>
+<div align="center"><img src="assets/ShowcaseOfHacking.png" alt="Uzdevuma terminālis" width="720"/></div>
 
-Uzskriej portālam un atveras terminālis ar Python koda fragmentu un jautājumu. Tu analizē kodu ar galvu un ievadi atbildi. Nav interneta, nav padomu sākumā. Pēc kļūdas padoms parādās.
+Uzskrien portālam un atveras terminālis ar Python koda fragmentu un jautājumu. Tu analizē kodu ar galvu un ievadi atbildi. Nav interneta, nav padomu sākumā. Pēc kļūdas padoms parādās.
 
 Pareizi: portāls izslēdzas, saņem punktus un laika bonusu ja biji ātrs.
 Nepareizi: zaudē 5 punktus, redzi padomu.
@@ -52,7 +52,7 @@ Katram uzdevumam ir trīs mēģinājumi. Punktus skaita šādi: 1. mēģinājums
 
 ## Vizuālie efekti
 
-<img src="assets/ShowcaseOfGLSL.png" alt="GLSL shaderi" width="720"/>
+<div align="center"><img src="assets/ShowcaseOfGLSL.png" alt="GLSL shaderi" width="720"/></div>
 
 Spēle izmanto moderngl ar divpakāpju GLSL renderēšanu. Pirmajā solī scēnas shaderis pielieto post-FX: radiālu hromatisko aberāciju, scanlines, neon glow uz spožiem pikseļiem, FBM atmosfēras driftu un vinjeti. Otrajā solī screen shaderis upscale attēlu ar unsharp mask asināšanu. F1 izslēdz visus efektus.
 
