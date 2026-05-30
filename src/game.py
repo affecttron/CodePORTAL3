@@ -233,16 +233,17 @@ class Game:
 
     # Galvenā spēles cilpa
     def run(self):
-        while self._running:
-            self._handle_events()
-            self._update()
-            self._draw()
-            self._clock.tick(FPS)
-
-        self._sound.stop_music()
-        self._sound.stop_ambience()
-        self._score_log.save_score(self._player)
-        self._pipeline.shutdown()
+        try:
+            while self._running:
+                self._handle_events()
+                self._update()
+                self._draw()
+                self._clock.tick(FPS)
+        finally:
+            self._sound.stop_music()
+            self._sound.stop_ambience()
+            self._score_log.save_score(self._player)
+            self._pipeline.shutdown()
 
     # Apstrādā visus pygame notikumus
     def _handle_events(self):
