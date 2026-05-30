@@ -23,3 +23,8 @@
 [2026-05-30 01:07:24] [session_20260530_010709] Score saved: TestSpēlētājs = 0
 [2026-05-30 01:08:36] [session_20260530_010821] Score saved: TestSpēlētājs = 0
 [2026-05-30 01:10:41] [session_20260530_010844] Score saved: TestSpēlētājs = 200
+[2026-05-30 15:01:44] [session_20260530_150143] Score saved: Spēlētājs = 0
+[2026-05-30 15:08:49] [session_20260530_150827] Score saved: Spēlētājs = 0
+[2026-05-30 15:25:07] [session_20260530_152428] Score saved: Spēlētājs = 0
+[2026-05-30 15:27:35] [session_20260530_152625] Score saved: Spēlētājs = 0
+[2026-05-30 15:28:08] [session_20260530_152756] Score saved: Spēlētājs = 0

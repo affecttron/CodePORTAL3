@@ -47,9 +47,9 @@ class LevelEditor:
         self._clock = pygame.time.Clock()
 
         # Fonti
-        self._font = pygame.font.SysFont("Arial", 20)
-        self._font_small = pygame.font.SysFont("Arial", 14)
-        self._font_big = pygame.font.SysFont("Arial", 28, bold=True)
+        self._font = pygame.font.SysFont("bahnschrift", 20)
+        self._font_small = pygame.font.SysFont("bahnschrift", 14)
+        self._font_big = pygame.font.SysFont("bahnschrift", 28, bold=True)
 
         # Registry
         self._registry = TileRegistry()

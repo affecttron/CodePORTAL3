@@ -186,8 +186,8 @@ class DoorExitTile(Tile):
             TILE_SIZE * 2, TILE_SIZE * 2,
         )
         self._locked = True
-        self._font_label = pygame.font.SysFont("Consolas", 14, bold=True)
-        self._font_exit  = pygame.font.SysFont("Consolas", 28, bold=True)
+        self._font_label = pygame.font.SysFont("bahnschrift", 14, bold=True)
+        self._font_exit  = pygame.font.SysFont("bahnschrift", 28, bold=True)
 
     # Atslēdz durvis uz nākamo pasauli
     def unlock(self):

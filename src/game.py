@@ -45,13 +45,13 @@ class Game:
         self._clock = pygame.time.Clock()
 
         # Fonti
-        self._font_huge = pygame.font.SysFont("Arial", 64, bold=True)
-        self._font_big = pygame.font.SysFont("Arial", 36, bold=True)
-        self._font = pygame.font.SysFont("Arial", 24)
-        self._font_code = pygame.font.SysFont("Consolas", 20)
-        self._font_code_bold = pygame.font.SysFont("Consolas", 20, bold=True)
-        self._font_code_small = pygame.font.SysFont("Consolas", 15, bold=True)
-        self._font_small = pygame.font.SysFont("Arial", 18)
+        self._font_huge = pygame.font.SysFont("bahnschrift", 64, bold=True)
+        self._font_big = pygame.font.SysFont("bahnschrift", 36, bold=True)
+        self._font = pygame.font.SysFont("bahnschrift", 24)
+        self._font_code = pygame.font.SysFont("bahnschrift", 20)
+        self._font_code_bold = pygame.font.SysFont("bahnschrift", 20, bold=True)
+        self._font_code_small = pygame.font.SysFont("bahnschrift", 15, bold=True)
+        self._font_small = pygame.font.SysFont("bahnschrift", 18)
 
         self._player = Player(player_name)
 

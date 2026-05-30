@@ -2,6 +2,8 @@ import math
 import os
 import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
+
 import pygame
 
 from game import Game
@@ -14,6 +16,8 @@ from settings import (
     WHITE, BLACK, GRAY,
 )
 
+
+VERSION = "1.0"
 
 PLAY, EDITOR, SCORES, QUIT = "play", "editor", "scores", "quit"
 
@@ -45,12 +49,12 @@ class MainMenu:
         pygame.display.set_caption(TITLE)
         self._clock = pygame.time.Clock()
 
-        self._font_title = pygame.font.SysFont("Arial",    140, bold=True)
-        self._font_item  = pygame.font.SysFont("Arial",    56,  bold=True)
-        self._font_idx   = pygame.font.SysFont("Consolas", 20,  bold=True)
-        self._font_tag   = pygame.font.SysFont("Consolas", 22,  bold=True)
-        self._font       = pygame.font.SysFont("Arial",    28)
-        self._font_small = pygame.font.SysFont("Arial",    22)
+        self._font_title = pygame.font.SysFont("bahnschrift", 140,)
+        self._font_item  = pygame.font.SysFont("bahnschrift", 56, )
+        self._font_idx   = pygame.font.SysFont("bahnschrift", 20, )
+        self._font_tag   = pygame.font.SysFont("bahnschrift", 22, )
+        self._font       = pygame.font.SysFont("bahnschrift", 28)
+        self._font_small = pygame.font.SysFont("bahnschrift", 22)
 
         # Izvēlnes punkti
         self._items = [

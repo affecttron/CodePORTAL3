@@ -14,7 +14,7 @@ except Exception:
     _MODERNGL_AVAILABLE = False
 
 
-SHADER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shaders")
+SHADER_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "shaders")
 
 
 class ShaderPipeline:

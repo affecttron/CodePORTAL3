@@ -204,7 +204,7 @@ class Level:
             self._mono_cache = {}
         key = (size, bold)
         if key not in self._mono_cache:
-            self._mono_cache[key] = pygame.font.SysFont("Consolas", size, bold=bold)
+            self._mono_cache[key] = pygame.font.SysFont("bahnschrift", size, bold=bold)
         return self._mono_cache[key]
 
     # Ģenerē sesijas ID no uzdevuma teksta
