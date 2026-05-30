@@ -241,8 +241,8 @@ class World:
 
         # Spawn
         if "spawn" in data:
-            self._spawn_x = data["spawn"]["x"] * TILE_SIZE
-            self._spawn_y = data["spawn"]["y"] * TILE_SIZE
+            self._spawn_x = int(data["spawn"]["x"]) * TILE_SIZE
+            self._spawn_y = int(data["spawn"]["y"]) * TILE_SIZE
 
         for tile_data in data.get("tiles", []):
             self.add_tile(tile_data["type"], tile_data["x"], tile_data["y"])
