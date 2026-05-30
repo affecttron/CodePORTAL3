@@ -24,7 +24,7 @@ class ParallaxLayer:
 
         raw_offset_y = -(camera_y * self._scroll_speed) + self._y_offset
         min_offset_y = SCREEN_HEIGHT - self._height   # 0 when image == screen height
-        offset_y = max(min_offset_y, min(0, raw_offset_y))
+        offset_y = max(min_offset_y, min(self._y_offset, raw_offset_y))
 
         x = offset_x - self._width
         while x < SCREEN_WIDTH:

@@ -1,13 +1,33 @@
+import os
 import pygame
 from settings import (
     PLAYER_WIDTH, PLAYER_HEIGHT,
-    GRAVITY, JUMP_STRENGTH, MOVE_SPEED, MAX_FALL_SPEED, CLIMB_SPEED,
+    GRAVITY, JUMP_STRENGTH, MOVE_SPEED, SPRINT_SPEED, MAX_FALL_SPEED, CLIMB_SPEED,
     WORLD_WIDTH, WORLD_HEIGHT,
+    IMAGES_FOLDER,
     NEON_CYAN, NEON_PINK, WHITE,
 )
 
-COYOTE_FRAMES = 6      # frames after leaving ground where jump still works
-JUMP_BUFFER_FRAMES = 10  # frames before landing where a queued jump fires
+COYOTE_FRAMES = 6
+JUMP_BUFFER_FRAMES = 10
+
+_ANIM_IDLE = "idle"
+_ANIM_WALK = "walk"
+_ANIM_RUN  = "run"
+_ANIM_JUMP = "jump"
+_ANIM_DEAD = "dead"
+
+# fails, kadru skaits, spēles kadri uz animācijas kadru
+_ANIM_CONFIGS = {
+    _ANIM_IDLE: ("Idle.png", 6,  8),
+    _ANIM_WALK: ("Walk.png", 10, 5),
+    _ANIM_RUN:  ("Run.png",  10, 4),
+    _ANIM_JUMP: ("Jump.png", 6,  5),
+    _ANIM_DEAD: ("Dead.png", 5,  8),
+}
+
+# renderēšanas izmērs pikseļos
+_VISUAL_SIZE = 185
 
 
 class PlayerSprite:
@@ -16,34 +36,85 @@ class PlayerSprite:
     def __init__(self, x, y):
         self._x = float(x)
         self._y = float(y)
-        # Remember the last respawn
 
         self._spawn_x = float(x)
         self._spawn_y = float(y)
 
-        # setingu importi
-        self._width = PLAYER_WIDTH
+        self._width  = PLAYER_WIDTH
         self._height = PLAYER_HEIGHT
 
-        # atrumi
+        # ātrumi
         self._vel_x = 0.0
         self._vel_y = 0.0
 
-        # stavoklis
-        self._on_ground = False      # Vai stāv uz platformas?
-        self._facing_right = True    # Kurp skatās (animācijai)
-        self._is_moving = False      # Vai pašlaik kustas?
-        self._is_jumping = False     # Vai lec?
+        # stāvoklis
+        self._on_ground    = False
+        self._facing_right = True
+        self._is_moving    = False
+        self._is_jumping   = False
+        self._is_sprinting = False
+        self._is_dead      = False
 
-        self._coyote_timer = 0       # frames left where jump works after leaving ground
-        self._jump_buffer = 0        # frames left for a buffered jump to fire
+        self._coyote_timer  = 0
+        self._jump_buffer   = 0
 
-        # Kāpnes: pārklājas ar climbable tile + W/S
-        self._on_ladder = False
-        self._climb_dir = 0          # -1 = augšup, +1 = lejup, 0 = stāv
-        self._climb_lockout = 0      # frames where climb is ignored (post-jump)
+        # kāpnes
+        self._on_ladder    = False
+        self._climb_dir    = 0
+        self._climb_lockout = 0
 
-        self._animation_frame = 0
+        # piezemēšanās zibsnīša taimeris
+        self._landing_timer = 0
+        self._airborne_frames = 0
+
+        # animācijas kadri pa labi un pa kreisi
+        self._sprites_r: dict = {}
+        self._sprites_l: dict = {}
+        self._sprites_loaded = False
+
+        # pašreizējais animācijas stāvoklis un tikateris
+        self._anim_state = _ANIM_IDLE
+        self._anim_tick  = 0
+
+        self._load_sprites()
+
+    # Ielādē visus animācijas sprite sarakstus
+    def _load_sprites(self):
+        sprite_dir = os.path.join(IMAGES_FOLDER, "PlayerSprite")
+        for name, (filename, frame_count, _) in _ANIM_CONFIGS.items():
+            path = os.path.join(sprite_dir, filename)
+            frames_r = self._slice_sheet(path, frame_count)
+            if frames_r:
+                self._sprites_r[name] = frames_r
+                self._sprites_l[name] = [
+                    pygame.transform.flip(f, True, False) for f in frames_r
+                ]
+        self._sprites_loaded = bool(self._sprites_r)
+
+    # Sagriež sprite sheet atsevišķos kadros
+    def _slice_sheet(self, path, frame_count):
+        if not os.path.exists(path):
+            print(f"[PlayerSprite] nav atrasts: {path}")
+            return []
+        try:
+            sheet = pygame.image.load(path)
+            try:
+                sheet = sheet.convert_alpha()
+            except pygame.error:
+                pass
+        except pygame.error as exc:
+            print(f"[PlayerSprite] nevar ielādēt: {exc}")
+            return []
+
+        sw, sh = sheet.get_width(), sheet.get_height()
+        frame_w = sw // frame_count
+        frames = []
+        for i in range(frame_count):
+            raw = pygame.Surface((frame_w, sh), pygame.SRCALPHA)
+            raw.blit(sheet, (0, 0), (i * frame_w, 0, frame_w, sh))
+            scaled = pygame.transform.scale(raw, (_VISUAL_SIZE, _VISUAL_SIZE))
+            frames.append(scaled)
+        return frames
 
     # Atjaunina fiziku un sadursmes kadrā
     def update(self, platforms, climbables=None):
@@ -60,7 +131,6 @@ class PlayerSprite:
         self._move_vertical(platforms)
         self._check_world_bounds()
 
-        # Coyote time: allow jumping for a few frames after walking off a ledge
         if prev_on_ground and not self._on_ground:
             self._coyote_timer = COYOTE_FRAMES
         elif self._on_ground:
@@ -68,7 +138,6 @@ class PlayerSprite:
         elif self._coyote_timer > 0:
             self._coyote_timer -= 1
 
-        # Jump buffer: fire a buffered jump as soon as we can
         if self._jump_buffer > 0:
             self._jump_buffer -= 1
             if self._on_ground or self._coyote_timer > 0:
@@ -77,7 +146,17 @@ class PlayerSprite:
         if self._climb_lockout > 0:
             self._climb_lockout -= 1
 
-        self._animation_frame += 1
+        # piezemēšanās kadri
+        if self._on_ground:
+            if self._airborne_frames >= 5:
+                self._landing_timer = 4
+            self._airborne_frames = 0
+        else:
+            self._airborne_frames += 1
+        if self._landing_timer > 0:
+            self._landing_timer -= 1
+
+        self._update_anim_state()
 
     # Piemēro gravitācijas paātrinājumu
     def _apply_gravity(self):
@@ -95,7 +174,6 @@ class PlayerSprite:
     # Pārvieto horizontāli un risina sadursmes
     def _move_horizontal(self, platforms):
         self._x += self._vel_x
-
         player_rect = self.get_rect()
         for platform_rect in platforms:
             if player_rect.colliderect(platform_rect):
@@ -110,16 +188,15 @@ class PlayerSprite:
     def _move_vertical(self, platforms):
         self._y += self._vel_y
         self._on_ground = False
-
         player_rect = self.get_rect()
         for platform_rect in platforms:
             if player_rect.colliderect(platform_rect):
-                if self._vel_y > 0:  # Krīt uz leju
+                if self._vel_y > 0:
                     self._y = platform_rect.top - self._height
                     self._vel_y = 0
                     self._on_ground = True
                     self._is_jumping = False
-                elif self._vel_y < 0:  # Lec uz augšu
+                elif self._vel_y < 0:
                     self._y = platform_rect.bottom
                     self._vel_y = 0
                     self._is_jumping = False
@@ -131,28 +208,49 @@ class PlayerSprite:
             self._x = 0
         if self._x + self._width > WORLD_WIDTH:
             self._x = WORLD_WIDTH - self._width
-        # Ja iekrīt bedrē - atgriež uz pēdējo spawn punktu
         if self._y > WORLD_HEIGHT:
             self.respawn(self._spawn_x, self._spawn_y)
 
- # kustibas
+    # Nosaka animācijas stāvokli pēc kustības
+    def _update_anim_state(self):
+        new_state = self._resolve_anim_state()
+        if new_state != self._anim_state:
+            self._anim_state = new_state
+            self._anim_tick  = 0
+        else:
+            self._anim_tick += 1
 
-    # Sāk kustību pa kreisi
-    def move_left(self):
-        self._vel_x = -MOVE_SPEED
+    # Atgriež animācijas nosaukumu pēc statusa
+    def _resolve_anim_state(self):
+        if self._is_dead:
+            return _ANIM_DEAD
+        if (not self._on_ground and self._airborne_frames > 2) or self._landing_timer > 0:
+            return _ANIM_JUMP
+        if abs(self._vel_x) > 0.1:
+            return _ANIM_RUN if self._is_sprinting else _ANIM_WALK
+        return _ANIM_IDLE
+
+    # Sāk kustību pa kreisi, pēc izvēles sprint
+    def move_left(self, sprint=False):
+        speed = SPRINT_SPEED if sprint else MOVE_SPEED
+        self._vel_x = -speed
         self._facing_right = False
-        self._is_moving = True
+        self._is_moving    = True
+        self._is_sprinting = sprint
 
-    # Sāk kustību pa labi
-    def move_right(self):
-        self._vel_x = MOVE_SPEED
+    # Sāk kustību pa labi, pēc izvēles sprint
+    def move_right(self, sprint=False):
+        speed = SPRINT_SPEED if sprint else MOVE_SPEED
+        self._vel_x = speed
         self._facing_right = True
-        self._is_moving = True
+        self._is_moving    = True
+        self._is_sprinting = sprint
 
     # Apstādina horizontālo kustību
     def stop(self):
         self._vel_x = 0
-        self._is_moving = False
+        self._is_moving    = False
+        self._is_sprinting = False
 
     # Rāpjas augšup pa kāpnēm
     def climb_up(self):
@@ -184,13 +282,25 @@ class PlayerSprite:
 
     # Tiešā lēciena fizika
     def _execute_jump(self):
-        self._vel_y = JUMP_STRENGTH
-        self._on_ground = False
-        self._is_jumping = True
+        self._vel_y        = JUMP_STRENGTH
+        self._on_ground    = False
+        self._is_jumping   = True
         self._coyote_timer = 0
-        self._jump_buffer = 0
-        self._climb_dir = 0
+        self._jump_buffer  = 0
+        self._climb_dir    = 0
         self._climb_lockout = 12
+
+    # Ieslēdz nāves animāciju
+    def start_death_anim(self):
+        self._is_dead    = True
+        self._anim_state = _ANIM_DEAD
+        self._anim_tick  = 0
+
+    # Izslēdz nāves animāciju
+    def clear_death_anim(self):
+        self._is_dead    = False
+        self._anim_state = _ANIM_IDLE
+        self._anim_tick  = 0
 
     # Teleportē spēlētāju uz spawn pozīciju
     def respawn(self, x, y):
@@ -206,34 +316,74 @@ class PlayerSprite:
         self._x += dx
         self._y += dy
 
-    # Zīmē spēlētāju ar krāsainu animāciju
+    # Zīmē spēlētāju ekrānā
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
         screen_x = int(self._x - camera_offset_x)
         screen_y = int(self._y - camera_offset_y)
 
+        if self._sprites_loaded:
+            self._draw_sprite(screen, screen_x, screen_y)
+        else:
+            self._draw_fallback(screen, screen_x, screen_y)
+
+    # Izvēlas pareizo lēciena kadru pēc ātruma
+    def _get_jump_frame(self):
+        if self._landing_timer > 0:
+            return 5
+        if self._anim_tick < 4:
+            return 0
+        if self._anim_tick < 8:
+            return 1
+        if self._vel_y < 0:
+            return 2
+        if self._vel_y < 8:
+            return 3
+        return 4
+
+    # Zīmē animētu sprite no sprite sheet
+    def _draw_sprite(self, screen, screen_x, screen_y):
+        state  = self._anim_state
+        bank   = self._sprites_r if self._facing_right else self._sprites_l
+        frames = bank.get(state) or bank.get(_ANIM_IDLE, [])
+        if not frames:
+            self._draw_fallback(screen, screen_x, screen_y)
+            return
+
+        _, frame_count, speed = _ANIM_CONFIGS[state]
+        if state == _ANIM_JUMP:
+            idx = self._get_jump_frame()
+        elif state == _ANIM_DEAD:
+            # nāves animācija spēlējas vienreiz un apstājas
+            idx = min(self._anim_tick // speed, frame_count - 1)
+        else:
+            idx = (self._anim_tick // speed) % frame_count
+
+        frame  = frames[idx]
+        draw_x = screen_x - (_VISUAL_SIZE - self._width)  // 2
+        draw_y = screen_y + self._height - _VISUAL_SIZE
+        screen.blit(frame, (draw_x, draw_y))
+
+    # Zīmē krāsainu rezerves taisnstūri
+    def _draw_fallback(self, screen, screen_x, screen_y):
         if self._is_jumping:
             color = NEON_PINK
         elif self._is_moving:
-            if (self._animation_frame // 10) % 2 == 0:
+            if (self._anim_tick // 10) % 2 == 0:
                 color = NEON_CYAN
             else:
                 color = WHITE
         else:
             color = NEON_CYAN
 
-        # kermenis testiem
-        pygame.draw.rect(screen, color, (screen_x, screen_y, self._width, self._height))
-        pygame.draw.rect(screen, (0, 100, 100), (screen_x, screen_y, self._width, self._height), 2)
+        pygame.draw.rect(screen, color,
+                         (screen_x, screen_y, self._width, self._height))
+        pygame.draw.rect(screen, (0, 100, 100),
+                         (screen_x, screen_y, self._width, self._height), 2)
 
         eye_y = screen_y + 15
-        if self._facing_right:
-            eye_x = screen_x + self._width - 15
-        else:
-            eye_x = screen_x + 8
-
+        eye_x = (screen_x + self._width - 15) if self._facing_right else (screen_x + 8)
         pygame.draw.circle(screen, (0, 0, 0), (eye_x, eye_y), 4)
-        pygame.draw.circle(screen, WHITE, (eye_x, eye_y), 2)
-
+        pygame.draw.circle(screen, WHITE,     (eye_x, eye_y), 2)
 
         if self._is_jumping:
             for i in range(3):
@@ -241,41 +391,18 @@ class PlayerSprite:
                     screen, NEON_PINK,
                     (screen_x + 10 + i * 12, screen_y + self._height + 5),
                     (screen_x + 10 + i * 12, screen_y + self._height + 15),
-                    2
+                    2,
                 )
 
     # Atgriež spēlētāja sadursmes taisnstūri
     def get_rect(self):
         return pygame.Rect(int(self._x), int(self._y), self._width, self._height)
 
-    # Atgriež x pozīciju pikseļos
-    def get_x(self):
-        return self._x
-
-    # Atgriež y pozīciju pikseļos
-    def get_y(self):
-        return self._y
-
-    # Atgriež spēlētāja centra x koordinātu
-    def get_center_x(self):
-        return self._x + self._width // 2
-
-    # Atgriež spēlētāja centra y koordinātu
-    def get_center_y(self):
-        return self._y + self._height // 2
-
-    # Vai spēlētājs stāv uz zemes
-    def is_on_ground(self):
-        return self._on_ground
-
-    # Vai spēlētājs kustas horizontāli
-    def is_moving(self):
-        return self._is_moving
-
-    # Atgriež horizontālo ātrumu
-    def get_vel_x(self):
-        return self._vel_x
-
-    # Atgriež vertikālo ātrumu
-    def get_vel_y(self):
-        return self._vel_y
+    def get_x(self):         return self._x
+    def get_y(self):         return self._y
+    def get_center_x(self):  return self._x + self._width  // 2
+    def get_center_y(self):  return self._y + self._height // 2
+    def is_on_ground(self):  return self._on_ground
+    def is_moving(self):     return self._is_moving
+    def get_vel_x(self):     return self._vel_x
+    def get_vel_y(self):     return self._vel_y

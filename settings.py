@@ -53,6 +53,7 @@ WORLD_HEIGHT = WORLD_HEIGHT_TILES * TILE_SIZE   # = 2560 px
 GRAVITY = 0.8                     # Cik ātri spēlētājs krīt
 JUMP_STRENGTH = -16               # Lēciena spēks, negatīvs nozīmē uz augšu
 MOVE_SPEED = 6                    # Staigāšanas ātrums px/kadrā
+SPRINT_SPEED = 11                 # Skriešanas ātrums px/kadrā (SHIFT)
 MAX_FALL_SPEED = 18               # Maksimālais kritiena ātrums
 CLIMB_SPEED = 5                   # Rāpšanās ātrums pa kāpnēm px/kadrā
 

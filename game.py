@@ -123,6 +123,8 @@ class Game:
 
         self._death_flash_timer = 0
         self._death_flash_points = 10
+        self._respawn_delay = 0
+        self._respawn_spawn = (0, 0)
 
         self._access_denied_timer = 0
 
@@ -189,9 +191,10 @@ class Game:
         ]
 
         _row1_data = [
-            ("[A/D]",   NEON_CYAN), (" staigāt  ", _label_dim),
-            ("[SPACE]", NEON_CYAN), (" lekt  ",    _label_dim),
-            ("[W/S]",   NEON_CYAN), (" rāpties",   _label_dim),
+            ("[A/D]",    NEON_CYAN), (" staigāt  ",  _label_dim),
+            ("[SHIFT]",  NEON_CYAN), (" sprint  ",   _label_dim),
+            ("[SPACE]",  NEON_CYAN), (" lekt  ",     _label_dim),
+            ("[W/S]",    NEON_CYAN), (" rāpties",    _label_dim),
         ]
         _row2_data = [
             ("[R]",   NEON_CYAN), (" respawn  ", _label_dim),
@@ -358,14 +361,17 @@ class Game:
     def _handle_continuous_input(self):
         if self._state != STATE_PLAYING:
             return
+        if self._respawn_delay > 0:
+            return
 
         keys = pygame.key.get_pressed()
+        is_sprint = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
 
         # Kustība
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            self._player_sprite.move_left()
+            self._player_sprite.move_left(sprint=is_sprint)
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            self._player_sprite.move_right()
+            self._player_sprite.move_right(sprint=is_sprint)
         else:
             self._player_sprite.stop()
 
@@ -417,6 +423,13 @@ class Game:
         if self._feedback_timer > 0:
             self._feedback_timer -= 1
 
+        if self._respawn_delay > 0:
+            self._respawn_delay -= 1
+            if self._respawn_delay == 0:
+                sx, sy = self._respawn_spawn
+                self._player_sprite.respawn(sx, sy)
+                self._player_sprite.clear_death_anim()
+
         if self._death_flash_timer > 0:
             self._death_flash_timer -= 1
 
@@ -440,9 +453,12 @@ class Game:
         if hazard and self._death_flash_timer == 0:
             self._sound.play_sound("death")
             spawn_x, spawn_y = self._world.get_spawn_position()
-            self._player_sprite.respawn(spawn_x, spawn_y)
+            self._player_sprite.start_death_anim()
+            self._player_sprite.stop()
             self._player.deduct_score(self._death_flash_points)
             self._death_flash_timer = 90
+            self._respawn_delay = 40
+            self._respawn_spawn = (spawn_x, spawn_y)
             self._pipeline.pulse_glitch(1.0)
 
         if self._portal_cooldown == 0:

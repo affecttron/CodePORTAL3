@@ -186,6 +186,15 @@
           "fallback_color": [150, 100, 50]
         },
         {
+          "id": "metal_ladder",
+          "name": "Metāla kāpnes",
+          "image": "metal_ladder.png",
+          "solid": false,
+          "kills": false,
+          "climbable": true,
+          "fallback_color": [130, 140, 150]
+        },
+        {
           "id": "checkpoint",
           "name": "Saglabājums",
           "image": "checkpoint.png",
