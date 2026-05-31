@@ -149,9 +149,9 @@ class Level:
         return task.verify(ans)
 
     # Zīmē uzdevuma UI un atgriež izkārtojumu
-    def display_task(self, screen, font_normal, attempts=0):
+    def display_task(self, screen, font_normal, attempts=0, max_attempts=3):
         layout = self.get_panel_layout()
-        self._draw_base_ui(screen, layout, attempts)
+        self._draw_base_ui(screen, layout, attempts, max_attempts)
         self._draw_code_block(screen, font_normal, layout["code"])
         self._ensure_overclock_started()
         self._draw_overclock_strip(screen, layout["overclock"])
@@ -220,7 +220,7 @@ class Level:
         return f"0x{h:04X}"
 
     # Zīmē pamata paneļa rāmi un virsrakstu
-    def _draw_base_ui(self, screen, layout, attempts):
+    def _draw_base_ui(self, screen, layout, attempts, max_attempts=3):
         panel = layout["panel"]
         color = self._theme_color
         dim = self._dim_color(color, 0.45)
@@ -247,7 +247,7 @@ class Level:
         chip = f"[ {slug} // {self._current_task_index + 1:02d}/{len(self._tasks):02d} ]"
         screen.blit(font_chip.render(chip, True, color), (panel.x + 18, panel.y + 13))
 
-        self._draw_attempt_dots(screen, panel, attempts)
+        self._draw_attempt_dots(screen, panel, attempts, max_attempts)
 
         font_chip_sm = self._mono_font(16, bold=True)
         rec_blink = (pygame.time.get_ticks() // 500) % 2 == 0
@@ -281,7 +281,7 @@ class Level:
         draw_corner_accents(screen, panel, color)
 
     # Zīmē mēģinājumu punktus virsrakstjoslā
-    def _draw_attempt_dots(self, screen, panel, attempts):
+    def _draw_attempt_dots(self, screen, panel, attempts, max_attempts=3):
         color = self._theme_color
         dim = self._dim_color(color, 0.35)
         font_label = self._mono_font(14, bold=True)
@@ -290,7 +290,6 @@ class Level:
         screen.blit(label, (label_x, panel.y + 19))
         dot_x0 = label_x + label.get_width() + 10
         dot_y = panel.y + 26
-        max_attempts = 3
         used = min(attempts, max_attempts)
         for i in range(max_attempts):
             cx = dot_x0 + i * 14
