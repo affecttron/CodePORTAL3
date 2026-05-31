@@ -101,6 +101,7 @@ class Game:
 
         # Leaderboard (loaded fresh each time we enter the state)
         self._leaderboard_cache = None
+        self._leaderboard_stats = None   # (total_games, avg_score)
 
         # Score at the start of the current world (for per-world delta in transition)
         self._world_score_start = 0
@@ -621,6 +622,7 @@ class Game:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
         elif sel == 1:                        # Leaderboard
             self._leaderboard_cache = None    # force a fresh load
+            self._leaderboard_stats = None
             self._state = STATE_LEADERBOARD
         elif sel == 2:                        # Quit
             self._running = False
@@ -940,6 +942,7 @@ class Game:
         layout = self._current_level.display_task(
             self._screen, self._font_code,
             attempts=self._player.get_attempts(),
+            max_attempts=self._current_world_config["max_attempts"],
         )
         if layout is None:
             return
@@ -1316,6 +1319,10 @@ class Game:
         # Load scores once per visit
         if self._leaderboard_cache is None:
             self._leaderboard_cache = self._score_log.get_top_scores(limit=12)
+            self._leaderboard_stats = (
+                self._score_log.get_total_games(),
+                self._score_log.get_average_score(),
+            )
 
         color  = NEON_CYAN
         dim    = dim_color(color, 0.45)
@@ -1344,8 +1351,7 @@ class Game:
         chip_surf = self._font_code_bold.render("[ LEADERBOARD // TOP_SCORES ]", True, color)
         self._screen.blit(chip_surf, (lx + 20, ly + 14))
 
-        total_games  = self._score_log.get_total_games()
-        avg_score    = self._score_log.get_average_score()
+        total_games, avg_score = self._leaderboard_stats
         stats_txt    = f"sessions: {total_games:03d}   avg.score: {avg_score:05d}"
         stats_surf   = self._font_code_small.render(stats_txt, True, dim)
         self._screen.blit(stats_surf, (panel.right - stats_surf.get_width() - 20, ly + 17))
