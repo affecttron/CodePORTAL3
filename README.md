@@ -118,10 +118,30 @@ Nepieciešams Python 3.10 vai jaunāks.
 
 ---
 
+## Third-Party Assets
+
+This project uses third-party assets from the following sources:
+
+**Tileset 1**
+https://craftpix.net/freebies/free-industrial-zone-tileset-pixel-art/
+
+**Tileset 2**
+https://craftpix.net/freebies/power-station-free-tileset-pixel-art/
+
+**Player Sprite**
+https://craftpix.net/freebies/city-man-pixel-art-character-sprite-sheets/
+
+**Music**
+https://www.bensound.com/royalty-free-music/track/prism-ambient-suspenseful
+
+These assets are subject to their respective licenses and remain the property of their original creators.
+
+The original asset files are not distributed as part of this repository. Please obtain them directly from the respective sources listed above.
+
+---
+
 <div align="center">
 
-Veidoja **Artūrs Skorikovs** · Komanda **PORTAL 3**
-
-_(jo Portal 2 jau bija paņemts)_
+Veidoja **Artūrs Skorikovs** · Komanda **CodePortal3**
 
 </div>
