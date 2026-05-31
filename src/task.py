@@ -15,11 +15,11 @@ class Task:
     # Aprēķina punktus pēc mēģinājumu skaita
     def calculate_points(self, attempt_number):
         if attempt_number == 1:
-            return 100
+            return self._points
         if attempt_number == 2:
-            return 50
+            return self._points // 2
         if attempt_number == 3:
-            return 20
+            return self._points // 5
         return 0
 
     # Atgriež uzdevuma jautājuma tekstu
