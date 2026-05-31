@@ -1,6 +1,7 @@
 import math
 import os
 import sys
+import traceback
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 
@@ -270,7 +271,8 @@ class MainMenu:
         self._draw()
         self._fade(out=False, frames=18)
         if exc is not None:
-            raise exc
+            traceback.print_exception(type(exc), exc, exc.__traceback__)
+            print(f"[launch] kļūda")
 
     # Animē ekrāna ienākšanu vai iziešanu
     def _fade(self, out, frames=18, hold=0):
