@@ -1,7 +1,15 @@
 import json
 import os
 import pygame
-from settings import TILE_SIZE, IMAGES_FOLDER, TILES_REGISTRY_FILE
+from settings import TILE_SIZE, IMAGES_FOLDER, TILES_REGISTRY_FILE, WORLD_TINT, WORLD_TINT_ALPHA
+
+
+def _apply_world_tint(surf):
+    t = WORLD_TINT_ALPHA / 255.0
+    mult = tuple(int(255 * (1.0 - t) + c * t) for c in WORLD_TINT)
+    tint = pygame.Surface(surf.get_size())
+    tint.fill(mult)
+    surf.blit(tint, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
 
 
 class TileDefinition:
@@ -179,6 +187,7 @@ class TileRegistry:
                 frame.blit(sheet, (0, 0), (i * frame_w, 0, frame_w, sh))
                 if frame_w != TILE_SIZE or sh != TILE_SIZE:
                     frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
+                _apply_world_tint(frame)
                 frames.append(frame)
             self._loaded_images_count += 1
             return frames
@@ -208,6 +217,7 @@ class TileRegistry:
                 pass
             if image.get_width() != TILE_SIZE or image.get_height() != TILE_SIZE:
                 image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+            _apply_world_tint(image)
             self._loaded_images_count += 1
             return image
         except pygame.error as e:

@@ -6,6 +6,7 @@ from settings import (
     WORLD_WIDTH, WORLD_HEIGHT,
     IMAGES_FOLDER,
     NEON_CYAN, NEON_PINK, WHITE,
+    WORLD_TINT, WORLD_TINT_ALPHA,
 )
 
 COYOTE_FRAMES = 6
@@ -113,6 +114,11 @@ class PlayerSprite:
             raw = pygame.Surface((frame_w, sh), pygame.SRCALPHA)
             raw.blit(sheet, (0, 0), (i * frame_w, 0, frame_w, sh))
             scaled = pygame.transform.scale(raw, (_VISUAL_SIZE, _VISUAL_SIZE))
+            t = WORLD_TINT_ALPHA / 255.0
+            mult = tuple(int(255 * (1.0 - t) + c * t) for c in WORLD_TINT)
+            tint = pygame.Surface((_VISUAL_SIZE, _VISUAL_SIZE))
+            tint.fill(mult)
+            scaled.blit(tint, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
             frames.append(scaled)
         return frames
 

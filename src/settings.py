@@ -110,6 +110,10 @@ PORTAL_THEME_COLORS = {
 # Fons
 BACKGROUND_COLOR = (10, 10, 25)
 
+# Pasaules krāsu tints (#657082), piemērots tiles un sprite ielādes laikā
+WORLD_TINT = (101, 112, 130)
+WORLD_TINT_ALPHA = 50
+
 
 
 # UZDEVUMU SISTĒMA
