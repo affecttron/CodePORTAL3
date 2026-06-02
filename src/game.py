@@ -297,7 +297,8 @@ class Game:
                         if self._current_level:
                             self._current_level.skip_typewriter()
                     elif event.key == pygame.K_BACKSPACE:
-                        self._input_text = self._input_text[:-1]
+                        if self._current_level and self._current_level.is_typewriter_complete():
+                            self._input_text = self._input_text[:-1]
 
                 elif self._state == STATE_PAUSED:
                     n = len(self._pause_items)
@@ -327,7 +328,8 @@ class Game:
 
             # TEXTINPUT lai varetu latviesu burtus ievadit.
             if event.type == pygame.TEXTINPUT:
-                if self._state == STATE_TASK and self._correct_flash_timer == 0 and len(self._input_text) < 50:
+                typewriter_done = not self._current_level or self._current_level.is_typewriter_complete()
+                if self._state == STATE_TASK and self._correct_flash_timer == 0 and typewriter_done and len(self._input_text) < 50:
                     self._input_text += event.text
 
             # Mouse Hover
