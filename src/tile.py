@@ -309,7 +309,8 @@ class BackgroundTile(Tile):
             if pat:
                 self._draw_surf.blit(pat, (0, 0))
 
-        self._draw_surf.blit(BackgroundTile._tint_surf, (0, 0))
+        if BackgroundTile._tint_surf is not None:
+            self._draw_surf.blit(BackgroundTile._tint_surf, (0, 0))
         screen.blit(self._draw_surf, (x, y))
         self._animation_frame += 1
 
