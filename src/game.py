@@ -7,6 +7,7 @@ from world import World
 from camera import Camera
 from tile_registry import TileRegistry
 from parallax_background import ParallaxBackground
+from rain import Rain
 from level import create_level
 from score_log import ScoreLog
 from sound_manager import SoundManager
@@ -80,6 +81,7 @@ class Game:
 
         self._parallax = ParallaxBackground()
         self._parallax.create_cyberpunk_scene()
+        self._rain = Rain()
 
         self._score_log = ScoreLog()
 
@@ -452,6 +454,7 @@ class Game:
             self._world.get_climbable_rects(),
         )
         self._camera.update()
+        self._rain.update()
 
         hazard = self._world.check_hazard_collision(self._player_sprite.get_rect())
         if hazard and self._death_flash_timer == 0:
@@ -709,6 +712,7 @@ class Game:
     def _draw_playing(self):
         cam_x, cam_y = self._camera.get_offset()
         self._parallax.draw(self._screen, cam_x, cam_y)
+        self._rain.draw(self._screen)
         self._world.draw(self._screen, cam_x, cam_y)
         self._player_sprite.draw(self._screen, cam_x, cam_y)
         self._camera.apply_motion_blur(self._screen)
