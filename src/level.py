@@ -435,7 +435,7 @@ class Level:
         new_int = int(self._tw_revealed)
 
         if new_int > prev_int:
-            flat = "".join(self._tw_wrapped)
+            flat = "".join(self._tw_wrapped or [])
             blipped = False
             for i in range(prev_int, new_int):
                 if i >= len(flat):
