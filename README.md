@@ -60,6 +60,8 @@ Spēle izmanto moderngl ar divpakāpju GLSL renderēšanu. Pirmajā solī scēna
 
 ## Arhitektūra
 
+Pilna klašu diagramma ar visiem atribūtiem un saitēm atrodas [uml.md](uml.md).
+
 Projekts izmanto četrus OOP principus.
 
 **Iekapsulēšana.** Visi klašu atribūti ir privāti ar `_` prefiksu un pieejami tikai caur metodēm. `PlayerSprite` pārvalda savu fiziku pilnīgi iekšēji, `Game` nekad tieši nepieskaras koordinātēm.
@@ -84,11 +86,15 @@ Tile                    Level
 ## Instalācija
 
 ```bash
+git clone https://github.com/affecttron/CodePORTAL3.git
+cd CodePortal3
 pip install moderngl pygame-ce numpy
 python main.py
 ```
 
 Nepieciešams Python 3.10 vai jaunāks.
+
+`moderngl` ir vajadzīgs GLSL post-FX efektiem. Ja tas nav uzinstalēts vai grafiskā karte to neatbalsta, spēle startē bez vizuālajiem efektiem.
 
 ---
 

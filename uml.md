@@ -1,5 +1,7 @@
 # CODE Portal 3 UML klašu diagramma
 
+Projekta vispārīgs apraksts un spēles mehānikas ir [README.md](README.md).
+
 Viss, kas šeit redzams, nāk no paša koda. Neko klāt neizdomāju. Lai diagrammu būtu vieglāk lasīt un bultas mazāk krustotos, sadalīju to četrās daļās pa moduļiem.
 
 Par apzīmējumiem: `+` ir public, `-` ir private (Python kodā tas ir `_` prefikss priekšā), un `$` apzīmē statisku jeb klases atribūtu. Python redzamību piespiedu kārtā neuztur, tāpēc `protected` (`#`) diagrammā nav. Kodā nav arī īstu interfeisu vai abstraktu klašu, un `enum` tipus neatradu nevienu.
