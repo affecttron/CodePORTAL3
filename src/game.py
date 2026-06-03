@@ -408,7 +408,7 @@ class Game:
             self._handle_task_hold_input()
             if self._correct_flash_timer > 0:
                 self._correct_flash_timer -= 1
-                if self._correct_flash_timer == 0 and self._pending_next_task:
+                if self._correct_flash_timer == 0 and self._pending_next_task and self._current_level is not None:
                     self._pending_next_task = False
                     self._hint_revealed = False
                     self._hint_text = ""
@@ -515,6 +515,8 @@ class Game:
     # Iesniedz atbildi un vērtē rezultātu
     def _submit_answer(self):
         if not self._input_text.strip():
+            return
+        if self._current_level is None:
             return
 
         task = self._current_level.get_current_task()
@@ -954,6 +956,8 @@ class Game:
 
     # Zīmē termināla ievades lauku ar kursoru
     def _draw_terminal_input(self, layout):
+        if self._current_level is None:
+            return
         rect = layout["input"]
         color = self._current_level.get_theme_color()
         dim = tuple(int(c * 0.4) for c in color)
@@ -980,6 +984,8 @@ class Game:
 
     # Zīmē padomu un vadības palīdzību
     def _draw_terminal_hints(self, layout):
+        if self._current_level is None:
+            return
         rect = layout["hint"]
         color = self._current_level.get_theme_color()
         dim_text = (140, 142, 148)
@@ -1347,7 +1353,7 @@ class Game:
         chip_surf = self._font_code_bold.render("[ LEADERBOARD // TOP_SCORES ]", True, color)
         self._screen.blit(chip_surf, (lx + 20, ly + 14))
 
-        total_games, avg_score = self._leaderboard_stats
+        total_games, avg_score = self._leaderboard_stats or (0, 0)
         stats_txt    = f"sessions: {total_games:03d}   avg.score: {avg_score:05d}"
         stats_surf   = self._font_code_small.render(stats_txt, True, dim)
         self._screen.blit(stats_surf, (panel.right - stats_surf.get_width() - 20, ly + 17))
