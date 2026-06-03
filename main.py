@@ -447,7 +447,7 @@ class MainMenu:
         t    = self._font_small.render(hint, True, DIM)
         self._screen.blit(t, t.get_rect(center=(cx, y)))
 
-        ver = self._font_small.render("v0.3", True, DIM_SOFT)
+        ver = self._font_small.render(f"v{VERSION}", True, DIM_SOFT)
         self._screen.blit(ver, ver.get_rect(midright=(SCREEN_WIDTH - 40, y)))
 
     # Rezultātu logs

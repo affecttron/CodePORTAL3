@@ -727,10 +727,6 @@ class Game:
     HUD_TITLE_HEIGHT = 32
     HUD_BG = (10, 12, 16, 215)
 
-    # Aptumšo HUD krāsu
-    def _hud_dim(self, color, factor):
-        return dim_color(color, factor)
-
     # Izseko punktu un portālu izmaiņas pulsam
     def _hud_track_pulses(self):
         now = pygame.time.get_ticks()
@@ -758,8 +754,8 @@ class Game:
         self._hud_track_pulses()
 
         color = NEON_CYAN
-        dim = self._hud_dim(color, 0.45)
-        dimmer = self._hud_dim(color, 0.22)
+        dim = dim_color(color, 0.45)
+        dimmer = dim_color(color, 0.22)
 
         hud_w = SCREEN_WIDTH - self.HUD_MARGIN_X * 2
         hud_x = self.HUD_MARGIN_X
@@ -841,7 +837,7 @@ class Game:
         name_surf = self._font_code_bold.render(name, True, WHITE)
         self._screen.blit(name_surf, (sect.x + 18, sect.y + 30))
         meta = f"lvl.{self._player.get_level_reached():02d}  /  tasks.{self._player.get_tasks_completed():02d}"
-        meta_surf = self._font_code_small.render(meta, True, self._hud_dim(color, 0.55))
+        meta_surf = self._font_code_small.render(meta, True, dim_color(color, 0.55))
         self._screen.blit(meta_surf, (sect.x + 18, sect.y + 56))
 
     # Zīmē punktu skaitu ar pulsācijas efektu
@@ -904,7 +900,7 @@ class Game:
                     ))
                     self._screen.blit(self._portal_halo_surf, (seg_rect.x - 7, seg_rect.y - 7))
             else:
-                pygame.draw.rect(self._screen, self._hud_dim(seg_color, 0.3), seg_rect, 1)
+                pygame.draw.rect(self._screen, dim_color(seg_color, 0.3), seg_rect, 1)
 
         count_surf = self._font_code.render(f"{completed} / {total_portals}", True, color)
         seg_total_w = total_portals * seg_w + (total_portals - 1) * seg_gap
@@ -1196,8 +1192,6 @@ class Game:
 
     # Zīmē pauzes izvēlni ar statusu
     def _draw_pause_menu(self):
-        from ui_utils import draw_corner_accents  # jau importēts moduļa līmenī
-
         color = NEON_CYAN
         dim   = dim_color(color, 0.45)
         dimmer = dim_color(color, 0.22)
