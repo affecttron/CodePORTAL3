@@ -153,17 +153,18 @@ class Game:
 
         # HUD virsmas, izveidotas vienu reizi
         _hud_w = SCREEN_WIDTH - self.HUD_MARGIN_X * 2
-        _dim_cyan = dim_color(NEON_CYAN, 0.45)
+        _hc    = self.HUD_COLOR
+        _hc_dim = dim_color(_hc, 0.45)
         _label_dim = (140, 142, 148)
 
         self._hud_bg_surf = pygame.Surface((_hud_w, self.HUD_HEIGHT), pygame.SRCALPHA)
         self._hud_bg_surf.fill(self.HUD_BG)
 
         self._hud_title_tint_surf = pygame.Surface((_hud_w, self.HUD_TITLE_HEIGHT), pygame.SRCALPHA)
-        self._hud_title_tint_surf.fill((NEON_CYAN[0], NEON_CYAN[1], NEON_CYAN[2], 26))
+        self._hud_title_tint_surf.fill((_hc[0], _hc[1], _hc[2], 26))
 
         self._hud_scanline_surf = pygame.Surface((_hud_w, self.HUD_HEIGHT), pygame.SRCALPHA)
-        _sl_color = (NEON_CYAN[0], NEON_CYAN[1], NEON_CYAN[2], 14)
+        _sl_color = (_hc[0], _hc[1], _hc[2], 14)
         for _y in range(0, self.HUD_HEIGHT, 3):
             pygame.draw.line(self._hud_scanline_surf, _sl_color, (0, _y), (_hud_w, _y))
 
@@ -173,14 +174,14 @@ class Game:
         )
         self._portal_halo_surf = pygame.Surface((52, 28), pygame.SRCALPHA)
 
-        self._hud_chip_surf = self._font_code_small.render("[ HUD // OPERATOR_LINK ]", True, NEON_CYAN)
+        self._hud_chip_surf = self._font_code_small.render("[ HUD // OPERATOR_LINK ]", True, _hc)
         _name = self._player.get_name()
         _sid = sum(ord(c) for c in _name) & 0xFFFF
         self._hud_prompt_surf = self._font_code_small.render(
-            f"root@portal:~# ./monitor --uid=0x{_sid:04X}", True, _dim_cyan
+            f"root@portal:~# ./monitor --uid=0x{_sid:04X}", True, _hc_dim
         )
-        self._hud_sys_bright_surf = self._font_code_small.render("SYS: ONLINE", True, NEON_CYAN)
-        self._hud_sys_dim_surf    = self._font_code_small.render("SYS: ONLINE", True, _dim_cyan)
+        self._hud_sys_bright_surf = self._font_code_small.render("SYS: ONLINE", True, _hc)
+        self._hud_sys_dim_surf    = self._font_code_small.render("SYS: ONLINE", True, _hc_dim)
 
         self._hud_section_label_surfs = [
             self._font_code_small.render(lbl, True, _label_dim)
@@ -188,16 +189,16 @@ class Game:
         ]
 
         _row1_data = [
-            ("[A/D]",    NEON_CYAN), (" staigāt  ",  _label_dim),
-            ("[SHIFT]",  NEON_CYAN), (" sprint  ",   _label_dim),
-            ("[SPACE]",  NEON_CYAN), (" lekt  ",     _label_dim),
-            ("[W/S]",    NEON_CYAN), (" rāpties",    _label_dim),
+            ("[A/D]",    _hc), (" staigāt  ",  _label_dim),
+            ("[SHIFT]",  _hc), (" sprint  ",   _label_dim),
+            ("[SPACE]",  _hc), (" lekt  ",     _label_dim),
+            ("[W/S]",    _hc), (" rāpties",    _label_dim),
         ]
         _row2_data = [
-            ("[R]",   NEON_CYAN), (" respawn  ", _label_dim),
-            ("[F1]",  NEON_CYAN), (" FX  ",      _label_dim),
-            ("[F9]",  NEON_CYAN), (" skip  ",    _label_dim),
-            ("[ESC]", NEON_CYAN), (" pauze",      _label_dim),
+            ("[R]",   _hc), (" respawn  ", _label_dim),
+            ("[F1]",  _hc), (" FX  ",      _label_dim),
+            ("[F9]",  _hc), (" skip  ",    _label_dim),
+            ("[ESC]", _hc), (" pauze",      _label_dim),
         ]
         self._ctrl_surfs_row1 = [self._font_code_small.render(t, True, c) for t, c in _row1_data]
         self._ctrl_surfs_row2 = [self._font_code_small.render(t, True, c) for t, c in _row2_data]
@@ -726,6 +727,7 @@ class Game:
     HUD_HEIGHT = 112
     HUD_TITLE_HEIGHT = 32
     HUD_BG = (10, 12, 16, 215)
+    HUD_COLOR = (150, 162, 172)
 
     # Izseko punktu un portālu izmaiņas pulsam
     def _hud_track_pulses(self):
@@ -753,7 +755,7 @@ class Game:
     def _draw_hud(self):
         self._hud_track_pulses()
 
-        color = NEON_CYAN
+        color = self.HUD_COLOR
         dim = dim_color(color, 0.45)
         dimmer = dim_color(color, 0.22)
 
@@ -873,7 +875,7 @@ class Game:
         portal_colors = PORTAL_THEME_COLORS
         seg_w, seg_h, seg_gap = 38, 14, 8
         world_label = self._font_code_small.render(
-            f"WORLD {self._world_index + 1}", True, (0, 140, 140)
+            f"WORLD {self._world_index + 1}", True, dim_color(color, 0.55)
         )
         self._screen.blit(world_label, (sect.x + 18, sect.y + 20))
         seg_y = sect.y + 50
@@ -1192,7 +1194,7 @@ class Game:
 
     # Zīmē pauzes izvēlni ar statusu
     def _draw_pause_menu(self):
-        color = NEON_CYAN
+        color = self.HUD_COLOR
         dim   = dim_color(color, 0.45)
         dimmer = dim_color(color, 0.22)
 
@@ -1320,7 +1322,7 @@ class Game:
                 self._score_log.get_average_score(),
             )
 
-        color  = NEON_CYAN
+        color  = self.HUD_COLOR
         dim    = dim_color(color, 0.45)
         dimmer = dim_color(color, 0.22)
         gold   = NEON_YELLOW
