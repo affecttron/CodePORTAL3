@@ -208,6 +208,7 @@ class _PassthroughPipeline:
             self._display_size = (int(display_size[0]), int(display_size[1]))
         flags = pygame.FULLSCREEN if fullscreen else 0
         self._display = pygame.display.set_mode(self._display_size, flags)
+        self._display_size = self._display.get_size()
         self._surface = pygame.Surface(self._render_size).convert()
         self._needs_scale = self._render_size != self._display_size
 

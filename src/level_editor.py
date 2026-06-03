@@ -28,7 +28,7 @@ BUTTON_SIZE = 70
 BUTTON_SPACING = 8
 
 TOOLBAR_ARROW_W = 55        # Bultiņu pogu platums pikseļos
-TOOLBAR_SCROLL_STEP = 390   # Ritināšanas solis pikseļos uz klikšķi
+TOOLBAR_SCROLL_STEP = 390   # Scroll solis pikseļos uz klikšķi
 
 LEVEL_FILE_RE = re.compile(r"^level_(\d+)\.json$", re.IGNORECASE)
 
@@ -39,7 +39,7 @@ class LevelEditor:
     def __init__(self):
         self._pipeline = ShaderPipeline.create_passthrough(
             (SCREEN_WIDTH, SCREEN_HEIGHT),
-            fullscreen=False,
+            fullscreen=True,
             display_size=(DISPLAY_WIDTH, DISPLAY_HEIGHT),
         )
         self._screen = self._pipeline.surface
@@ -103,7 +103,7 @@ class LevelEditor:
                         _td.get_name()[:9], True, WHITE
                     )
 
-        # Pre-render static toolbar control-hint lines
+
         self._toolbar_ctrl_surfs = [
             self._font_small.render(line, True, WHITE) for line in [
                 "MOUSE: Kreisais=likt, Labais=dzēst",
@@ -113,8 +113,8 @@ class LevelEditor:
             ]
         ]
 
-        # Top-bar string cache (invalidated when state changes)
-        self._top_bar_surf = None
+
+        self._top_bar_surf = self._font.render("", True, WHITE)
         self._top_bar_cache_key = None
 
     # Izvēlas pirmo tile aktīvajā kategorijā

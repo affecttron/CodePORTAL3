@@ -2555,11 +2555,6 @@
       "y": 11
     },
     {
-      "type": "industrial_06",
-      "x": 29,
-      "y": 10
-    },
-    {
       "type": "industrial_04",
       "x": 23,
       "y": 10
@@ -2813,6 +2808,141 @@
       "type": "industrial_79",
       "x": 65,
       "y": 26
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 25
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 24
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 23
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 22
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 21
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 20
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 19
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 18
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 17
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 16
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 15
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 14
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 13
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 12
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 11
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 10
+    },
+    {
+      "type": "metal_ladder",
+      "x": 32,
+      "y": 9
+    },
+    {
+      "type": "industrial_05",
+      "x": 29,
+      "y": 10
+    },
+    {
+      "type": "industrial_05",
+      "x": 30,
+      "y": 10
+    },
+    {
+      "type": "industrial_18",
+      "x": 66,
+      "y": 26
+    },
+    {
+      "type": "industrial_18",
+      "x": 67,
+      "y": 26
+    },
+    {
+      "type": "industrial_71",
+      "x": 25,
+      "y": 3
+    },
+    {
+      "type": "industrial_71",
+      "x": 26,
+      "y": 3
+    },
+    {
+      "type": "industrial_71",
+      "x": 12,
+      "y": 9
+    },
+    {
+      "type": "industrial_71",
+      "x": 13,
+      "y": 9
+    },
+    {
+      "type": "industrial_71",
+      "x": 9,
+      "y": 9
+    },
+    {
+      "type": "industrial_71",
+      "x": 8,
+      "y": 9
     }
   ],
   "bg_tiles": [
