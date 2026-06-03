@@ -241,7 +241,7 @@ class LevelEditor:
         ctrl_pressed = bool(event.mod & pygame.KMOD_CTRL)
         shift_pressed = bool(event.mod & pygame.KMOD_SHIFT)
 
-        # TAB bez Ctrl — nākamā kategorija
+        # TAB bez Ctrl nākamā kategorija
         if event.key == pygame.K_TAB and not ctrl_pressed:
             if self._categories:
                 self._current_category_index = (self._current_category_index + 1) % len(self._categories)

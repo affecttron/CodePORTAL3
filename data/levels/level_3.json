@@ -5,316 +5,6 @@
   },
   "tiles": [
     {
-      "type": "ground",
-      "x": 1,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 2,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 3,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 4,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 5,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 6,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 7,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 8,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 8,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 8,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 7,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 6,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 5,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 4,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 3,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 2,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 1,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 1,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 2,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 3,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 4,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 5,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 6,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 7,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 9,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 10,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 11,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 13,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 14,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 15,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 16,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 17,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 18,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 19,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 12,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 11,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 10,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 13,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 12,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 9,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 14,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 15,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 16,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 17,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 18,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 19,
-      "y": 12
-    },
-    {
-      "type": "ground",
-      "x": 20,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 20,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 20,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 21,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 22,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 23,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 24,
-      "y": 13
-    },
-    {
-      "type": "ground",
-      "x": 24,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 24,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 23,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 22,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 21,
-      "y": 15
-    },
-    {
-      "type": "ground",
-      "x": 21,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 22,
-      "y": 14
-    },
-    {
-      "type": "ground",
-      "x": 23,
-      "y": 14
-    },
-    {
-      "type": "door_exit",
-      "x": 22,
-      "y": 11
-    },
-    {
       "type": "portal_pink",
       "x": 11,
       "y": 11
@@ -328,6 +18,1046 @@
       "type": "portal_white",
       "x": 19,
       "y": 11
+    },
+    {
+      "type": "industrial_31",
+      "x": 9,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 10,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 11,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 12,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 13,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 14,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 15,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 16,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 17,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 18,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 19,
+      "y": 12
+    },
+    {
+      "type": "industrial_32",
+      "x": 20,
+      "y": 12
+    },
+    {
+      "type": "industrial_33",
+      "x": 21,
+      "y": 12
+    },
+    {
+      "type": "industrial_41",
+      "x": 11,
+      "y": 13
+    },
+    {
+      "type": "industrial_41",
+      "x": 12,
+      "y": 13
+    },
+    {
+      "type": "industrial_41",
+      "x": 13,
+      "y": 13
+    },
+    {
+      "type": "industrial_41",
+      "x": 15,
+      "y": 13
+    },
+    {
+      "type": "industrial_41",
+      "x": 16,
+      "y": 13
+    },
+    {
+      "type": "industrial_41",
+      "x": 17,
+      "y": 13
+    },
+    {
+      "type": "industrial_41",
+      "x": 19,
+      "y": 13
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 13
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 14
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 15
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 13
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 14
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 15
+    },
+    {
+      "type": "industrial_43",
+      "x": 10,
+      "y": 15
+    },
+    {
+      "type": "industrial_44",
+      "x": 20,
+      "y": 15
+    },
+    {
+      "type": "industrial_33",
+      "x": 20,
+      "y": 14
+    },
+    {
+      "type": "industrial_31",
+      "x": 10,
+      "y": 14
+    },
+    {
+      "type": "industrial_32",
+      "x": 11,
+      "y": 14
+    },
+    {
+      "type": "industrial_32",
+      "x": 12,
+      "y": 14
+    },
+    {
+      "type": "industrial_32",
+      "x": 13,
+      "y": 14
+    },
+    {
+      "type": "industrial_32",
+      "x": 15,
+      "y": 14
+    },
+    {
+      "type": "industrial_32",
+      "x": 16,
+      "y": 14
+    },
+    {
+      "type": "industrial_32",
+      "x": 17,
+      "y": 14
+    },
+    {
+      "type": "industrial_32",
+      "x": 19,
+      "y": 14
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 16
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 17
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 19
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 21
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 22
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 23
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 24
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 25
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 26
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 27
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 28
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 29
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 30
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 31
+    },
+    {
+      "type": "industrial_40",
+      "x": 9,
+      "y": 32
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 16
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 17
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 19
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 21
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 22
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 23
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 24
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 25
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 26
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 27
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 28
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 29
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 30
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 31
+    },
+    {
+      "type": "industrial_42",
+      "x": 21,
+      "y": 32
+    },
+    {
+      "type": "industrial_36",
+      "x": 11,
+      "y": 15
+    },
+    {
+      "type": "industrial_36",
+      "x": 12,
+      "y": 15
+    },
+    {
+      "type": "industrial_36",
+      "x": 13,
+      "y": 15
+    },
+    {
+      "type": "industrial_36",
+      "x": 15,
+      "y": 15
+    },
+    {
+      "type": "industrial_36",
+      "x": 16,
+      "y": 15
+    },
+    {
+      "type": "industrial_36",
+      "x": 17,
+      "y": 15
+    },
+    {
+      "type": "industrial_36",
+      "x": 19,
+      "y": 15
+    },
+    {
+      "type": "industrial_04",
+      "x": 0,
+      "y": 13
+    },
+    {
+      "type": "industrial_06",
+      "x": 8,
+      "y": 13
+    },
+    {
+      "type": "industrial_05",
+      "x": 1,
+      "y": 13
+    },
+    {
+      "type": "industrial_05",
+      "x": 2,
+      "y": 13
+    },
+    {
+      "type": "industrial_05",
+      "x": 3,
+      "y": 13
+    },
+    {
+      "type": "industrial_05",
+      "x": 4,
+      "y": 13
+    },
+    {
+      "type": "industrial_05",
+      "x": 5,
+      "y": 13
+    },
+    {
+      "type": "industrial_05",
+      "x": 6,
+      "y": 13
+    },
+    {
+      "type": "industrial_05",
+      "x": 7,
+      "y": 13
+    },
+    {
+      "type": "industrial_24",
+      "x": 8,
+      "y": 15
+    },
+    {
+      "type": "industrial_22",
+      "x": 0,
+      "y": 15
+    },
+    {
+      "type": "industrial_23",
+      "x": 1,
+      "y": 15
+    },
+    {
+      "type": "industrial_23",
+      "x": 2,
+      "y": 15
+    },
+    {
+      "type": "industrial_23",
+      "x": 3,
+      "y": 15
+    },
+    {
+      "type": "industrial_23",
+      "x": 4,
+      "y": 15
+    },
+    {
+      "type": "industrial_23",
+      "x": 6,
+      "y": 15
+    },
+    {
+      "type": "industrial_23",
+      "x": 7,
+      "y": 15
+    },
+    {
+      "type": "industrial_11",
+      "x": 1,
+      "y": 14
+    },
+    {
+      "type": "industrial_11",
+      "x": 2,
+      "y": 14
+    },
+    {
+      "type": "industrial_11",
+      "x": 3,
+      "y": 14
+    },
+    {
+      "type": "industrial_11",
+      "x": 4,
+      "y": 14
+    },
+    {
+      "type": "industrial_11",
+      "x": 6,
+      "y": 14
+    },
+    {
+      "type": "industrial_11",
+      "x": 7,
+      "y": 14
+    },
+    {
+      "type": "industrial_15",
+      "x": 8,
+      "y": 14
+    },
+    {
+      "type": "industrial_13",
+      "x": 0,
+      "y": 14
+    },
+    {
+      "type": "industrial_77",
+      "x": 10,
+      "y": 16
+    },
+    {
+      "type": "industrial_77",
+      "x": 11,
+      "y": 16
+    },
+    {
+      "type": "industrial_77",
+      "x": 19,
+      "y": 16
+    },
+    {
+      "type": "industrial_77",
+      "x": 20,
+      "y": 16
+    },
+    {
+      "type": "industrial_77",
+      "x": 10,
+      "y": 18
+    },
+    {
+      "type": "industrial_77",
+      "x": 8,
+      "y": 18
+    },
+    {
+      "type": "industrial_77",
+      "x": 8,
+      "y": 20
+    },
+    {
+      "type": "industrial_77",
+      "x": 10,
+      "y": 20
+    },
+    {
+      "type": "industrial_77",
+      "x": 20,
+      "y": 18
+    },
+    {
+      "type": "industrial_77",
+      "x": 22,
+      "y": 18
+    },
+    {
+      "type": "industrial_77",
+      "x": 22,
+      "y": 20
+    },
+    {
+      "type": "industrial_77",
+      "x": 20,
+      "y": 20
+    },
+    {
+      "type": "industrial_71",
+      "x": 21,
+      "y": 20
+    },
+    {
+      "type": "industrial_71",
+      "x": 9,
+      "y": 20
+    },
+    {
+      "type": "industrial_71",
+      "x": 9,
+      "y": 18
+    },
+    {
+      "type": "industrial_71",
+      "x": 21,
+      "y": 18
+    },
+    {
+      "type": "industrial_64",
+      "x": 23,
+      "y": 13
+    },
+    {
+      "type": "industrial_64",
+      "x": 22,
+      "y": 13
+    },
+    {
+      "type": "industrial_64",
+      "x": 24,
+      "y": 13
+    },
+    {
+      "type": "industrial_64",
+      "x": 24,
+      "y": 14
+    },
+    {
+      "type": "industrial_64",
+      "x": 24,
+      "y": 15
+    },
+    {
+      "type": "industrial_64",
+      "x": 23,
+      "y": 15
+    },
+    {
+      "type": "industrial_64",
+      "x": 22,
+      "y": 15
+    },
+    {
+      "type": "industrial_64",
+      "x": 22,
+      "y": 14
+    },
+    {
+      "type": "industrial_64",
+      "x": 23,
+      "y": 14
+    },
+    {
+      "type": "industrial_64",
+      "x": 25,
+      "y": 13
+    },
+    {
+      "type": "industrial_64",
+      "x": 25,
+      "y": 14
+    },
+    {
+      "type": "industrial_64",
+      "x": 26,
+      "y": 14
+    },
+    {
+      "type": "industrial_64",
+      "x": 27,
+      "y": 14
+    },
+    {
+      "type": "industrial_64",
+      "x": 27,
+      "y": 13
+    },
+    {
+      "type": "industrial_64",
+      "x": 26,
+      "y": 13
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 13
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 14
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 15
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 16
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 17
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 18
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 19
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 20
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 21
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 22
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 23
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 24
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 25
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 26
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 13
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 14
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 15
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 16
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 17
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 18
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 19
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 20
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 21
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 22
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 23
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 24
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 25
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 26
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 27
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 28
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 29
+    },
+    {
+      "type": "industrial_61",
+      "x": 18,
+      "y": 30
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 27
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 28
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 29
+    },
+    {
+      "type": "industrial_61",
+      "x": 14,
+      "y": 30
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 14
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 15
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 16
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 17
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 18
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 19
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 20
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 21
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 22
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 23
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 24
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 25
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 26
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 27
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 28
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 29
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 30
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 31
+    },
+    {
+      "type": "industrial_61",
+      "x": 5,
+      "y": 32
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 16
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 17
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 18
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 19
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 20
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 21
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 22
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 23
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 24
+    },
+    {
+      "type": "industrial_61",
+      "x": 2,
+      "y": 25
+    },
+    {
+      "type": "industrial_71",
+      "x": 3,
+      "y": 22
+    },
+    {
+      "type": "industrial_71",
+      "x": 4,
+      "y": 22
+    },
+    {
+      "type": "industrial_71",
+      "x": 15,
+      "y": 17
+    },
+    {
+      "type": "industrial_71",
+      "x": 16,
+      "y": 17
+    },
+    {
+      "type": "industrial_71",
+      "x": 17,
+      "y": 17
+    },
+    {
+      "type": "industrial_71",
+      "x": 3,
+      "y": 18
+    },
+    {
+      "type": "industrial_71",
+      "x": 4,
+      "y": 18
+    },
+    {
+      "type": "industrial_71",
+      "x": 1,
+      "y": 18
+    },
+    {
+      "type": "industrial_71",
+      "x": 0,
+      "y": 18
+    },
+    {
+      "type": "industrial_62",
+      "x": 10,
+      "y": 13
+    },
+    {
+      "type": "industrial_62",
+      "x": 20,
+      "y": 13
+    },
+    {
+      "type": "door_exit",
+      "x": 24,
+      "y": 11
+    },
+    {
+      "type": "anim_trap",
+      "x": 5,
+      "y": 12
     }
   ],
   "bg_tiles": []
