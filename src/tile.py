@@ -218,41 +218,41 @@ class DoorExitTile(Tile):
         if self._locked:
             border_color = (255, 0, 64)
             dim_red      = (60, 0, 15)
-            # Gate bars
+            # Vārti
             pygame.draw.rect(screen, dim_red, (x + 8,     y + 8, 12, h - 16))
             pygame.draw.rect(screen, dim_red, (x + w - 20, y + 8, 12, h - 16))
-            # Padlock shackle (U via 3 rects)
+            # Piekaramā slēdzeņa arka
             cx = x + w // 2
             cy = y + h // 2
             pygame.draw.rect(screen, border_color, (cx - 12, cy - 22, 6,  20))
             pygame.draw.rect(screen, border_color, (cx +  6, cy - 22, 6,  20))
             pygame.draw.rect(screen, border_color, (cx - 12, cy - 22, 24,  6))
-            # Padlock body
+            # Slēdzeņa korpuss
             pygame.draw.rect(screen, border_color, (cx - 18, cy - 6, 36, 28))
-            # Label
+            # Etiķete
             lbl = self._font_label.render("LOCKED", True, border_color)
             screen.blit(lbl, (x + w // 2 - lbl.get_width() // 2, y + h - 20))
         else:
             pulse = 0.5 + 0.5 * math.sin(now / 300.0)
             g = int(200 + 55 * pulse)
             border_color = (0, g, g)
-            # Scanline fill
+            # Skenlīniju aizpildījums
             for sy in range(y + 4, y + h - 4, 6):
                 pygame.draw.line(screen, (0, 50, 50), (x + 4, sy), (x + w - 4, sy))
-            # EXIT text (blinking)
+            # Mirgojošs teksts EXIT
             if (now // 400) % 2 == 0:
                 exit_surf = self._font_exit.render("EXIT", True, (0, 255, 255))
                 screen.blit(exit_surf, (
                     x + w // 2 - exit_surf.get_width() // 2,
                     y + h // 2 - exit_surf.get_height() // 2,
                 ))
-            # Label
+            # Etiķete
             lbl = self._font_label.render("-> NEXT LEVEL", True, (0, 255, 255))
             screen.blit(lbl, (x + w // 2 - lbl.get_width() // 2, y + h - 20))
 
-        # Border
+        # Apmale
         pygame.draw.rect(screen, border_color, (x, y, w, h), 2)
-        # Corner accents (8 px lines at each corner)
+        # Stūru akcenti
         al = 8
         for cx2, cy2, dx, dy in [
             (x,     y,     1,  1), (x + w - 1, y,     -1,  1),

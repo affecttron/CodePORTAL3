@@ -22,7 +22,7 @@ class World:
         self._doors = []
         self._bg_tiles = []
         self._bg_tile_at = {}
-        # Per-frame collision lists — rebuilt lazily, invalidated on edits.
+        # Sadursmes saraksti, atjaunina pēc izmaiņām
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
         self._spawn_x = PLAYER_SPAWN_X
@@ -68,7 +68,7 @@ class World:
             self._hazards.append(new_tile)
         elif isinstance(new_tile, DoorExitTile):
             self._doors.append(new_tile)
-            # Register all 4 grid cells so any cell can be right-clicked to remove
+            # Reģistrē visas 4 šūnas noņemšanai
             self._tile_at[(grid_x + 1, grid_y    )] = new_tile
             self._tile_at[(grid_x,     grid_y + 1)] = new_tile
             self._tile_at[(grid_x + 1, grid_y + 1)] = new_tile
@@ -239,7 +239,7 @@ class World:
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # Spawn
+        # Sākuma pozīcija
         if "spawn" in data:
             self._spawn_x = int(data["spawn"]["x"]) * TILE_SIZE
             self._spawn_y = int(data["spawn"]["y"]) * TILE_SIZE
@@ -279,11 +279,11 @@ class World:
         self.add_tile("portal_yellow", 25, 15)
         self.add_tile("portal_green", 40, 15)
 
-        # Spawn
+        # Sākuma pozīcija
         self._spawn_x = 2 * TILE_SIZE
         self._spawn_y = 14 * TILE_SIZE
 
-    # === GETTERS ===
+    # IEGŪTĀJI
     # Atgriež visu tile sarakstu
     def get_tiles(self):
         return self._tiles

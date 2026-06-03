@@ -14,10 +14,10 @@ class ScoreLog:
         self._session_id = self._generate_session_id()
         self._timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # Pjabut mapei kur ievietot
+        # Izveido mapi ja tādas nav
         os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-        # veido csv
+        # Izveido CSV failu
         self._ensure_csv_exists()
 
     # Ģenerē unikālu sesijas identifikatoru
@@ -80,7 +80,7 @@ class ScoreLog:
     # Atgriež augstākos rezultātus sakārtotus
     def get_top_scores(self, limit=5):
         scores = self.load_scores()
-        # sorteja
+        # Sakārto pēc punktiem
         sorted_scores = sorted(scores, key=lambda x: x["score"], reverse=True)
         return sorted_scores[:limit]
 
