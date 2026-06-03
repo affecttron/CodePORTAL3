@@ -65,10 +65,8 @@ class Camera:
             target_x = self._target.get_center_x() - self._screen_width // 2
             target_y = self._target.get_center_y() - int(self._screen_height * CAMERA_VERTICAL_ANCHOR)
 
-
-            if hasattr(self._target, "get_vel_x") and MOVE_SPEED > 0:
-                vel_ratio = max(-1.0, min(1.0, self._target.get_vel_x() / MOVE_SPEED))
-                self._lookahead_target_x = vel_ratio * CAMERA_LOOKAHEAD_MAX
+            vel_ratio = max(-1.0, min(1.0, self._target.get_vel_x() / MOVE_SPEED))
+            self._lookahead_target_x = vel_ratio * CAMERA_LOOKAHEAD_MAX
 
             self._lookahead_x += (self._lookahead_target_x - self._lookahead_x) * CAMERA_LOOKAHEAD_LERP
 

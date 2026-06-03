@@ -283,19 +283,18 @@ class Game:
                         self._debug_skip_world()
 
                 elif self._state == STATE_TASK:
-                    if self._correct_flash_timer > 0:
-                        pass
-                    elif event.key == pygame.K_RETURN:
-                        if self._current_level and not self._current_level.is_typewriter_complete():
-                            self._current_level.skip_typewriter()
-                        else:
-                            self._submit_answer()
-                    elif event.key == pygame.K_TAB:
-                        if self._current_level:
-                            self._current_level.skip_typewriter()
-                    elif event.key == pygame.K_BACKSPACE:
-                        if self._current_level and self._current_level.is_typewriter_complete():
-                            self._input_text = self._input_text[:-1]
+                    if self._correct_flash_timer == 0:
+                        if event.key == pygame.K_RETURN:
+                            if self._current_level and not self._current_level.is_typewriter_complete():
+                                self._current_level.skip_typewriter()
+                            else:
+                                self._submit_answer()
+                        elif event.key == pygame.K_TAB:
+                            if self._current_level:
+                                self._current_level.skip_typewriter()
+                        elif event.key == pygame.K_BACKSPACE:
+                            if self._current_level and self._current_level.is_typewriter_complete():
+                                self._input_text = self._input_text[:-1]
 
                 elif self._state == STATE_PAUSED:
                     n = len(self._pause_items)
@@ -1033,85 +1032,66 @@ class Game:
 
     # Zīmē nāves sarkano pārklājumu
     def _draw_death_flash(self):
-        t = self._death_flash_timer
-        # Ienāk 15 kadros, tur, iziet 30 kadros
-        if t > 75:
-            frac = (90 - t) / 15.0        # 0 uz 1 kad t no 90 uz 75
-        elif t > 30:
-            frac = 1.0
-        else:
-            frac = t / 30.0               # 1 uz 0 kad t no 30 uz 0
-
-        frac = max(0.0, min(1.0, frac))
-
-        self._death_overlay_surf.fill((180, 0, 0, int(180 * frac)))
-        self._screen.blit(self._death_overlay_surf, (0, 0))
-
-        self._death_stripe_surf.fill((0, 0, 0, 0))
-        for sy in range(0, SCREEN_HEIGHT, 6):
-            pygame.draw.line(self._death_stripe_surf, (0, 0, 0, int(60 * frac)), (0, sy), (SCREEN_WIDTH, sy))
-        self._screen.blit(self._death_stripe_surf, (0, 0))
-
-        c = tuple(int(ch * frac) for ch in NEON_RED)
-
-        killed_surf = self._font_huge.render("NĀVE", True, c)
-        killed_rect = killed_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 44))
-        self._screen.blit(killed_surf, killed_rect)
-
-        # Atskaitītie punkti
-        pts_surf = self._font_big.render(f"-{self._death_flash_points} pts", True, c)
-        pts_rect = pts_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 32))
-        self._screen.blit(pts_surf, pts_rect)
-
-        # Stūru akcenta līnijas
-        al = 32
-        for cx, cy, dx, dy in [
-            (0, 0, 1, 1),
-            (SCREEN_WIDTH - 1, 0, -1, 1),
-            (0, SCREEN_HEIGHT - 1, 1, -1),
-            (SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, -1, -1),
-        ]:
-            pygame.draw.line(self._screen, c, (cx, cy), (cx + dx * al, cy), 3)
-            pygame.draw.line(self._screen, c, (cx, cy), (cx, cy + dy * al), 3)
-
-        # Plāna sarkana apmale
-        pygame.draw.rect(self._screen, c, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), 4)
+        self._draw_red_flash(
+            timer=self._death_flash_timer,
+            total=90, fade_in=15, hold_end=30,
+            overlay_surf=self._death_overlay_surf,
+            stripe_surf=self._death_stripe_surf,
+            overlay_rgb=(180, 0, 0), overlay_alpha=180,
+            stripe_step=6, stripe_alpha=60,
+            text="NĀVE",
+            pts_text=f"-{self._death_flash_points} pts",
+            pts_y=32,
+        )
 
     # Zīmē piekļuves lieguma uzliesmojumu
     def _draw_access_denied_flash(self):
-        t = self._access_denied_timer
-        if t > 35:
-            frac = (45 - t) / 10.0
-        elif t > 15:
+        self._draw_red_flash(
+            timer=self._access_denied_timer,
+            total=45, fade_in=10, hold_end=15,
+            overlay_surf=self._access_denied_overlay_surf,
+            stripe_surf=self._access_denied_stripe_surf,
+            overlay_rgb=(200, 0, 0), overlay_alpha=170,
+            stripe_step=8, stripe_alpha=70,
+            text="ACCESS DENIED",
+            pts_text="-5 pts",
+            pts_y=36,
+        )
+
+    def _draw_red_flash(self, timer, total, fade_in, hold_end,
+                        overlay_surf, stripe_surf,
+                        overlay_rgb, overlay_alpha,
+                        stripe_step, stripe_alpha,
+                        text, pts_text, pts_y):
+        fade_in_end = total - fade_in
+        if timer > fade_in_end:
+            frac = (total - timer) / float(fade_in)
+        elif timer > hold_end:
             frac = 1.0
         else:
-            frac = t / 15.0
+            frac = timer / float(hold_end)
         frac = max(0.0, min(1.0, frac))
 
-        self._access_denied_overlay_surf.fill((200, 0, 0, int(170 * frac)))
-        self._screen.blit(self._access_denied_overlay_surf, (0, 0))
+        overlay_surf.fill((*overlay_rgb, int(overlay_alpha * frac)))
+        self._screen.blit(overlay_surf, (0, 0))
 
-        self._access_denied_stripe_surf.fill((0, 0, 0, 0))
-        for sy in range(0, SCREEN_HEIGHT, 8):
-            pygame.draw.line(self._access_denied_stripe_surf, (0, 0, 0, int(70 * frac)), (0, sy), (SCREEN_WIDTH, sy))
-        self._screen.blit(self._access_denied_stripe_surf, (0, 0))
+        stripe_surf.fill((0, 0, 0, 0))
+        for sy in range(0, SCREEN_HEIGHT, stripe_step):
+            pygame.draw.line(stripe_surf, (0, 0, 0, int(stripe_alpha * frac)), (0, sy), (SCREEN_WIDTH, sy))
+        self._screen.blit(stripe_surf, (0, 0))
 
         c = tuple(int(ch * frac) for ch in NEON_RED)
 
-        denied_surf = self._font_huge.render("ACCESS DENIED", True, c)
-        denied_rect = denied_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 44))
-        self._screen.blit(denied_surf, denied_rect)
+        text_surf = self._font_huge.render(text, True, c)
+        self._screen.blit(text_surf, text_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 44)))
 
-        pts_surf = self._font_big.render("-5 pts", True, c)
-        pts_rect = pts_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 36))
-        self._screen.blit(pts_surf, pts_rect)
+        pts_surf = self._font_big.render(pts_text, True, c)
+        self._screen.blit(pts_surf, pts_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + pts_y)))
 
         al = 32
         for cx, cy, dx, dy in [
-            (0, 0, 1, 1),
-            (SCREEN_WIDTH - 1, 0, -1, 1),
-            (0, SCREEN_HEIGHT - 1, 1, -1),
-            (SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, -1, -1),
+            (0, 0, 1, 1), (SCREEN_WIDTH - 1, 0, -1, 1),
+            (0, SCREEN_HEIGHT - 1, 1, -1), (SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, -1, -1),
         ]:
             pygame.draw.line(self._screen, c, (cx, cy), (cx + dx * al, cy), 3)
             pygame.draw.line(self._screen, c, (cx, cy), (cx, cy + dy * al), 3)

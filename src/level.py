@@ -65,6 +65,7 @@ class Level:
         self._scanline_surf = None
         self._code_label_surf = None
         self._oc_surf_cache = {}
+        self._mono_cache = {}
 
     # Ielādē uzdevumus no JSON faila
     def load_tasks(self, tasks_file=TASKS_FILE):
@@ -202,8 +203,6 @@ class Level:
     _MONO_CACHE_LIMIT = 16
 
     def _mono_font(self, size, bold=False):
-        if not hasattr(self, "_mono_cache"):
-            self._mono_cache = {}
         key = (size, bold)
         if key not in self._mono_cache:
             if len(self._mono_cache) >= self._MONO_CACHE_LIMIT:

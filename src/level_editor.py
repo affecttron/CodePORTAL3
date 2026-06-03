@@ -29,6 +29,7 @@ BUTTON_SPACING = 8
 
 TOOLBAR_ARROW_W = 55        # Bultiņu pogu platums pikseļos
 TOOLBAR_SCROLL_STEP = 390   # Scroll solis pikseļos uz klikšķi
+CONTROLS_PANEL_W = 400      # Vadības paneļa platums labajā pusē
 
 LEVEL_FILE_RE = re.compile(r"^level_(\d+)\.json$", re.IGNORECASE)
 
@@ -414,7 +415,7 @@ class LevelEditor:
         category = self._categories[self._current_category_index]
         tiles = self._registry.get_tiles_in_category(category)
         total_width = len(tiles) * (BUTTON_SIZE + BUTTON_SPACING)
-        visible_width = SCREEN_WIDTH - TOOLBAR_ARROW_W * 2 - 400 - 20
+        visible_width = SCREEN_WIDTH - TOOLBAR_ARROW_W * 2 - CONTROLS_PANEL_W - 20
         return max(0, total_width - visible_width)
 
     # Notur rīkjoslas ritināšanu pieļaujamās robežās
@@ -616,7 +617,7 @@ class LevelEditor:
         # Kreisā un labā bultiņas poga
         arrow_h = TOOLBAR_HEIGHT - 20
         left_rect = pygame.Rect(5, toolbar_y + 10, TOOLBAR_ARROW_W, arrow_h)
-        right_rect = pygame.Rect(SCREEN_WIDTH - 405 - TOOLBAR_ARROW_W, toolbar_y + 10, TOOLBAR_ARROW_W, arrow_h)
+        right_rect = pygame.Rect(SCREEN_WIDTH - CONTROLS_PANEL_W - 5 - TOOLBAR_ARROW_W, toolbar_y + 10, TOOLBAR_ARROW_W, arrow_h)
         self._toolbar_arrow_left_rect = left_rect
         self._toolbar_arrow_right_rect = right_rect
 
@@ -641,7 +642,7 @@ class LevelEditor:
             tiles = self._registry.get_tiles_in_category(category)
 
             tiles_area_x = TOOLBAR_ARROW_W + 10
-            tiles_area_w = SCREEN_WIDTH - 400 - TOOLBAR_ARROW_W * 2 - 20
+            tiles_area_w = SCREEN_WIDTH - CONTROLS_PANEL_W - TOOLBAR_ARROW_W * 2 - 20
 
             # Apgriež zīmēšanas laukumu, lai tiles neparādās zem bultiņām
             clip_rect = pygame.Rect(tiles_area_x, toolbar_y, tiles_area_w, TOOLBAR_HEIGHT)
@@ -669,7 +670,7 @@ class LevelEditor:
 
             self._screen.set_clip(None)
 
-        controls_x = SCREEN_WIDTH - 400
+        controls_x = SCREEN_WIDTH - CONTROLS_PANEL_W
         controls_y = toolbar_y + 10
         for i, surf in enumerate(self._toolbar_ctrl_surfs):
             self._screen.blit(surf, (controls_x, controls_y + i * 18))
