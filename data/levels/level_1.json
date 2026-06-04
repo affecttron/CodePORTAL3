@@ -4023,6 +4023,11 @@
       "type": "industrial_15",
       "x": 34,
       "y": 9
+    },
+    {
+      "type": "portal_yellow",
+      "x": 83,
+      "y": 25
     }
   ],
   "bg_tiles": [
