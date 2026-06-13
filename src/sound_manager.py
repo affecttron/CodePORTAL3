@@ -37,14 +37,12 @@ class SoundManager:
 
     _instance = None
 
-    # Atgriež vienīgo SoundManager instanci
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
-    # Inicializē audio sistēmu vienreiz
     def __init__(self):
         if self._initialized:
             return
@@ -73,7 +71,6 @@ class SoundManager:
         self._prepare_music()
         self._load_ambience()
 
-    # Ielādē visas spēles skaņas no failiem
     def _load_sounds(self):
         for name, filename in SOUND_FILES.items():
             path = os.path.join(SOUNDS_FOLDER, filename)
@@ -87,13 +84,11 @@ class SoundManager:
             except pygame.error as e:
                 print(f"[SoundManager] '{filename}' ielāde neizdevās: {e}")
 
-    # Sagatavo mūzikas faila ceļu
     def _prepare_music(self):
         path = os.path.join(SOUNDS_FOLDER, MUSIC_FILE)
         if os.path.isfile(path):
             self._music_path = path
 
-    # Ielādē fona ambient skaņas
     def _load_ambience(self):
         folder = os.path.join(SOUNDS_FOLDER, AMBIENCE_FOLDER)
         if not os.path.isdir(folder):
@@ -114,14 +109,12 @@ class SoundManager:
             except pygame.error as e:
                 print(f"[SoundManager] ambient '{filename}' neielādēts: {e}")
 
-    # Sāk ambient skaņu atskaņošanu
     def start_ambience(self):
         if not self._ambience_sounds or self._ambience_channel is None:
             return
         self._ambience_enabled = True
         self._schedule_next_ambience(initial=True)
 
-    # Apstādina ambient skaņas
     def stop_ambience(self):
         self._ambience_enabled = False
         if self._ambience_channel is not None:
@@ -130,7 +123,6 @@ class SoundManager:
             except pygame.error:
                 pass
 
-    # Atjaunina ambient stāvokli kadrā
     def update_ambience(self):
         if not self._ambience_enabled or self._ambience_channel is None:
             return
@@ -146,7 +138,6 @@ class SoundManager:
             pass
         self._schedule_next_ambience(initial=False)
 
-    # Plāno nākamās ambient skaņas laiku
     def _schedule_next_ambience(self, initial):
         if initial:
             gap = AMBIENCE_INITIAL_DELAY_MS
@@ -154,13 +145,11 @@ class SoundManager:
             gap = random.randint(AMBIENCE_MIN_GAP_MS, AMBIENCE_MAX_GAP_MS)
         self._next_ambience_ms = pygame.time.get_ticks() + gap
 
-    # Iestata ambient skaļumu
     def set_ambience_volume(self, volume):
         self._ambience_volume = max(0.0, min(1.0, float(volume)))
         for sound in self._ambience_sounds:
             sound.set_volume(self._ambience_volume)
 
-    # Atskaņo skaņu pēc nosaukuma
     def play_sound(self, sound_name):
         sound = self._sounds.get(sound_name)
         if sound is None:
@@ -170,7 +159,6 @@ class SoundManager:
         except pygame.error:
             pass
 
-    # Sāk mūzikas atskaņošanu bezgalīgā ciklā
     def play_music(self):
         if self._music_path is None:
             return
@@ -184,21 +172,18 @@ class SoundManager:
         except pygame.error as e:
             print(f"[SoundManager] failed: {e}")
 
-    # Apstādina mūziku
     def stop_music(self):
         try:
             pygame.mixer.music.stop()
         except pygame.error:
             pass
 
-    # Iestata efektu skaļumu
     def set_volume(self, volume):
         self._sound_volume = max(0.0, min(1.0, float(volume)))
         for name, sound in self._sounds.items():
             multiplier = SOUND_VOLUME_OVERRIDES.get(name, 1.0)
             sound.set_volume(self._sound_volume * multiplier)
 
-    # Iestata mūzikas skaļumu
     def set_music_volume(self, volume):
         self._music_volume = max(0.0, min(1.0, float(volume)))
         try:

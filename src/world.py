@@ -11,7 +11,6 @@ from settings import (
 
 class World:
 
-    # Izveido tukšu pasauli ar reģistru
     def __init__(self, registry=None):
         self._tiles = []
         self._tile_at = {}
@@ -22,7 +21,6 @@ class World:
         self._doors = []
         self._bg_tiles = []
         self._bg_tile_at = {}
-        # Sadursmes saraksti, atjaunina pēc izmaiņām
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
         self._spawn_x = PLAYER_SPAWN_X
@@ -31,10 +29,7 @@ class World:
         self._world_height = WORLD_HEIGHT
         self._registry = registry
 
-    # === TILE PĀRVALDĪBA ===
-    # Pievieno tile norādītā tīkla pozīcijā
     def add_tile(self, tile_type, grid_x, grid_y):
-        # Spawn = tikai pozīcija
         if tile_type == TILE_SPAWN:
             self._spawn_x = grid_x * TILE_SIZE
             self._spawn_y = grid_y * TILE_SIZE
@@ -52,13 +47,11 @@ class World:
             self._bg_tile_at[(grid_x, grid_y)] = new_tile
             return
 
-        # Noņemam veco šajā vietā
         self.remove_tile(grid_x, grid_y)
 
         self._tiles.append(new_tile)
         self._tile_at[(grid_x, grid_y)] = new_tile
 
-        # Sadalām pa sarakstiem
         if isinstance(new_tile, SolidTile):
             self._platforms.append(new_tile)
             self._solid_rects_cache = None
@@ -68,7 +61,6 @@ class World:
             self._hazards.append(new_tile)
         elif isinstance(new_tile, DoorExitTile):
             self._doors.append(new_tile)
-            # Reģistrē visas 4 šūnas noņemšanai
             self._tile_at[(grid_x + 1, grid_y    )] = new_tile
             self._tile_at[(grid_x,     grid_y + 1)] = new_tile
             self._tile_at[(grid_x + 1, grid_y + 1)] = new_tile
@@ -77,7 +69,6 @@ class World:
             self._climbables.append(new_tile)
             self._climbable_rects_cache = None
 
-    # Noņem tile no norādītās pozīcijas
     def remove_tile(self, grid_x, grid_y):
         tile_to_remove = self._tile_at.pop((grid_x, grid_y), None)
         if tile_to_remove is None:
@@ -103,21 +94,17 @@ class World:
             self._climbables.remove(tile_to_remove)
             self._climbable_rects_cache = None
 
-    # Noņem fona tile no norādītās pozīcijas
     def remove_bg_tile(self, grid_x, grid_y):
         tile = self._bg_tile_at.pop((grid_x, grid_y), None)
         if tile is not None and tile in self._bg_tiles:
             self._bg_tiles.remove(tile)
 
-    # Atgriež tile pie norādītajām koordinātēm
     def get_tile_at(self, grid_x, grid_y):
         return self._tile_at.get((grid_x, grid_y))
 
-    # Atgriež fona tile pie norādītajām koordinātēm
     def get_bg_tile_at(self, grid_x, grid_y):
         return self._bg_tile_at.get((grid_x, grid_y))
 
-    # Notīra visu pasauli līdz tukšumam
     def clear(self):
         self._tiles.clear()
         self._tile_at.clear()
@@ -131,8 +118,6 @@ class World:
         self._solid_rects_cache = None
         self._climbable_rects_cache = None
 
-    # === ZĪMĒŠANA ===
-    # Zīmē visas redzamās tiles ekrānā
     def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
         sw, sh = screen.get_size()
         gx_min = camera_offset_x // TILE_SIZE
@@ -154,60 +139,48 @@ class World:
                     seen.add(id(t))
                     t.draw(screen, camera_offset_x, camera_offset_y)
 
-    # === SADURSMES ===
-    # Atgriež cieto tile taisnstūrus sadursmēm
     def get_solid_rects(self):
         if self._solid_rects_cache is None:
             self._solid_rects_cache = [p.get_rect() for p in self._platforms]
         return self._solid_rects_cache
 
-    # Atgriež kāpšanas tile taisnstūrus
     def get_climbable_rects(self):
         if self._climbable_rects_cache is None:
             self._climbable_rects_cache = [c.get_rect() for c in self._climbables]
         return self._climbable_rects_cache
 
-    # Pārbauda sadursmi ar aktīvu portālu
     def check_portal_collision(self, player_rect):
         for portal in self._portals:
             if portal.is_active() and player_rect.colliderect(portal.get_rect()):
                 return portal
         return None
 
-    # Pārbauda sadursmi ar bīstamu flīzi
     def check_hazard_collision(self, player_rect):
         for hazard in self._hazards:
             if player_rect.colliderect(hazard.get_rect()):
                 return hazard
         return None
 
-    # Pārbauda vai spēlētājs pieskaras durvīm
     def check_door_collision(self, player_rect):
         for door in self._doors:
             if player_rect.colliderect(door.get_rect()):
                 return True
         return False
 
-    # Atslēdz visas izejas durvis
     def unlock_door(self):
         for door in self._doors:
             door.unlock()
 
-    # Aizslēdz visas izejas durvis
     def lock_doors(self):
         for door in self._doors:
             door.lock()
 
-    # Atgriež portālu skaitu pasaulē
     def get_portal_count(self):
         return len(self._portals)
 
-    # Atgriež durvju sarakstu
     def get_doors(self):
         return self._doors
 
-    # === JSON SAGLABĀŠANA ===
-    # Saglabā pasauli JSON failā
     def save_to_file(self, filename):
         os.makedirs(LEVELS_FOLDER, exist_ok=True)
         filepath = os.path.join(LEVELS_FOLDER, filename)
@@ -226,7 +199,6 @@ class World:
 
         print(f"Saglabāts: {filepath}")
 
-    # Ielādē pasauli no JSON faila
     def load_from_file(self, filename):
         filepath = os.path.join(LEVELS_FOLDER, filename)
 
@@ -239,7 +211,6 @@ class World:
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # Sākuma pozīcija
         if "spawn" in data:
             self._spawn_x = int(data["spawn"]["x"]) * TILE_SIZE
             self._spawn_y = int(data["spawn"]["y"]) * TILE_SIZE
@@ -253,8 +224,6 @@ class World:
         print(f"Ielādēts: {filepath} ({len(self._tiles)} tiles, {len(self._bg_tiles)} bg tiles)")
         return True
 
-    # === DEMO PASAULE ===
-    # Izveido demonstrācijas pasauli testēšanai
     def create_demo_world(self):
         self.clear()
 
@@ -262,11 +231,9 @@ class World:
             print("Nav registry - demo netiks izveidots")
             return
 
-        # Grīda
         for x in range(60):
             self.add_tile("ground", x, 16)
 
-        # Platformas
         for x in range(4, 8):
             self.add_tile("platform", x, 12)
         for x in range(12, 16):
@@ -274,40 +241,30 @@ class World:
         for x in range(18, 22):
             self.add_tile("platform", x, 8)
 
-        # 3 portāli
         self.add_tile("portal_red", 8, 15)
         self.add_tile("portal_yellow", 25, 15)
         self.add_tile("portal_green", 40, 15)
 
-        # Sākuma pozīcija
         self._spawn_x = 2 * TILE_SIZE
         self._spawn_y = 14 * TILE_SIZE
 
-    # IEGŪTĀJI
-    # Atgriež visu tile sarakstu
     def get_tiles(self):
         return self._tiles
 
-    # Atgriež cieto platformu sarakstu
     def get_platforms(self):
         return self._platforms
 
-    # Atgriež portālu sarakstu
     def get_portals(self):
         return self._portals
 
-    # Atgriež bīstamo tile sarakstu
     def get_hazards(self):
         return self._hazards
 
-    # Atgriež spēlētāja sākuma pozīciju
     def get_spawn_position(self):
         return (self._spawn_x, self._spawn_y)
 
-    # Atgriež pasaules izmēru pikseļos
     def get_world_size(self):
         return (self._world_width, self._world_height)
 
-    # Atgriež kopējo tile skaitu
     def get_tile_count(self):
         return len(self._tiles) + len(self._bg_tiles)

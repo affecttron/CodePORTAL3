@@ -5,11 +5,6 @@ from typing import Any
 
 import pygame
 
-#
-# Šo failu neveidoju pilnība es, tas tika mantots no citiem projektiem kas utilizē GLSL shaderus Pygame spēles.
-# Paldies projektam - https://github.com/Rabbid76/PyGameExamplesAndAnswers
-#
-
 moderngl: Any = None
 try:
     import moderngl

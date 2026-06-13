@@ -6,7 +6,6 @@ from settings import SCORES_FILE, LOG_FILE
 
 class ScoreLog:
 
-    # Izveido rezultātu žurnālu ar CSV failu
     def __init__(self, filename=SCORES_FILE, log_filename=LOG_FILE):
         self._filename = filename
         self._log_filename = log_filename
@@ -14,24 +13,19 @@ class ScoreLog:
         self._session_id = self._generate_session_id()
         self._timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # Izveido mapi ja tādas nav
         os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-        # Izveido CSV failu
         self._ensure_csv_exists()
 
-    # Ģenerē unikālu sesijas identifikatoru
     def _generate_session_id(self):
         return datetime.now().strftime("session_%Y%m%d_%H%M%S")
 
-    # Izveido CSV failu ar galveni ja nav
     def _ensure_csv_exists(self):
         if not os.path.exists(self._filename):
             with open(self._filename, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(["name", "date", "score", "level_reached", "tasks_completed"])
 
-    # Saglabā spēlētāja rezultātu failā
     def save_score(self, player):
         try:
             with open(self._filename, "a", newline="", encoding="utf-8") as f:
@@ -51,7 +45,6 @@ class ScoreLog:
             print(f"Kļūda saglabājot: {e}")
             return False
 
-    # Ielādē visus rezultātus no faila
     def load_scores(self):
         if not os.path.exists(self._filename):
             return []
@@ -77,14 +70,11 @@ class ScoreLog:
         self._entries = scores
         return scores
 
-    # Atgriež augstākos rezultātus sakārtotus
     def get_top_scores(self, limit=5):
         scores = self.load_scores()
-        # Sakārto pēc punktiem
         sorted_scores = sorted(scores, key=lambda x: x["score"], reverse=True)
         return sorted_scores[:limit]
 
-    # Atgriež konkrēta spēlētāja labāko rezultātu
     def get_player_best(self, player_name):
         scores = self.load_scores()
         player_scores = [s for s in scores if s["name"] == player_name]
@@ -92,11 +82,9 @@ class ScoreLog:
             return None
         return max(player_scores, key=lambda x: x["score"])
 
-    # Atgriež kopējo spēļu skaitu
     def get_total_games(self):
         return len(self.load_scores())
 
-    # Aprēķina vidējo rezultātu visām spēlēm
     def get_average_score(self):
         scores = self.load_scores()
         if not scores:
@@ -104,7 +92,6 @@ class ScoreLog:
         total = sum(s["score"] for s in scores)
         return total // len(scores)
 
-    # Ieraksta ziņojumu žurnāla failā
     def write_log(self, msg):
         try:
             os.makedirs(os.path.dirname(self._log_filename), exist_ok=True)
@@ -114,10 +101,8 @@ class ScoreLog:
         except Exception as e:
             print(f"Kļūda: {e}")
 
-    # Atgriež sesijas identifikatoru
     def get_session_id(self):
         return self._session_id
 
-    # Atgriež rezultātu faila ceļu
     def get_filename(self):
         return self._filename

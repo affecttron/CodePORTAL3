@@ -35,7 +35,6 @@ STATE_LEADERBOARD = "leaderboard"
 
 class Game:
 
-    # Inicializē visu spēles sistēmu
     def __init__(self, player_name="Spēlētājs"):
         self._init_pipeline()
         self._init_fonts()
@@ -97,11 +96,11 @@ class Game:
 
         self._pause_selection = 0
         self._pause_items = [("RESUME", "turpināt spēli"), ("LEADERBOARD", "labākie rezultāti"), ("QUIT", "iziet")]
-        self._pause_item_rects = []   # aizpilda _draw_pause_menu, klikšķu pārbaudei
-        self._lb_panel_rect: pygame.Rect | None = None  # aizpilda _draw_leaderboard
+        self._pause_item_rects = []
+        self._lb_panel_rect: pygame.Rect | None = None
 
         self._leaderboard_cache = None
-        self._leaderboard_stats = None   # kopā spēles, vidējais rezultāts
+        self._leaderboard_stats = None
 
         self._current_level = None
         self._current_portal = None
@@ -137,9 +136,8 @@ class Game:
         self._hud_portal_pulse_ms = -10000
 
     def _init_surfaces(self):
-        # Iepriekš piešķirtas pārklājuma virsmas
-        _flash_w = 1100 - 2 * 26   # paneļa platums bez ietvarēm
-        _flash_h = 360 + 12 + 32   # koda bloks plus overclock joslas augstums
+        _flash_w = 1100 - 2 * 26
+        _flash_h = 360 + 12 + 32
         self._correct_flash_surf = pygame.Surface((_flash_w, _flash_h), pygame.SRCALPHA)
 
         self._death_overlay_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -151,7 +149,6 @@ class Game:
         self._fullscreen_dark_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         self._fullscreen_dark_surf.fill((0, 0, 0, 220))
 
-        # HUD virsmas, izveidotas vienu reizi
         _hud_w = SCREEN_WIDTH - self.HUD_MARGIN_X * 2
         _hc    = self.HUD_COLOR
         _hc_dim = dim_color(_hc, 0.45)
@@ -203,12 +200,10 @@ class Game:
         self._ctrl_surfs_row1 = [self._font_code_small.render(t, True, c) for t, c in _row1_data]
         self._ctrl_surfs_row2 = [self._font_code_small.render(t, True, c) for t, c in _row2_data]
 
-    # Ielādē pasauli pēc indeksa
     def _load_world(self, world_index=0):
         self._world_index = world_index
         self._current_world_config = get_world_config(world_index)
 
-        # Endless režīmā izvēlas nejaušus uzdevumu ID
         if self._endless_mode:
             self._current_world_config = dict(self._current_world_config)
             self._current_world_config["level_ids"] = random.sample(range(1, 10), 3)
@@ -229,7 +224,6 @@ class Game:
         self._player.set_max_attempts(self._current_world_config["max_attempts"])
         self._world_score_start = self._player.get_score()
 
-    # Galvenā spēles cilpa
     def run(self):
         try:
             while self._running:
@@ -243,7 +237,6 @@ class Game:
             self._score_log.save_score(self._player)
             self._pipeline.shutdown()
 
-    # Apstrādā visus pygame notikumus
     def _handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -322,13 +315,11 @@ class Game:
                     if event.key == pygame.K_RETURN:
                         self._running = False
 
-            # TEXTINPUT ļauj ievadīt latviešu burtus
             if event.type == pygame.TEXTINPUT:
                 typewriter_done = not self._current_level or self._current_level.is_typewriter_complete()
                 if self._state == STATE_TASK and self._correct_flash_timer == 0 and typewriter_done and len(self._input_text) < 50:
                     self._input_text += event.text
 
-            # Peles virzīšana
             if event.type == pygame.MOUSEMOTION:
                 mx, my = self._pipeline.scale_mouse_pos(event.pos)
                 if self._state == STATE_PAUSED and self._pause_item_rects:
@@ -357,7 +348,6 @@ class Game:
                     if self._lb_panel_rect and self._lb_panel_rect.collidepoint(mx, my):
                         self._state = STATE_PAUSED
 
-    # Apstrādā turētus kustības taustiņus
     def _handle_continuous_input(self):
         if self._state != STATE_PLAYING:
             return
@@ -367,7 +357,6 @@ class Game:
         keys = pygame.key.get_pressed()
         is_sprint = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
 
-        # Kustība
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self._player_sprite.move_left(sprint=is_sprint)
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
@@ -375,7 +364,6 @@ class Game:
         else:
             self._player_sprite.stop()
 
-        # Rāpšanās (W=augšup, S=lejup)
         if keys[pygame.K_w]:
             self._player_sprite.climb_up()
         elif keys[pygame.K_s]:
@@ -383,7 +371,6 @@ class Game:
         else:
             self._player_sprite.stop_climbing()
 
-    # Apstrādā turēto backspace uzdevuma ievadē
     def _handle_task_hold_input(self):
         keys = pygame.key.get_pressed()
 
@@ -395,9 +382,7 @@ class Game:
         else:
             self._backspace_held_frames = 0
 
-    # Atjaunina spēles loģiku kadrā
     def _update(self):
-        # Pauzētā stāvoklī pasaule netiek atjaunināta
         if self._state in (STATE_PAUSED, STATE_LEADERBOARD):
             return
 
@@ -441,7 +426,6 @@ class Game:
 
         self._sound.update_ambience()
 
-    # Atjaunina aktīvās spēles fiziku un sadursmes
     def _update_playing(self):
         self._player_sprite.update(
             self._world.get_solid_rects(),
@@ -475,15 +459,12 @@ class Game:
                 self._state = STATE_TRANSITION
                 self._pipeline.pulse_glitch(1.0)
 
-    # Atjaunina pārejas animācijas taimeri
     def _update_transition(self):
         self._transition_timer += 1
-        # Pēc 2. pasaules durvis ved uz uzvaras ekrānu
         if self._next_world_index == 3 and not self._endless_mode:
             if self._transition_timer >= 30:
                 self._state = STATE_WIN
             return
-        # Parāda titulkarti, ielādē nākamo pasauli
         if self._transition_timer >= 121:
             self._load_world(self._next_world_index)
             spawn_x, spawn_y = self._world.get_spawn_position()
@@ -491,7 +472,6 @@ class Game:
             self._portal_cooldown = 60
             self._state = STATE_PLAYING
 
-    # Atver uzdevuma paneli portāla aktivizēšanai
     def _open_task(self, portal):
         portal_slot = portal.get_level_id() - 1
         level_ids = self._current_world_config.get("level_ids", [1, 2, 3])
@@ -512,7 +492,6 @@ class Game:
         self._sound.play_sound("portal_open")
         print(f"Portal opened: Level {level_id}")
 
-    # Iesniedz atbildi un vērtē rezultātu
     def _submit_answer(self):
         if not self._input_text.strip():
             return
@@ -560,7 +539,6 @@ class Game:
                 self._pipeline.pulse_glitch(0.45)
                 self._input_text = ""
 
-    # Aizver uzdevumu pēc veiksmīgas pabeigšanas
     def _close_task_success(self):
         if self._current_portal:
             self._current_portal.deactivate()
@@ -577,16 +555,13 @@ class Game:
 
         self._return_to_playing()
 
-    # Aizver uzdevumu un beidz spēli
     def _close_task_fail(self):
         self._return_to_playing()
         self._state = STATE_GAME_OVER
 
-    # Aizver uzdevumu bez rezultāta
     def _close_task_cancel(self):
         self._return_to_playing()
 
-    # Atgriežas spēlē no uzdevuma paneļa
     def _return_to_playing(self):
         self._state = STATE_PLAYING
         self._current_level = None
@@ -599,10 +574,8 @@ class Game:
         self._portal_cooldown = 60
         pygame.key.stop_text_input()
 
-        # Attālo spēlētāju no portāla
         self._player_sprite.nudge(-100)
 
-    # Izlaiž visu pasauli atkļūdošanai
     def _debug_skip_world(self):
         for portal in self._world.get_portals():
             portal.deactivate()
@@ -614,27 +587,24 @@ class Game:
         self._state = STATE_TRANSITION
         self._pipeline.pulse_glitch(1.0)
 
-    # Izpilda izvēlēto pauzes punktu
     def _activate_pause_selection(self):
         self._sound.play_sound("menu_click")
         sel = self._pause_selection
-        if sel == 0:                          # Turpināt
+        if sel == 0:
             self._state = STATE_PLAYING
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-        elif sel == 1:                        # Rezultātu tabula
-            self._leaderboard_cache = None    # ielādē no jauna
+        elif sel == 1:
+            self._leaderboard_cache = None
             self._leaderboard_stats = None
             self._state = STATE_LEADERBOARD
-        elif sel == 2:                        # Iziet
+        elif sel == 2:
             self._running = False
 
-    # Parāda statusu ziņojumu ekrānā
     def _show_feedback(self, msg, color):
         self._feedback_message = msg
         self._feedback_color = color
         self._feedback_timer = 180
 
-    # Zīmē pašreizējo spēles stāvokli
     def _draw(self):
         if self._state == STATE_PLAYING:
             self._draw_playing()
@@ -666,7 +636,6 @@ class Game:
 
         self._pipeline.present()
 
-    # Zīmē pareizas atbildes mirgoņas efektu
     def _draw_correct_flash(self, layout):
         t = self._correct_flash_timer
         frac = min(1.0, t / 22.0)
@@ -704,7 +673,6 @@ class Game:
         pts_rect = pts_surf.get_rect(center=(flash_rect.centerx, flash_rect.centery + 36))
         self._screen.blit(pts_surf, pts_rect)
 
-    # Zīmē pasauli, spēlētāju un HUD
     def _draw_playing(self):
         cam_x, cam_y = self._camera.get_offset()
         self._parallax.draw(self._screen, cam_x, cam_y)
@@ -719,8 +687,6 @@ class Game:
         if self._death_flash_timer > 0:
             self._draw_death_flash()
 
-    # HUD josla apakšā
-
     HUD_MARGIN_X = 32
     HUD_MARGIN_BOTTOM = 24
     HUD_HEIGHT = 112
@@ -728,7 +694,6 @@ class Game:
     HUD_BG = (10, 12, 16, 215)
     HUD_COLOR = (150, 162, 172)
 
-    # Izseko punktu un portālu izmaiņas pulsam
     def _hud_track_pulses(self):
         now = pygame.time.get_ticks()
         cur_score = self._player.get_score()
@@ -741,7 +706,6 @@ class Game:
             self._hud_portal_pulse_ms = now
             self._hud_last_completed = cur_done
 
-    # Aprēķina pulsācijas intensitāti pēc laika
     def _hud_pulse(self, start_ms, duration=520):
         if start_ms < 0:
             return 0.0
@@ -750,7 +714,6 @@ class Game:
             return 0.0
         return 1.0 - elapsed / duration
 
-    # Zīmē visu HUD joslu apakšā
     def _draw_hud(self):
         self._hud_track_pulses()
 
@@ -773,12 +736,10 @@ class Game:
         )
         self._draw_hud_sections(content_rect, color, dimmer)
 
-        # Rāmis, stūri un skenlīnijas
         pygame.draw.rect(self._screen, color, hud_rect, 2)
         draw_corner_accents(self._screen, hud_rect, color)
         self._draw_hud_scanlines(hud_rect)
 
-    # Zīmē HUD virsrakstu joslu ar statusu
     def _draw_hud_title_bar(self, hud_rect, color, dim):
         title_bar = pygame.Rect(hud_rect.x, hud_rect.y, hud_rect.w, self.HUD_TITLE_HEIGHT)
         self._screen.blit(self._hud_title_tint_surf, title_bar.topleft)
@@ -803,7 +764,6 @@ class Game:
         if blink:
             pygame.draw.circle(self._screen, color, (sx - 10, hud_rect.y + 16), 4)
 
-    # Zīmē HUD sadaļas ar dažādiem datiem
     def _draw_hud_sections(self, content, color, dimmer):
         sections = ("OPERATOR", "SCORE", "PORTALS", "CONTROLS")
         weights = (0.22, 0.16, 0.22, 0.40)
@@ -832,7 +792,6 @@ class Game:
                     (x_cursor, content.bottom - 8), 1,
                 )
 
-    # Zīmē spēlētāja vārdu un līmeni HUD
     def _draw_hud_operator(self, sect, color):
         name = self._player.get_name()
         name_surf = self._font_code_bold.render(name, True, WHITE)
@@ -841,7 +800,6 @@ class Game:
         meta_surf = self._font_code_small.render(meta, True, dim_color(color, 0.55))
         self._screen.blit(meta_surf, (sect.x + 18, sect.y + 56))
 
-    # Zīmē punktu skaitu ar pulsācijas efektu
     def _draw_hud_score(self, sect):
         pulse = self._hud_pulse(self._hud_score_pulse_ms)
         base = NEON_YELLOW
@@ -868,7 +826,6 @@ class Game:
             )
             self._screen.blit(delta_surf, (sect.x + 18, sect.y + 56))
 
-    # Zīmē portālu progresu HUD joslas segmentos
     def _draw_hud_portals(self, sect, color):
         completed = len(self._completed_portals)
         portal_colors = PORTAL_THEME_COLORS
@@ -893,7 +850,6 @@ class Game:
                     (seg_rect.x + 2, seg_rect.y + 2),
                     (seg_rect.right - 3, seg_rect.y + 2), 1,
                 )
-                # Spīdums pēdējam aizpildītajam portālam
                 if pulse > 0 and i == completed - 1:
                     self._portal_halo_surf.fill((
                         seg_color[0], seg_color[1], seg_color[2],
@@ -907,7 +863,6 @@ class Game:
         seg_total_w = total_portals * seg_w + (total_portals - 1) * seg_gap
         self._screen.blit(count_surf, (sect.x + 18 + seg_total_w + 14, seg_y - 4))
 
-    # Zīmē vadības pogu padomus
     def _draw_hud_controls(self, sect):
         x = sect.x + 18
         for surf in self._ctrl_surfs_row1:
@@ -918,11 +873,9 @@ class Game:
             self._screen.blit(surf, (x, sect.y + 56))
             x += surf.get_width()
 
-    # Zīmē HUD skenlīniju efektu
     def _draw_hud_scanlines(self, rect):
         self._screen.blit(self._hud_scanline_surf, rect.topleft)
 
-    # Zīmē atgriezeniskās saites ziņojumu
     def _draw_feedback(self):
         text = self._font_big.render(self._feedback_message, True, self._feedback_color)
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 120))
@@ -933,7 +886,6 @@ class Game:
 
         self._screen.blit(text, text_rect)
 
-    # Zīmē uzdevuma paneli ar ievadi
     def _draw_task_ui(self):
         if self._current_level is None:
             return
@@ -951,7 +903,6 @@ class Game:
         if self._correct_flash_timer > 0:
             self._draw_correct_flash(layout)
 
-    # Zīmē termināla ievades lauku ar kursoru
     def _draw_terminal_input(self, layout):
         if self._current_level is None:
             return
@@ -979,7 +930,6 @@ class Game:
             cursor_h = self._font_code.get_height() - 4
             pygame.draw.rect(self._screen, color, (cursor_x, text_y + 2, cursor_w, cursor_h))
 
-    # Zīmē padomu un vadības palīdzību
     def _draw_terminal_hints(self, layout):
         if self._current_level is None:
             return
@@ -1030,7 +980,6 @@ class Game:
             self._screen.blit(surf, (x, y))
             x += surf.get_width()
 
-    # Zīmē nāves sarkano pārklājumu
     def _draw_death_flash(self):
         self._draw_red_flash(
             timer=self._death_flash_timer,
@@ -1044,7 +993,6 @@ class Game:
             pts_y=32,
         )
 
-    # Zīmē piekļuves lieguma uzliesmojumu
     def _draw_access_denied_flash(self):
         self._draw_red_flash(
             timer=self._access_denied_timer,
@@ -1098,7 +1046,6 @@ class Game:
 
         pygame.draw.rect(self._screen, c, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), 4)
 
-    # Zīmē uzvaras ekrānu
     def _draw_win_screen(self):
         self._screen.blit(self._fullscreen_dark_surf, (0, 0))
 
@@ -1122,7 +1069,6 @@ class Game:
         hint_rect = hint.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 160))
         self._screen.blit(hint, hint_rect)
 
-    # Zīmē pasaules pārejas karti
     def _draw_transition_screen(self):
         self._screen.blit(self._fullscreen_dark_surf, (0, 0))
 
@@ -1158,7 +1104,6 @@ class Game:
                                delta_surf.get_rect(center=(SCREEN_WIDTH // 2,
                                                             SCREEN_HEIGHT // 2 + 126)))
 
-    # Zīmē spēles beigšanās ekrānu
     def _draw_game_over_screen(self):
         self._screen.blit(self._fullscreen_dark_surf, (0, 0))
 
@@ -1166,13 +1111,10 @@ class Game:
         gg_rect = gg_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         self._screen.blit(gg_text, gg_rect)
 
-    # PAUZES IZVĒLNE
-
     _PAUSE_W = 820
     _PAUSE_H = 520
     _PAUSE_TITLE_H = 50
 
-    # Zīmē pauzes izvēlni ar statusu
     def _draw_pause_menu(self):
         color = self.HUD_COLOR
         dim   = dim_color(color, 0.45)
@@ -1183,13 +1125,10 @@ class Game:
         py = (SCREEN_HEIGHT - ph) // 2
         panel = pygame.Rect(px, py, pw, ph)
 
-        # Tumšs pārklājums aiz paneļa
         self._screen.blit(self._fullscreen_dark_surf, (0, 0))
 
-        # Paneļa fons
         pygame.draw.rect(self._screen, (10, 12, 16), panel)
 
-        # Virsrakstjoslas tints
         title_bar = pygame.Rect(px, py, pw, self._PAUSE_TITLE_H)
         tint = pygame.Surface((pw, self._PAUSE_TITLE_H), pygame.SRCALPHA)
         tint.fill((color[0], color[1], color[2], 26))
@@ -1198,11 +1137,9 @@ class Game:
                          (title_bar.left, title_bar.bottom - 1),
                          (title_bar.right, title_bar.bottom - 1), 1)
 
-        # Virsraksta etiķete
         chip_surf = self._font_code_bold.render("[ SYSTEM // PAUSED ]", True, color)
         self._screen.blit(chip_surf, (px + 20, py + 14))
 
-        # Mirgojošs REC punkts
         blink = (pygame.time.get_ticks() // 500) % 2 == 0
         rec_col = color if blink else dim
         if blink:
@@ -1210,7 +1147,6 @@ class Game:
         rec_surf = self._font_code_small.render("REC", True, rec_col)
         self._screen.blit(rec_surf, (panel.right - 76, py + 17))
 
-        # Statusa josla ar pasaules datiem
         STATUS_H = 44
         status_y = py + self._PAUSE_TITLE_H
         status_bar = pygame.Rect(px, status_y, pw, STATUS_H)
@@ -1231,7 +1167,6 @@ class Game:
         pygame.draw.line(self._screen, dimmer,
                          (px, status_bar.bottom - 1), (px + pw, status_bar.bottom - 1), 1)
 
-        # Izvēlnes punkti, izveido taisnstūrus klikšķiem
         items = self._pause_items
         item_h = 72
         items_y = py + self._PAUSE_TITLE_H + STATUS_H + 20
@@ -1245,7 +1180,6 @@ class Game:
             row_y = items_y + i * item_h
 
             if selected:
-                # Izgaismo izvēlētās rindas fonu
                 hi = pygame.Surface((pw - 40, item_h - 8), pygame.SRCALPHA)
                 hi.fill((color[0], color[1], color[2], 18))
                 self._screen.blit(hi, (px + 20, row_y))
@@ -1265,7 +1199,6 @@ class Game:
             sub_surf = self._font_code_small.render(subtitle, True, sub_col)
             self._screen.blit(sub_surf, (px + 72, row_y + 44))
 
-        # Navigācijas padomi
         nav_parts = [
             ("[↑/↓]", color), ("  navigēt    ", dim),
             ("[ENTER]", color), ("  apstiprināt    ", dim),
@@ -1279,22 +1212,17 @@ class Game:
             self._screen.blit(s, (nx, ny))
             nx += s.get_width()
 
-        # Rāmis un stūri
         pygame.draw.rect(self._screen, color, panel, 2)
         draw_corner_accents(self._screen, panel, color)
-
-    # REZULTĀTU TABULA
 
     _LB_W = 1160
     _LB_H = 780
     _LB_TITLE_H = 50
-    _LB_COLS = (60, 340, 180, 120, 140, 260)   # rangs, vārds, punkti, līmenis, uzdevumi, datums
+    _LB_COLS = (60, 340, 180, 120, 140, 260)
 
-    # Zīmē rezultātu tabulu ar rindām
     def _draw_leaderboard(self):
         from ui_utils import draw_corner_accents
 
-        # Ielādē rezultātus vienu reizi
         if self._leaderboard_cache is None:
             self._leaderboard_cache = self._score_log.get_top_scores(limit=12)
             self._leaderboard_stats = (
@@ -1312,12 +1240,11 @@ class Game:
         lx = (SCREEN_WIDTH  - lw) // 2
         ly = (SCREEN_HEIGHT - lh) // 2
         panel = pygame.Rect(lx, ly, lw, lh)
-        self._lb_panel_rect = panel   # saglabāts klikšķu pārbaudei
+        self._lb_panel_rect = panel
 
         self._screen.blit(self._fullscreen_dark_surf, (0, 0))
         pygame.draw.rect(self._screen, (10, 12, 16), panel)
 
-        # Virsrakstjosla
         title_bar = pygame.Rect(lx, ly, lw, self._LB_TITLE_H)
         tint = pygame.Surface((lw, self._LB_TITLE_H), pygame.SRCALPHA)
         tint.fill((color[0], color[1], color[2], 26))
@@ -1334,7 +1261,6 @@ class Game:
         stats_surf   = self._font_code_small.render(stats_txt, True, dim)
         self._screen.blit(stats_surf, (panel.right - stats_surf.get_width() - 20, ly + 17))
 
-        # Kolonnu galvenes rinda
         col_labels = ("#", "NAME", "SCORE", "LVL", "TASKS", "DATE")
         header_y = ly + self._LB_TITLE_H + 16
         cx = lx + 24
@@ -1343,11 +1269,9 @@ class Game:
             self._screen.blit(hs, (cx, header_y))
             cx += cw
 
-        # Atdalītājs zem galvenēm
         div_y = header_y + 26
         pygame.draw.line(self._screen, dimmer, (lx + 20, div_y), (panel.right - 20, div_y), 1)
 
-        # Rezultātu rindas
         row_h   = 52
         rows_y  = div_y + 10
         entries = self._leaderboard_cache
@@ -1359,11 +1283,10 @@ class Game:
             for rank, entry in enumerate(entries, 1):
                 ry = rows_y + (rank - 1) * row_h
                 if ry + row_h > panel.bottom - 60:
-                    break  # apgriež ja pārāk daudz rindu
+                    break
 
                 is_me = entry["name"] == player_name
 
-                # Izgaismo pašreizējo spēlētāju
                 if is_me:
                     hi = pygame.Surface((lw - 40, row_h - 6), pygame.SRCALPHA)
                     hi.fill((color[0], color[1], color[2], 14))
@@ -1371,7 +1294,6 @@ class Game:
                     pygame.draw.line(self._screen, color,
                                      (lx + 20, ry), (lx + 20, ry + row_h - 6), 3)
 
-                # Zelta 1., sudraba 2., bronzas 3. vieta
                 rank_col = (
                     (255, 215, 0)   if rank == 1 else
                     (192, 192, 192) if rank == 2 else
@@ -1394,12 +1316,10 @@ class Game:
                     self._screen.blit(cs, (cx, ry + 12))
                     cx += cw
 
-                # Plāns atdalītājs
                 sep_y = ry + row_h - 4
                 pygame.draw.line(self._screen, dimmer,
                                  (lx + 20, sep_y), (panel.right - 20, sep_y), 1)
 
-        # Apakšas navigācijas padomi
         hint_parts = [
             ("[ESC]", color), (" / ", dimmer), ("[ENTER]", color), ("  atpakaļ", dim),
         ]

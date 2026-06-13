@@ -1,18 +1,15 @@
 class Task:
-    # Izveido uzdevumu ar vērtēšanas datiem
     def __init__(self, question, correct_answer, hint, points):
         self._question = question
         self._correct_answer = correct_answer
         self._hint = hint
         self._points = points
 
-    # Pārbauda vai spēlētāja atbilde pareiza
     def verify(self, ans):
         player_answer = ans.strip().lower()
         correct = self._correct_answer.strip().lower()
         return player_answer == correct
 
-    # Aprēķina punktus pēc mēģinājumu skaita
     def calculate_points(self, attempt_number):
         if attempt_number == 1:
             return self._points
@@ -22,10 +19,8 @@ class Task:
             return self._points // 5
         return 0
 
-    # Atgriež uzdevuma jautājuma tekstu
     def get_question(self):
         return self._question
 
-    # Atgriež padoma tekstu spēlētājam
     def get_hint(self):
         return self._hint

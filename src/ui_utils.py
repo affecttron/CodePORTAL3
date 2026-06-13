@@ -1,7 +1,6 @@
 import pygame
 
 
-# Aptumšo krāsu par norādīto koeficientu
 def dim_color(color, factor=0.4):
     return (
         max(0, min(255, int(color[0] * factor))),
@@ -10,7 +9,6 @@ def dim_color(color, factor=0.4):
     )
 
 
-# Zīmē stūru akcentu līnijas taisnstūrim
 def draw_corner_accents(screen, rect, color, size=14, thickness=3):
     for x_dir, x_anchor in ((1, rect.left), (-1, rect.right - 1)):
         for y_dir, y_anchor in ((1, rect.top), (-1, rect.bottom - 1)):
